@@ -1,0 +1,80 @@
+<nav class="navbar" *ngIf="currentUser">
+  <div class="navbar-container">
+    <!-- Logo/Brand -->
+    <div class="navbar-brand">
+      <i class="fas fa-graduation-cap"></i>
+      <span class="brand-text">Portail Doctorat</span>
+    </div>
+
+    <!-- Actions -->
+    <div class="navbar-actions">
+      <!-- Notifications -->
+      <button class="navbar-icon-btn" title="Notifications">
+        <i class="fas fa-bell"></i>
+        <span class="badge">3</span>
+      </button>
+
+      <!-- Messages -->
+      <button class="navbar-icon-btn" title="Messages">
+        <i class="fas fa-envelope"></i>
+        <span class="badge">5</span>
+      </button>
+
+      <!-- User Menu -->
+      <div class="user-menu-wrapper">
+        <button 
+          class="user-menu-trigger"
+          [class.active]="showUserMenu"
+          (click)="toggleUserMenu()"
+        >
+          <div class="user-avatar">
+            {{ currentUser.FirstName.charAt(0) }}{{ currentUser.LastName.charAt(0) }}
+          </div>
+          
+          <div class="user-info">
+            <span class="user-name">{{ currentUser.FirstName }} {{ currentUser.LastName }}</span>
+            <span class="user-role">{{ getUserRoleLabel() }}</span>
+          </div>
+          
+          <i class="fas fa-chevron-down"></i>
+        </button>
+
+        <!-- Dropdown Menu -->
+        <div class="user-dropdown" *ngIf="showUserMenu">
+          <div class="dropdown-header">
+            <div class="user-avatar-large">
+              {{ currentUser.FirstName.charAt(0) }}{{ currentUser.LastName.charAt(0) }}
+            </div>
+            <div class="user-details">
+              <strong>{{ currentUser.FirstName }} {{ currentUser.LastName }}</strong>
+              <small>{{ currentUser.email }}</small>
+              <span class="user-badge">{{ getUserRoleLabel() }}</span>
+            </div>
+          </div>
+
+          <div class="dropdown-divider"></div>
+
+          <button class="dropdown-item" (click)="goToProfile()">
+            <i class="fas fa-user"></i>
+            <span>Mon profil</span>
+          </button>
+
+          <button class="dropdown-item" (click)="goToSettings()">
+            <i class="fas fa-cog"></i>
+            <span>Paramètres</span>
+          </button>
+
+          <div class="dropdown-divider"></div>
+
+          <button class="dropdown-item logout" (click)="logout()">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Se déconnecter</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Overlay pour fermer le menu -->
+<div class="overlay" *ngIf="showUserMenu" (click)="toggleUserMenu()"></div>

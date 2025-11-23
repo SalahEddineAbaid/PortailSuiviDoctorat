@@ -12,11 +12,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
+import ma.emsi.userservice.dto.request.TokenRefreshRequest;
+
 
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
+@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
 public class AuthController {
 
     private final AuthService authService;
@@ -58,10 +61,9 @@ public class AuthController {
 
     // ✅ Refresh Token
     @PostMapping("/refresh")
-    public ResponseEntity<?> refresh(@RequestBody Map<String, String> request) {
+    public ResponseEntity<?> refresh(@Valid @RequestBody TokenRefreshRequest request) {
         try {
-            String refreshToken = request.get("refreshToken");
-            TokenResponse response = authService.refreshToken(refreshToken);
+            TokenResponse response = authService.refreshToken(request.refreshToken());
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -71,4 +73,5 @@ public class AuthController {
                     .body(Map.of("error", "Erreur lors du rafraîchissement du token"));
         }
     }
+
 }

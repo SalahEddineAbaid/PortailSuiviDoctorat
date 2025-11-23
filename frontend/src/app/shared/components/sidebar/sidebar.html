@@ -1,0 +1,27 @@
+<aside class="sidebar" [class.collapsed]="isCollapsed">
+  <!-- Toggle button -->
+  <button class="sidebar-toggle" (click)="toggleSidebar()">
+    <i [class]="isCollapsed ? 'fas fa-chevron-right' : 'fas fa-chevron-left'"></i>
+  </button>
+
+  <!-- Sidebar header -->
+  <div class="sidebar-header">
+    <i class="fas fa-bars"></i>
+    <span class="sidebar-title" *ngIf="!isCollapsed">{{ title }}</span>
+  </div>
+
+  <!-- Menu items -->
+  <nav class="sidebar-nav">
+    <a
+      *ngFor="let item of menuItems"
+      [routerLink]="item.route"
+      routerLinkActive="active"
+      class="sidebar-item"
+      [title]="item.label"
+    >
+      <i [class]="item.icon"></i>
+      <span class="item-label" *ngIf="!isCollapsed">{{ item.label }}</span>
+      <span class="item-badge" *ngIf="item.badge && !isCollapsed">{{ item.badge }}</span>
+    </a>
+  </nav>
+</aside>

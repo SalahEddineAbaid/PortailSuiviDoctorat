@@ -1,6 +1,9 @@
 package ma.emsi.userservice.service;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import ma.emsi.userservice.dto.request.ChangePasswordRequest;
+import ma.emsi.userservice.dto.request.ForgotPasswordRequest;
 import ma.emsi.userservice.entity.Role;
 import ma.emsi.userservice.entity.RoleName;
 import ma.emsi.userservice.entity.User;
@@ -8,6 +11,8 @@ import ma.emsi.userservice.repository.UserRepository;
 import ma.emsi.userservice.repository.RoleRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import ma.emsi.userservice.dto.request.ResetPasswordRequest;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
@@ -15,7 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserService {
 
-
+    private final PasswordRequestService passwordRequestService;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final RefreshTokenService refreshTokenService;
@@ -72,24 +77,49 @@ public class UserService {
         refreshTokenService.deleteByUser(user);
     }
 
-    public void changePassword(String email, String oldPassword, String newPassword) {
+    public void changePassword(String email, @Valid ChangePasswordRequest request) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
 
         // Vérifier l'ancien mot de passe
-        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+        if (!passwordEncoder.matches(request.oldPassword(), user.getPassword())) {
             throw new RuntimeException("Ancien mot de passe incorrect");
         }
 
+        // Mettre à jour le mot de passe (validation déjà faite par @Valid)
+        user.setPassword(passwordEncoder.encode(request.newPassword()));
+        userRepository.save(user);
+    }
+
+
+    public void requestPasswordReset(@Valid @RequestBody ForgotPasswordRequest request) {
+        passwordRequestService.requestPasswordReset(request);
+    }
+
+    public void resetPasswordWithToken(ResetPasswordRequest request) {
+        passwordRequestService.resetPassword(request);
+    }
+
+
+
+    /**
+     * Réinitialise le mot de passe sans vérifier l'ancien
+     * (utilisé lors de la réinitialisation par token)
+     */
+    public void resetPassword(String email, String newPassword) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+
         // Valider le nouveau mot de passe
-        if (newPassword == null || newPassword.length() < 6) {
+        if (newPassword == null || newPassword.length() < 12) {
             throw new IllegalArgumentException("Le nouveau mot de passe doit contenir au moins 6 caractères");
         }
 
-        // Mettre à jour le mot de passe
+        // Encoder et sauvegarder le nouveau mot de passe
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
     }
+
 
 
 

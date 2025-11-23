@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,6 +17,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @RequiredArgsConstructor
@@ -26,7 +28,13 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
+                // ✅ CORS doit être en PREMIER
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+
+                // ✅ Désactiver CSRF
+                .csrf(AbstractHttpConfigurer::disable)
+
+                // ✅ Configuration des autorisations
                 .authorizeHttpRequests(auth -> auth
                         // Routes publiques (authentification)
                         .requestMatchers("/api/auth/**").permitAll()
@@ -38,26 +46,44 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/**").hasRole("ADMINISTRATEUR")
                         .requestMatchers("/api/directeur/**").hasRole("DIRECTEUR")
                         .requestMatchers("/api/doctorant/**").hasRole("DOCTORANT")
+                        .requestMatchers("/api/users/**").authenticated()
 
                         // Toutes les autres requêtes nécessitent une authentification
                         .anyRequest().authenticated()
                 )
+
+                // ✅ Session stateless (JWT)
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
+
+                // ✅ Ajouter le filtre JWT
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:4200"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
+
+        // ✅ Autoriser l'origine Angular
+        configuration.setAllowedOrigins(List.of("http://localhost:4200"));
+
+        // ✅ Autoriser toutes les méthodes HTTP
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+
+        // ✅ Autoriser tous les headers
+        configuration.setAllowedHeaders(List.of("*"));
+
+        // ✅ Permettre les credentials (cookies, authorization)
         configuration.setAllowCredentials(true);
+
+        // ✅ Exposer les headers de réponse
+        configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
+
+        // ✅ Durée de cache de la requête preflight
+        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

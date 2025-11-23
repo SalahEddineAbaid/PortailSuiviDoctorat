@@ -5,8 +5,8 @@ import java.util.Set;
 public record UserResponse(
         Long id,
         String email,
-        String firstName,
-        String lastName,
+        String FirstName,
+        String LastName,
         String phoneNumber,
         String adresse,
         String ville,

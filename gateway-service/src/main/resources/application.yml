@@ -1,0 +1,22 @@
+server:
+  port: 8888
+
+spring:
+  application:
+    name: gateway-service
+  cloud:
+    gateway:
+      routes:
+        - id: user-service-users
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/api/users/**
+        - id: user-service-auth
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/api/auth/**
+    eureka:
+        client:
+            defaultZone: http://localhost:8761/eureka/
+        instance:
+            prefer-ip-address: true

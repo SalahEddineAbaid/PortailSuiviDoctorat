@@ -1,11 +1,16 @@
 package ma.emsi.userservice.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import ma.emsi.userservice.dto.request.ChangePasswordRequest;
+import ma.emsi.userservice.dto.request.ForgotPasswordRequest;
+import ma.emsi.userservice.dto.request.ResetPasswordRequest;
 import ma.emsi.userservice.dto.response.UserResponse;
 import ma.emsi.userservice.entity.User;
 import ma.emsi.userservice.service.AuthService;
 import ma.emsi.userservice.service.UserService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -22,9 +27,12 @@ public class UserController {
     private final UserService userService;
     private final AuthService authService;
 
+    
     /**
      * 🔹 Récupérer le profil de l'utilisateur connecté
      */
+
+
     @GetMapping("/profile")
     public ResponseEntity<UserResponse> getProfile(@AuthenticationPrincipal UserDetails userDetails) {
         User user = userService.findByEmail(userDetails.getUsername());
@@ -49,16 +57,17 @@ public class UserController {
      */
     @PostMapping("/change-password")
     public ResponseEntity<Map<String, String>> changePassword(
-            @AuthenticationPrincipal UserDetails userDetails,
-            @RequestBody Map<String, String> request) {
+            @Valid @RequestBody ChangePasswordRequest request,
+            Authentication authentication) {
 
-        String oldPassword = request.get("oldPassword");
-        String newPassword = request.get("newPassword");
+        String email = authentication.getName();
+        userService.changePassword(email, request);
 
-        userService.changePassword(userDetails.getUsername(), oldPassword, newPassword);
-
-        return ResponseEntity.ok(Map.of("message", "Mot de passe modifié avec succès"));
+        return ResponseEntity.ok(Map.of(
+                "message", "Mot de passe modifié avec succès"
+        ));
     }
+
 
     /**
      * 🔹 Déconnexion (supprime le refresh token)
@@ -81,6 +90,33 @@ public class UserController {
 
         return ResponseEntity.ok(responses);
     }
+
+    /**
+     * 🔹 Demander la réinitialisation du mot de passe (mot de passe oublié)
+     */
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Map<String, String>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        userService.requestPasswordReset(request);
+
+        return ResponseEntity.ok(Map.of(
+                "message", "Si l'email existe, un lien de réinitialisation a été envoyé"
+        ));
+    }
+
+
+    /**
+     * 🔹 Réinitialiser le mot de passe avec le token
+     */
+    @PostMapping("/reset-password")
+    public ResponseEntity<Map<String, String>> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        userService.resetPasswordWithToken(request);
+
+        return ResponseEntity.ok(Map.of(
+                "message", "Mot de passe réinitialisé avec succès"
+        ));
+    }
+
+
 
     /**
      * 🔹 [ADMIN] Supprimer un utilisateur

@@ -1,5 +1,6 @@
 package ma.emsi.userservice.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import ma.emsi.userservice.entity.RefreshToken;
 import ma.emsi.userservice.entity.User;
@@ -24,6 +25,7 @@ public class RefreshTokenService {
     /**
      * 🔹 Crée un refresh token pour l’utilisateur
      */
+
     public RefreshToken createRefreshToken(User user) {
         refreshTokenRepository.deleteByUser(user);
 
@@ -58,6 +60,7 @@ public class RefreshTokenService {
     /**
      * 🔹 Supprime tous les tokens liés à un utilisateur (pour le logout)
      */
+    @Transactional
     public void deleteByUser(User user) {
         refreshTokenRepository.deleteByUser(user);
     }

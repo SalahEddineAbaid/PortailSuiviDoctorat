@@ -106,7 +106,10 @@ public class AuthService {
             User user = userRepository.findByEmail(request.email())
                     .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
 
-            // Enregistrement du refresh token
+            // ✅ SOLUTION : Supprimer les anciens refresh tokens de cet utilisateur
+            refreshTokenRepository.deleteByUser(user);
+
+            // Enregistrement du nouveau refresh token
             RefreshToken token = RefreshToken.builder()
                     .token(refreshToken)
                     .user(user)
@@ -119,6 +122,7 @@ public class AuthService {
             throw ex;
         }
     }
+
 
     public TokenResponse refreshToken(String refreshToken) {
         // Validation du refresh token

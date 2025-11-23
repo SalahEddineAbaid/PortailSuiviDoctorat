@@ -21,6 +21,4 @@ public class Role {
 
     }
 
-
-    // Getters & Setters
 }

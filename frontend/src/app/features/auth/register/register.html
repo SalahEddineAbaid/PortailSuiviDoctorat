@@ -1,0 +1,214 @@
+<div class="register-container">
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="navbar-content">
+      <div class="logo">
+        <span class="logo-icon">🎓</span>
+        <span class="logo-text">Portail Doctoral</span>
+      </div>
+      <a routerLink="/login" class="btn-login">Se connecter</a>
+    </div>
+  </nav>
+
+  <!-- Formulaire d'inscription -->
+  <div class="register-card">
+    <div class="card-header">
+      <h1>Créer un compte</h1>
+      <p class="subtitle">Inscrivez-vous pour accéder au portail doctoral</p>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" class="register-form">
+      
+      <!-- Messages d'erreur/succès -->
+      <div class="alert alert-error" *ngIf="errorMessage">
+        <span class="alert-icon">⚠️</span>
+        {{ errorMessage }}
+      </div>
+
+      <div class="alert alert-success" *ngIf="successMessage">
+        <span class="alert-icon">✅</span>
+        {{ successMessage }}
+      </div>
+
+      <!-- Informations personnelles -->
+      <div class="form-section">
+        <h3 class="section-title">Informations personnelles</h3>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="firstName">Prénom <span class="required">*</span></label>
+            <input 
+              type="text" 
+              id="firstName" 
+              name="firstName"
+              [(ngModel)]="formData.FirstName"
+              placeholder="Votre prénom"
+              required>
+          </div>
+
+          <div class="form-group">
+            <label for="lastName">Nom <span class="required">*</span></label>
+            <input 
+              type="text" 
+              id="lastName" 
+              name="lastName"
+              [(ngModel)]="formData.LastName"
+              placeholder="Votre nom"
+              required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email <span class="required">*</span></label>
+          <input 
+            type="email" 
+            id="email" 
+            name="email"
+            [(ngModel)]="formData.email"
+            placeholder="exemple@domaine.com"
+            required>
+        </div>
+
+        <div class="form-group">
+          <label for="phoneNumber">Numéro de téléphone <span class="required">*</span></label>
+          <input 
+            type="tel" 
+            id="phoneNumber" 
+            name="phoneNumber"
+            [(ngModel)]="formData.phoneNumber"
+            placeholder="+212 6XX XX XX XX"
+            required>
+        </div>
+      </div>
+
+      <!-- Adresse -->
+      <div class="form-section">
+        <h3 class="section-title">Adresse</h3>
+        
+        <div class="form-group">
+          <label for="adresse">Adresse complète <span class="required">*</span></label>
+          <input 
+            type="text" 
+            id="adresse" 
+            name="adresse"
+            [(ngModel)]="formData.adresse"
+            placeholder="Rue, quartier, numéro..."
+            required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="ville">Ville <span class="required">*</span></label>
+            <input 
+              type="text" 
+              id="ville" 
+              name="ville"
+              [(ngModel)]="formData.ville"
+              placeholder="Votre ville"
+              required>
+          </div>
+
+          <div class="form-group">
+            <label for="pays">Pays <span class="required">*</span></label>
+            <input 
+              type="text" 
+              id="pays" 
+              name="pays"
+              [(ngModel)]="formData.pays"
+              placeholder="Votre pays"
+              required>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mot de passe -->
+      <div class="form-section">
+        <h3 class="section-title">Sécurité</h3>
+        
+        <div class="form-group">
+          <label for="password">Mot de passe <span class="required">*</span></label>
+          <div class="password-input">
+            <input 
+              [type]="showPassword ? 'text' : 'password'"
+              id="password" 
+              name="password"
+              [(ngModel)]="formData.password"
+              (input)="validatePassword()"
+              placeholder="Minimum 12 caractères"
+              required>
+            <button 
+              type="button" 
+              class="toggle-password"
+              (click)="togglePasswordVisibility()">
+              {{ showPassword ? '👁️' : '👁️‍🗨️' }}
+            </button>
+          </div>
+          
+          <!-- Critères du mot de passe -->
+          <div class="password-requirements" *ngIf="formData.password">
+            <p class="requirements-title">Le mot de passe doit contenir :</p>
+            <ul>
+              <li [class.valid]="hasValidLength()">
+                ✓ Entre 12 et 64 caractères
+              </li>
+              <li [class.valid]="hasLowerCase()">
+                ✓ Au moins une lettre minuscule
+              </li>
+              <li [class.valid]="hasUpperCase()">
+                ✓ Au moins une lettre majuscule
+              </li>
+              <li [class.valid]="hasDigit()">
+                ✓ Au moins un chiffre
+              </li>
+              <li [class.valid]="hasSpecialChar()">
+                ✓ Au moins un caractère spécial (@$!%*?&.)
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword">Confirmer le mot de passe <span class="required">*</span></label>
+          <div class="password-input">
+            <input 
+              [type]="showConfirmPassword ? 'text' : 'password'"
+              id="confirmPassword" 
+              name="confirmPassword"
+              [(ngModel)]="confirmPassword"
+              placeholder="Retapez votre mot de passe"
+              required>
+            <button 
+              type="button" 
+              class="toggle-password"
+              (click)="toggleConfirmPasswordVisibility()">
+              {{ showConfirmPassword ? '👁️' : '👁️‍🗨️' }}
+            </button>
+          </div>
+          <small class="match-indicator" *ngIf="confirmPassword" 
+                 [class.match]="formData.password === confirmPassword"
+                 [class.no-match]="formData.password !== confirmPassword">
+            {{ formData.password === confirmPassword ? '✓ Les mots de passe correspondent' : '✗ Les mots de passe ne correspondent pas' }}
+          </small>
+        </div>
+      </div>
+
+      <!-- Bouton de soumission -->
+      <button 
+        type="submit" 
+        class="btn-submit"
+        [disabled]="isLoading">
+        <span *ngIf="!isLoading">S'inscrire</span>
+        <span *ngIf="isLoading">
+          <span class="spinner"></span> Inscription en cours...
+        </span>
+      </button>
+    </form>
+
+    <!-- Lien vers login -->
+    <div class="login-link">
+      <p>Vous possédez déjà un compte ? 
+        <a routerLink="/login">Cliquez ici pour vous connecter</a>
+      </p>
+    </div>
+  </div>
+</div>

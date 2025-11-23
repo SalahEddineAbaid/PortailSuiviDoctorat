@@ -1,0 +1,86 @@
+###########################
+# JAVA / SPRING BOOT
+###########################
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+
+# Gradle (si jamais)
+.gradle/
+build/
+
+# Logs
+*.log
+
+# IntelliJ IDEA
+.idea/
+*.iml
+out/
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+
+###########################
+# NODE / FRONTEND
+###########################
+
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+
+###########################
+# DOCKER / DATABASE FILES
+###########################
+
+# MariaDB local data
+user-service/data/
+**/data/
+*.frm
+*.opt
+*.ibd
+*.cnf
+*.pid
+*.err
+*.sql
+*.db
+
+###########################
+# OPERATING SYSTEM FILES
+###########################
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Mac
+.DS_Store
+
+# Linux
+*.swp
+
+
+###########################
+# OTHER
+###########################
+
+# Env files
+.env
+*.env.local
+*.env.development
+*.env.production
+
+# Backup files
+*.bak
+*~

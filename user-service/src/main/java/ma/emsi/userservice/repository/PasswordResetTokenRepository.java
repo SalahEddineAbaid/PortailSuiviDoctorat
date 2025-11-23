@@ -7,10 +7,13 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
-public interface PasswordRestTokenRepository extends JpaRepository<PasswordResetToken, Long> {
+public interface PasswordResetTokenRepository extends JpaRepository<PasswordResetToken, Long> {
     Optional<PasswordResetToken> findByToken(String token);
+
+    List<PasswordResetToken> findByUserAndUsedFalse(User user);
 
     @Modifying
     @Transactional
@@ -18,5 +21,5 @@ public interface PasswordRestTokenRepository extends JpaRepository<PasswordReset
 
     @Modifying
     @Transactional
-    void deleteByExpirationDateBefore(LocalDateTime now);
+    int deleteByExpirationDateBefore(LocalDateTime now);
 }

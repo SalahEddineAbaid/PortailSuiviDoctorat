@@ -1,0 +1,101 @@
+<div class="login-container">
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="navbar-content">
+      <div class="logo">
+        <span class="logo-icon">🎓</span>
+        <span class="logo-text">Portail Doctoral</span>
+      </div>
+      <a routerLink="/register" class="btn-register">Créer un compte</a>
+    </div>
+  </nav>
+
+  <!-- Formulaire de connexion -->
+  <div class="login-card">
+    <div class="card-header">
+      <div class="welcome-icon">👋</div>
+      <h1>Bienvenue !</h1>
+      <p class="subtitle">Connectez-vous pour accéder à votre espace doctoral</p>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" class="login-form">
+      
+      <!-- Message d'erreur -->
+      <div class="alert alert-error" *ngIf="errorMessage">
+        <span class="alert-icon">⚠️</span>
+        {{ errorMessage }}
+      </div>
+
+      <!-- Email -->
+      <div class="form-group">
+        <label for="email">Adresse email</label>
+        <div class="input-with-icon">
+          <span class="input-icon">📧</span>
+          <input 
+            type="email" 
+            id="email" 
+            name="email"
+            [(ngModel)]="formData.email"
+            placeholder="exemple@domaine.com"
+            required
+            autocomplete="email">
+        </div>
+      </div>
+
+      <!-- Mot de passe -->
+      <div class="form-group">
+        <label for="password">Mot de passe</label>
+        <div class="password-input">
+          <span class="input-icon">🔒</span>
+          <input 
+            [type]="showPassword ? 'text' : 'password'"
+            id="password" 
+            name="password"
+            [(ngModel)]="formData.password"
+            placeholder="Votre mot de passe"
+            required
+            autocomplete="current-password">
+          <button 
+            type="button" 
+            class="toggle-password"
+            (click)="togglePasswordVisibility()">
+            {{ showPassword ? '👁️' : '👁️‍🗨️' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Lien mot de passe oublié -->
+      <div class="forgot-password-link">
+        <a routerLink="/forgot-password">Mot de passe oublié ?</a>
+      </div>
+
+      <!-- Bouton de soumission -->
+      <button 
+        type="submit" 
+        class="btn-submit"
+        [disabled]="isLoading">
+        <span *ngIf="!isLoading">Se connecter</span>
+        <span *ngIf="isLoading">
+          <span class="spinner"></span> Connexion en cours...
+        </span>
+      </button>
+    </form>
+
+    <!-- Divider -->
+    <div class="divider">
+      <span>OU</span>
+    </div>
+
+    <!-- Lien vers inscription -->
+    <div class="register-link">
+      <p>Vous n'avez pas encore de compte ? 
+        <a routerLink="/register">Cliquez ici pour vous inscrire</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <p>© 2025 Portail Doctoral - Tous droits réservés</p>
+  </div>
+</div>

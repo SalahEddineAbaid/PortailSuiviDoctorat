@@ -1,0 +1,68 @@
+<div class="dashboard-layout">
+  <!-- Navbar -->
+  <app-navbar></app-navbar>
+
+  <div class="dashboard-content">
+    <!-- Sidebar -->
+    <app-sidebar [menuItems]="menuItems" [title]="'Menu Doctorant'"></app-sidebar>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Loading State -->
+      <div *ngIf="isLoading" class="loading-container">
+        <div class="spinner"></div>
+        <p>Chargement des données...</p>
+      </div>
+
+      <!-- Welcome Section -->
+      <div *ngIf="!isLoading" class="welcome-container">
+        <div class="welcome-card">
+          <div class="welcome-icon">
+            <i class="fas fa-graduation-cap"></i>
+          </div>
+          <h1>{{ getWelcomeMessage() }}, {{ getUserName() }} ! 👋</h1>
+          <p class="welcome-text">
+            Bienvenue sur votre portail de doctorant
+          </p>
+          <div class="welcome-info">
+            <div class="info-item">
+              <i class="fas fa-envelope"></i>
+              <span>{{ userInfo?.email }}</span>
+            </div>
+            <div class="info-item">
+              <i class="fas fa-user-tag"></i>
+              <span>Doctorant</span>
+            </div>
+          </div>
+
+          <div class="welcome-message">
+            <i class="fas fa-info-circle"></i>
+            <p>
+              Les fonctionnalités complètes (gestion de thèse, publications, etc.) 
+              seront disponibles via les microservices dédiés.
+            </p>
+          </div>
+        </div>
+
+        <!-- Quick Info Cards -->
+        <div class="info-grid">
+          <div class="info-card">
+            <i class="fas fa-rocket"></i>
+            <h3>Nouveau portail</h3>
+            <p>Interface moderne et intuitive pour gérer votre parcours doctoral</p>
+          </div>
+          <div class="info-card">
+            <i class="fas fa-shield-alt"></i>
+            <h3>Sécurisé</h3>
+            <p>Vos données sont protégées avec JWT et Spring Security</p>
+          </div>
+          <div class="info-card">
+            <i class="fas fa-cogs"></i>
+            <h3>Microservices</h3>
+            <p>Architecture moderne avec services indépendants</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>

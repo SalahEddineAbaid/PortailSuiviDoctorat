@@ -1,0 +1,222 @@
+.dashboard-layout {
+  min-height: 100vh;
+  background: #f9fafb;
+}
+
+.dashboard-content {
+  display: flex;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.main-content {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 1rem;
+
+  .spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #e5e7eb;
+    border-top-color: #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  p {
+    color: #6b7280;
+    font-size: 1rem;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.welcome-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.welcome-card {
+  background: white;
+  border-radius: 16px;
+  padding: 3rem;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  }
+
+  .welcome-icon {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 1.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+
+    i {
+      font-size: 3rem;
+      color: white;
+    }
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    color: #1f2937;
+    margin: 0 0 1rem 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .welcome-text {
+    font-size: 1.25rem;
+    color: #6b7280;
+    margin: 0 0 2rem 0;
+  }
+
+  .welcome-info {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+
+    .info-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: #f9fafb;
+      border-radius: 12px;
+      color: #4b5563;
+      font-weight: 500;
+
+      i {
+        color: #667eea;
+      }
+    }
+  }
+
+  .welcome-message {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    border-left: 4px solid #667eea;
+    padding: 1.5rem;
+    border-radius: 8px;
+    display: flex;
+    gap: 1rem;
+    text-align: left;
+
+    i {
+      color: #667eea;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+      margin-top: 0.25rem;
+    }
+
+    p {
+      margin: 0;
+      color: #4b5563;
+      line-height: 1.6;
+    }
+  }
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+
+  .info-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    text-align: center;
+    transition: all 0.3s;
+    border: 2px solid transparent;
+
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+      border-color: #667eea;
+    }
+
+    i {
+      font-size: 3rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1rem;
+    }
+
+    h3 {
+      margin: 0 0 0.75rem 0;
+      color: #1f2937;
+      font-size: 1.25rem;
+    }
+
+    p {
+      margin: 0;
+      color: #6b7280;
+      line-height: 1.6;
+    }
+  }
+}
+
+@media (max-width: 968px) {
+  .dashboard-content {
+    flex-direction: column;
+  }
+
+  .main-content {
+    padding: 1rem;
+  }
+
+  .welcome-card {
+    padding: 2rem 1.5rem;
+
+    h1 {
+      font-size: 2rem;
+    }
+
+    .welcome-text {
+      font-size: 1.1rem;
+    }
+
+    .welcome-info {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+}
