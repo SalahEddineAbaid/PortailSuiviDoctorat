@@ -1,9 +1,8 @@
-server:
-  port: 8081
-
 spring:
   application:
     name: USER-SERVICE
+  config:
+    import: optional:configserver:http://localhost:8889
 
   datasource:
     url: jdbc:mariadb://localhost:3306/userdb
