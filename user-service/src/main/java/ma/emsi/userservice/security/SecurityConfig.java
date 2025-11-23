@@ -39,6 +39,9 @@ public class SecurityConfig {
                         // Routes publiques (authentification)
                         .requestMatchers("/api/auth/**").permitAll()
 
+                        // Routes publiques (mot de passe oublié) - DOIT ÊTRE AVANT /api/users/**
+                        .requestMatchers("/api/users/forgot-password", "/api/users/reset-password").permitAll()
+
                         // Routes techniques publiques
                         .requestMatchers("/error", "/actuator/**").permitAll()
 

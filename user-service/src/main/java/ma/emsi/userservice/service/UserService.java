@@ -25,12 +25,11 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final RefreshTokenService refreshTokenService;
     private final PasswordEncoder passwordEncoder;
-
+    private final ma.emsi.userservice.repository.PasswordResetTokenRepository passwordResetTokenRepository;
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
-
 
     public User findByEmail(String email) {
         return userRepository.findByEmail(email)
@@ -55,7 +54,6 @@ public class UserService {
         user.getRoles().removeIf(role -> role.getName().equals(roleName));
         return userRepository.save(user);
     }
-
 
     public User updateUser(User updatedUser) {
         User existing = userRepository.findByEmail(updatedUser.getEmail())
@@ -91,7 +89,6 @@ public class UserService {
         userRepository.save(user);
     }
 
-
     public void requestPasswordReset(@Valid @RequestBody ForgotPasswordRequest request) {
         passwordRequestService.requestPasswordReset(request);
     }
@@ -99,8 +96,6 @@ public class UserService {
     public void resetPasswordWithToken(ResetPasswordRequest request) {
         passwordRequestService.resetPassword(request);
     }
-
-
 
     /**
      * Réinitialise le mot de passe sans vérifier l'ancien
@@ -120,13 +115,15 @@ public class UserService {
         userRepository.save(user);
     }
 
-
-
-
     public void deleteUser(Long id) {
-        if (!userRepository.existsById(id)) {
-            throw new RuntimeException("Utilisateur introuvable");
-        }
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+
+        // Supprimer toutes les dépendances avant de supprimer l'utilisateur
+        refreshTokenService.deleteByUser(user);
+        passwordResetTokenRepository.deleteByUser(user);
+
+        // Ensuite supprimer l'utilisateur
         userRepository.deleteById(id);
     }
 }

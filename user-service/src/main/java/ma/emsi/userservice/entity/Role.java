@@ -14,7 +14,7 @@ public class Role {
     private Long id;
 
     @Enumerated(EnumType.STRING) // stocke la valeur texte de l'enum (ex: "ROLE_ADMIN")
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 50)
     private RoleName name;
 
     public Role() {
