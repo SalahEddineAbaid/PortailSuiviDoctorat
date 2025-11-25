@@ -27,12 +27,18 @@ public class UserController {
     private final UserService userService;
     private final AuthService authService;
 
-    
+    /**
+     * 🔹 Récupérer un utilisateur par ID (pour communication inter-services)
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
+        User user = userService.findById(id);
+        return ResponseEntity.ok(authService.toUserResponse(user));
+    }
+
     /**
      * 🔹 Récupérer le profil de l'utilisateur connecté
      */
-
-
     @GetMapping("/profile")
     public ResponseEntity<UserResponse> getProfile(@AuthenticationPrincipal UserDetails userDetails) {
         User user = userService.findByEmail(userDetails.getUsername());
@@ -64,10 +70,8 @@ public class UserController {
         userService.changePassword(email, request);
 
         return ResponseEntity.ok(Map.of(
-                "message", "Mot de passe modifié avec succès"
-        ));
+                "message", "Mot de passe modifié avec succès"));
     }
-
 
     /**
      * 🔹 Déconnexion (supprime le refresh token)
@@ -99,10 +103,8 @@ public class UserController {
         userService.requestPasswordReset(request);
 
         return ResponseEntity.ok(Map.of(
-                "message", "Si l'email existe, un lien de réinitialisation a été envoyé"
-        ));
+                "message", "Si l'email existe, un lien de réinitialisation a été envoyé"));
     }
-
 
     /**
      * 🔹 Réinitialiser le mot de passe avec le token
@@ -112,11 +114,8 @@ public class UserController {
         userService.resetPasswordWithToken(request);
 
         return ResponseEntity.ok(Map.of(
-                "message", "Mot de passe réinitialisé avec succès"
-        ));
+                "message", "Mot de passe réinitialisé avec succès"));
     }
-
-
 
     /**
      * 🔹 [ADMIN] Supprimer un utilisateur

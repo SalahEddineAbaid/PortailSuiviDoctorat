@@ -36,6 +36,11 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
     }
 
+    public User findById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Utilisateur avec l'ID " + id + " non trouvé"));
+    }
+
     public User assignRole(Long userId, RoleName roleName) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
