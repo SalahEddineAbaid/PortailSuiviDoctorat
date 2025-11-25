@@ -42,6 +42,10 @@ public class SecurityConfig {
                         // Routes publiques (mot de passe oublié) - DOIT ÊTRE AVANT /api/users/**
                         .requestMatchers("/api/users/forgot-password", "/api/users/reset-password").permitAll()
 
+                        // Routes pour communication inter-services (GET user by ID)
+                        // Permet aux autres microservices de récupérer les infos utilisateur
+                        .requestMatchers("/api/users/{id}").permitAll()
+
                         // Routes techniques publiques
                         .requestMatchers("/error", "/actuator/**").permitAll()
 
@@ -52,13 +56,11 @@ public class SecurityConfig {
                         .requestMatchers("/api/users/**").authenticated()
 
                         // Toutes les autres requêtes nécessitent une authentification
-                        .anyRequest().authenticated()
-                )
+                        .anyRequest().authenticated())
 
                 // ✅ Session stateless (JWT)
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 // ✅ Ajouter le filtre JWT
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
