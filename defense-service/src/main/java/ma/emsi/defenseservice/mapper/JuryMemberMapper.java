@@ -1,12 +1,12 @@
 package ma.emsi.defenseservice.mapper;
 
-import ma.emsi.defenseservice.client.UserServiceClient;
 import ma.emsi.defenseservice.dto.external.UserDTO;
 import ma.emsi.defenseservice.dto.request.JuryMemberCreateDTO;
 import ma.emsi.defenseservice.dto.response.JuryMemberResponseDTO;
 import ma.emsi.defenseservice.entity.Jury;
 import ma.emsi.defenseservice.entity.JuryMember;
 import ma.emsi.defenseservice.enums.MemberStatus;
+import ma.emsi.defenseservice.service.UserServiceFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 public class JuryMemberMapper {
 
     @Autowired
-    private UserServiceClient userServiceClient;
+    private UserServiceFacade userServiceFacade;
 
     public JuryMember toEntity(JuryMemberCreateDTO dto) {
         JuryMember entity = new JuryMember();
@@ -36,17 +36,11 @@ public class JuryMemberMapper {
         dto.setRole(entity.getRole());
         dto.setStatus(entity.getStatus());
 
-        // ✅ Enrichissement depuis user-service
-        try {
-            UserDTO professor = userServiceClient.getUserById(entity.getProfessorId());
-            dto.setProfessorName(professor.getFirstName() + " " + professor.getLastName());
-            dto.setProfessorEmail(professor.getEmail());
-            dto.setProfessorPhone(professor.getPhoneNumber());
-        } catch (Exception e) {
-            // En cas d'erreur, on laisse les champs null
-            System.err.println("⚠️ Impossible d'enrichir JuryMember " + entity.getId() +
-                    " avec les données du professeur " + entity.getProfessorId());
-        }
+        // ✅ Enrichissement depuis user-service (avec Resilience4j)
+        UserDTO professor = userServiceFacade.getUserById(entity.getProfessorId());
+        dto.setProfessorName(professor.getFirstName() + " " + professor.getLastName());
+        dto.setProfessorEmail(professor.getEmail());
+        dto.setProfessorPhone(professor.getPhoneNumber());
 
         return dto;
     }

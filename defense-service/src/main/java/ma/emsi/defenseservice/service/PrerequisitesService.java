@@ -1,7 +1,5 @@
 package ma.emsi.defenseservice.service;
 
-import ma.emsi.defenseservice.client.UserServiceClient;
-import ma.emsi.defenseservice.dto.external.UserDTO;
 import ma.emsi.defenseservice.entity.Prerequisites;
 import ma.emsi.defenseservice.exception.ResourceNotFoundException;
 import ma.emsi.defenseservice.repository.PrerequisitesRepository;
@@ -17,23 +15,18 @@ public class PrerequisitesService {
     private PrerequisitesRepository prerequisitesRepository;
 
     @Autowired
-    private UserServiceClient userServiceClient;
+    private UserServiceFacade userServiceFacade;
 
     public Prerequisites save(Prerequisites p) {
-        // ✅ IMPORTANT 2 : Validation du doctorant
-        try {
-            UserDTO doctorant = userServiceClient.getUserById(p.getDoctorantId());
+        // ✅ IMPORTANT 2 : Validation du doctorant (avec Resilience4j)
+        boolean isValidDoctorant = userServiceFacade.validateUserRole(
+                p.getDoctorantId(),
+                "ROLE_DOCTORANT");
 
-            // Vérifier que l'utilisateur a le rôle DOCTORANT
-            if (doctorant.getRoles() == null || !doctorant.getRoles().contains("ROLE_DOCTORANT")) {
-                throw new IllegalArgumentException(
-                        "L'utilisateur avec l'ID " + p.getDoctorantId() +
-                                " n'a pas le rôle DOCTORANT. Rôles: " + doctorant.getRoles());
-            }
-        } catch (feign.FeignException e) {
-            throw new ResourceNotFoundException(
-                    "Doctorant avec l'ID " + p.getDoctorantId() +
-                            " introuvable dans user-service. Erreur: " + e.status());
+        if (!isValidDoctorant) {
+            throw new IllegalArgumentException(
+                    "L'utilisateur avec l'ID " + p.getDoctorantId() +
+                            " n'existe pas ou n'a pas le rôle DOCTORANT");
         }
 
         return prerequisitesRepository.save(p);

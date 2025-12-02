@@ -1,12 +1,12 @@
 package ma.emsi.defenseservice.mapper;
 
-import ma.emsi.defenseservice.client.UserServiceClient;
 import ma.emsi.defenseservice.dto.external.UserDTO;
 import ma.emsi.defenseservice.dto.request.RapportSubmitDTO;
 import ma.emsi.defenseservice.dto.response.RapportResponseDTO;
 import ma.emsi.defenseservice.entity.DefenseRequest;
 import ma.emsi.defenseservice.entity.JuryMember;
 import ma.emsi.defenseservice.entity.Rapport;
+import ma.emsi.defenseservice.service.UserServiceFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 public class RapportMapper {
 
     @Autowired
-    private UserServiceClient userServiceClient;
+    private UserServiceFacade userServiceFacade;
 
     public Rapport toEntity(RapportSubmitDTO dto) {
         Rapport entity = new Rapport();
@@ -46,15 +46,10 @@ public class RapportMapper {
         if (entity.getJuryMember() != null) {
             dto.setJuryMemberId(entity.getJuryMember().getId());
 
-            // ✅ Enrichissement avec les données du professeur depuis user-service
-            try {
-                UserDTO professor = userServiceClient.getUserById(entity.getJuryMember().getProfessorId());
-                dto.setJuryMemberName(professor.getFirstName() + " " + professor.getLastName());
-            } catch (Exception e) {
-                // En cas d'erreur, on laisse le champ null
-                System.err.println("⚠️ Impossible d'enrichir le rapport " + entity.getId() +
-                        " avec les données du professeur " + entity.getJuryMember().getProfessorId());
-            }
+            // ✅ Enrichissement avec les données du professeur depuis user-service (avec
+            // Resilience4j)
+            UserDTO professor = userServiceFacade.getUserById(entity.getJuryMember().getProfessorId());
+            dto.setJuryMemberName(professor.getFirstName() + " " + professor.getLastName());
         }
 
         return dto;
