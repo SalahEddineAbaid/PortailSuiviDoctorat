@@ -1,10 +1,14 @@
 package ma.emsi.defenseservice.service;
 
+import ma.emsi.defenseservice.client.UserServiceClient;
+import ma.emsi.defenseservice.dto.external.UserDTO;
 import ma.emsi.defenseservice.entity.Prerequisites;
 import ma.emsi.defenseservice.exception.ResourceNotFoundException;
 import ma.emsi.defenseservice.repository.PrerequisitesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class PrerequisitesService {
@@ -12,7 +16,26 @@ public class PrerequisitesService {
     @Autowired
     private PrerequisitesRepository prerequisitesRepository;
 
+    @Autowired
+    private UserServiceClient userServiceClient;
+
     public Prerequisites save(Prerequisites p) {
+        // ✅ IMPORTANT 2 : Validation du doctorant
+        try {
+            UserDTO doctorant = userServiceClient.getUserById(p.getDoctorantId());
+
+            // Vérifier que l'utilisateur a le rôle DOCTORANT
+            if (doctorant.getRoles() == null || !doctorant.getRoles().contains("ROLE_DOCTORANT")) {
+                throw new IllegalArgumentException(
+                        "L'utilisateur avec l'ID " + p.getDoctorantId() +
+                                " n'a pas le rôle DOCTORANT. Rôles: " + doctorant.getRoles());
+            }
+        } catch (feign.FeignException e) {
+            throw new ResourceNotFoundException(
+                    "Doctorant avec l'ID " + p.getDoctorantId() +
+                            " introuvable dans user-service. Erreur: " + e.status());
+        }
+
         return prerequisitesRepository.save(p);
     }
 
@@ -26,5 +49,18 @@ public class PrerequisitesService {
         pre.setValid(isValid);
         return prerequisitesRepository.save(pre);
     }
-}
 
+    /**
+     * ✅ AMÉLIORATION : Récupérer tous les prérequis d'un doctorant
+     */
+    public List<Prerequisites> getByDoctorant(Long doctorantId) {
+        return prerequisitesRepository.findByDoctorantId(doctorantId);
+    }
+
+    /**
+     * ✅ AMÉLIORATION : Récupérer les prérequis validés d'un doctorant
+     */
+    public List<Prerequisites> getValidatedByDoctorant(Long doctorantId) {
+        return prerequisitesRepository.findByDoctorantIdAndIsValid(doctorantId, true);
+    }
+}

@@ -12,10 +12,13 @@ import ma.emsi.defenseservice.enums.MemberStatus;
 public class JuryMemberResponseDTO {
 
     private Long id;
-    private String name;
-    private String email;
-    private String affiliation;
-    private String grade;
+    private Long professorId;
+
+    // ✅ Données enrichies depuis user-service
+    private String professorName;
+    private String professorEmail;
+    private String professorPhone;
+
     private MemberRole role;
     private MemberStatus status;
 }

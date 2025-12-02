@@ -1,5 +1,7 @@
 package ma.emsi.defenseservice.service;
 
+import ma.emsi.defenseservice.client.UserServiceClient;
+import ma.emsi.defenseservice.dto.external.UserDTO;
 import ma.emsi.defenseservice.entity.JuryMember;
 import ma.emsi.defenseservice.enums.MemberStatus;
 import ma.emsi.defenseservice.exception.ResourceNotFoundException;
@@ -15,7 +17,28 @@ public class JuryMemberService {
     @Autowired
     private JuryMemberRepository juryMemberRepository;
 
+    @Autowired
+    private UserServiceClient userServiceClient;
+
     public JuryMember add(JuryMember member) {
+        // ✅ IMPORTANT 3 : Validation du professeur
+        try {
+            UserDTO professor = userServiceClient.getUserById(member.getProfessorId());
+
+            // Vérifier que l'utilisateur a le rôle PROFESSEUR ou DIRECTEUR
+            if (professor.getRoles() == null ||
+                    (!professor.getRoles().contains("ROLE_PROFESSEUR") &&
+                            !professor.getRoles().contains("ROLE_DIRECTEUR"))) {
+                throw new IllegalArgumentException(
+                        "L'utilisateur avec l'ID " + member.getProfessorId() +
+                                " n'a pas le rôle PROFESSEUR ou DIRECTEUR. Rôles: " + professor.getRoles());
+            }
+        } catch (feign.FeignException e) {
+            throw new ResourceNotFoundException(
+                    "Professeur avec l'ID " + member.getProfessorId() +
+                            " introuvable dans user-service. Erreur: " + e.status());
+        }
+
         return juryMemberRepository.save(member);
     }
 
@@ -31,4 +54,3 @@ public class JuryMemberService {
         return juryMemberRepository.save(member);
     }
 }
-
