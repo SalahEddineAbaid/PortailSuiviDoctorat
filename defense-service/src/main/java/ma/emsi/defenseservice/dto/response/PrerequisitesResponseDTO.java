@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 public class PrerequisitesResponseDTO {
 
     private Long id;
+    private Long doctorantId;
     private int journalArticles;
     private int conferences;
     private int trainingHours;

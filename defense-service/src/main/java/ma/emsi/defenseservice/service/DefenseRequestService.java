@@ -60,10 +60,24 @@ public class DefenseRequestService {
             request.setStatus(DefenseRequestStatus.SUBMITTED);
         }
 
-        // Si un prerequisitesId est fourni, charger l'entité depuis la DB
+        // ✅ CRITIQUE 2 : Validation des Prerequisites
         if (prerequisitesId != null) {
             Prerequisites prerequisites = prerequisitesRepository.findById(prerequisitesId)
                     .orElseThrow(() -> new ResourceNotFoundException("Prerequisites not found"));
+
+            // ✅ Vérifier que les prérequis sont validés
+            if (!prerequisites.isValid()) {
+                throw new IllegalStateException(
+                        "Les prérequis doivent être validés par le directeur avant de créer une demande de soutenance");
+            }
+
+            // ✅ Vérifier que les prérequis appartiennent au doctorant
+            if (!prerequisites.getDoctorantId().equals(request.getDoctorantId())) {
+                throw new IllegalArgumentException(
+                        "Les prérequis (ID: " + prerequisitesId + ") n'appartiennent pas au doctorant (ID: " +
+                                request.getDoctorantId() + ")");
+            }
+
             request.setPrerequisites(prerequisites);
         }
 
