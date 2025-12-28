@@ -6,12 +6,16 @@ import ma.emsi.defenseservice.dto.response.JuryResponseDTO;
 import ma.emsi.defenseservice.entity.DefenseRequest;
 import ma.emsi.defenseservice.entity.Jury;
 import ma.emsi.defenseservice.entity.JuryMember;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.Collectors;
 
 @Component
 public class JuryMapper {
+
+    @Autowired
+    private JuryMemberMapper juryMemberMapper;
 
     public Jury toEntity(JuryCreateDTO dto) {
         Jury entity = new Jury();
@@ -46,14 +50,7 @@ public class JuryMapper {
     }
 
     private JuryMemberResponseDTO memberToDTO(JuryMember member) {
-        JuryMemberResponseDTO dto = new JuryMemberResponseDTO();
-        dto.setId(member.getId());
-        dto.setName(member.getName());
-        dto.setEmail(member.getEmail());
-        dto.setAffiliation(member.getAffiliation());
-        dto.setGrade(member.getGrade());
-        dto.setRole(member.getRole());
-        dto.setStatus(member.getStatus());
-        return dto;
+        // ✅ Utiliser le JuryMemberMapper qui gère l'enrichissement
+        return juryMemberMapper.toDTO(member);
     }
 }

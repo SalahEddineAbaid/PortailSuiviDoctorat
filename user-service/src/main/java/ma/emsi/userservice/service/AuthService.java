@@ -1,6 +1,5 @@
 package ma.emsi.userservice.service;
 
-
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -60,9 +59,25 @@ public class AuthService {
         user.setPays(request.pays());
         user.setEnabled(true);
 
-        Role roleDoctorant = roleRepository.findByName(RoleName.ROLE_DOCTORANT)
-                .orElseThrow(() -> new RuntimeException("Le rôle ROLE_DOCTORANT n'existe pas"));
-        user.getRoles().add(roleDoctorant);
+        // ✅ CORRECTION : Utiliser les rôles envoyés dans la requête
+        if (request.roles() != null && !request.roles().isEmpty()) {
+            for (String roleName : request.roles()) {
+                try {
+                    RoleName roleEnum = RoleName.valueOf(roleName);
+                    Role role = roleRepository.findByName(roleEnum)
+                            .orElseThrow(() -> new RuntimeException("Le rôle " + roleName + " n'existe pas"));
+                    user.getRoles().add(role);
+                } catch (IllegalArgumentException e) {
+                    logger.warn("Rôle invalide ignoré : {}", roleName);
+                }
+            }
+        } else {
+            // Par défaut, assigner ROLE_DOCTORANT si aucun rôle n'est spécifié
+            Role roleDoctorant = roleRepository.findByName(RoleName.ROLE_DOCTORANT)
+                    .orElseThrow(() -> new RuntimeException("Le rôle ROLE_DOCTORANT n'existe pas"));
+            user.getRoles().add(roleDoctorant);
+        }
+
         logger.info("Utilisateur créé avec succès : {}", user.getId());
         return userRepository.save(user);
     }
@@ -82,8 +97,7 @@ public class AuthService {
                 u.getAdresse(),
                 u.getVille(),
                 u.getPays(),
-                roles
-        );
+                roles);
     }
 
     public TokenResponse login(LoginRequest request) {
@@ -92,9 +106,7 @@ public class AuthService {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             request.email(),
-                            request.password()
-                    )
-            );
+                            request.password()));
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -123,7 +135,6 @@ public class AuthService {
         }
     }
 
-
     public TokenResponse refreshToken(String refreshToken) {
         // Validation du refresh token
         if (refreshToken == null || !refreshTokenRepository.existsByToken(refreshToken)) {
@@ -146,8 +157,7 @@ public class AuthService {
                 null,
                 token.getUser().getRoles().stream()
                         .map(role -> new SimpleGrantedAuthority(role.getName().name()))
-                        .collect(Collectors.toList())
-        );
+                        .collect(Collectors.toList()));
         String newAccessToken = jwtProvider.generateToken(authentication);
 
         return new TokenResponse(newAccessToken, refreshToken);

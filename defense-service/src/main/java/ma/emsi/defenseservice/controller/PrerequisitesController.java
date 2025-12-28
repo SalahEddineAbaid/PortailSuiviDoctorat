@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/defense-service/prerequisites")
 public class PrerequisitesController {
@@ -52,6 +54,30 @@ public class PrerequisitesController {
             @RequestParam boolean valid) {
         Prerequisites validated = prerequisitesService.validate(id, valid);
         PrerequisitesResponseDTO response = mapper.toDTO(validated);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * ✅ AMÉLIORATION : Récupérer tous les prérequis d'un doctorant
+     */
+    @GetMapping("/doctorant/{doctorantId}")
+    public ResponseEntity<List<PrerequisitesResponseDTO>> getByDoctorant(@PathVariable Long doctorantId) {
+        List<Prerequisites> prerequisites = prerequisitesService.getByDoctorant(doctorantId);
+        List<PrerequisitesResponseDTO> response = prerequisites.stream()
+                .map(mapper::toDTO)
+                .toList();
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * ✅ AMÉLIORATION : Récupérer les prérequis validés d'un doctorant
+     */
+    @GetMapping("/doctorant/{doctorantId}/validated")
+    public ResponseEntity<List<PrerequisitesResponseDTO>> getValidatedByDoctorant(@PathVariable Long doctorantId) {
+        List<Prerequisites> prerequisites = prerequisitesService.getValidatedByDoctorant(doctorantId);
+        List<PrerequisitesResponseDTO> response = prerequisites.stream()
+                .map(mapper::toDTO)
+                .toList();
         return ResponseEntity.ok(response);
     }
 }

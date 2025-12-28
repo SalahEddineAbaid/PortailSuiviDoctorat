@@ -15,7 +15,24 @@ public class JuryMemberService {
     @Autowired
     private JuryMemberRepository juryMemberRepository;
 
+    @Autowired
+    private UserServiceFacade userServiceFacade;
+
     public JuryMember add(JuryMember member) {
+        // ✅ IMPORTANT 3 : Validation du professeur (avec Resilience4j)
+        boolean isValidProfessor = userServiceFacade.validateUserRole(
+                member.getProfessorId(),
+                "ROLE_PROFESSEUR")
+                || userServiceFacade.validateUserRole(
+                        member.getProfessorId(),
+                        "ROLE_DIRECTEUR");
+
+        if (!isValidProfessor) {
+            throw new IllegalArgumentException(
+                    "L'utilisateur avec l'ID " + member.getProfessorId() +
+                            " n'existe pas ou n'a pas le rôle PROFESSEUR ou DIRECTEUR");
+        }
+
         return juryMemberRepository.save(member);
     }
 
@@ -31,4 +48,3 @@ public class JuryMemberService {
         return juryMemberRepository.save(member);
     }
 }
-

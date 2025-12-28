@@ -15,7 +15,21 @@ public class JuryService {
     @Autowired
     private JuryRepository juryRepository;
 
+    @Autowired
+    private UserServiceFacade userServiceFacade;
+
     public Jury create(Jury jury) {
+        // ✅ IMPORTANT 1 : Validation du directeur (avec Resilience4j)
+        boolean isValidDirector = userServiceFacade.validateUserRole(
+                jury.getDirectorId(),
+                "ROLE_DIRECTEUR");
+
+        if (!isValidDirector) {
+            throw new IllegalArgumentException(
+                    "L'utilisateur avec l'ID " + jury.getDirectorId() +
+                            " n'existe pas ou n'a pas le rôle DIRECTEUR");
+        }
+
         jury.setProposalDate(LocalDateTime.now());
         return juryRepository.save(jury);
     }
@@ -38,4 +52,3 @@ public class JuryService {
         return juryRepository.save(jury);
     }
 }
-

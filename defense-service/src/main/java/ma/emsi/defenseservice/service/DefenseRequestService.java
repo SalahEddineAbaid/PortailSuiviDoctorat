@@ -1,7 +1,5 @@
 package ma.emsi.defenseservice.service;
 
-import ma.emsi.defenseservice.client.UserServiceClient;
-import ma.emsi.defenseservice.dto.external.UserDTO;
 import ma.emsi.defenseservice.entity.DefenseRequest;
 import ma.emsi.defenseservice.entity.Prerequisites;
 import ma.emsi.defenseservice.enums.DefenseRequestStatus;
@@ -24,33 +22,19 @@ public class DefenseRequestService {
     private PrerequisitesRepository prerequisitesRepository;
 
     @Autowired
-    private UserServiceClient userServiceClient;
+    private UserServiceFacade userServiceFacade;
 
     public DefenseRequest create(DefenseRequest request, Long prerequisitesId) {
-        // ✅ VALIDATION : Vérifier que le doctorant existe dans user-service
-        try {
-            System.out.println("🔍 Tentative de récupération de l'utilisateur avec ID: " + request.getDoctorantId());
-            UserDTO user = userServiceClient.getUserById(request.getDoctorantId());
-            System.out.println("✅ Utilisateur trouvé: " + user.getEmail() + " avec rôles: " + user.getRoles());
+        // ✅ VALIDATION : Vérifier que le doctorant existe et a le rôle DOCTORANT (avec
+        // Resilience4j)
+        boolean isValidDoctorant = userServiceFacade.validateUserRole(
+                request.getDoctorantId(),
+                "ROLE_DOCTORANT");
 
-            // Vérifier que l'utilisateur a le rôle DOCTORANT
-            if (user.getRoles() == null || !user.getRoles().contains("ROLE_DOCTORANT")) {
-                throw new IllegalArgumentException(
-                        "L'utilisateur avec l'ID " + request.getDoctorantId() +
-                                " n'a pas le rôle DOCTORANT. Rôles: " + user.getRoles());
-            }
-        } catch (feign.FeignException e) {
-            System.err.println("❌ Erreur Feign: " + e.status() + " - " + e.getMessage());
-            System.err.println("❌ Contenu de la réponse: " + e.contentUTF8());
-            throw new ResourceNotFoundException(
-                    "Doctorant avec l'ID " + request.getDoctorantId() +
-                            " introuvable dans user-service. Erreur: " + e.status());
-        } catch (Exception e) {
-            System.err.println("❌ Erreur générale: " + e.getClass().getName() + " - " + e.getMessage());
-            e.printStackTrace();
-            throw new ResourceNotFoundException(
-                    "Doctorant avec l'ID " + request.getDoctorantId() +
-                            " introuvable dans user-service. Erreur: " + e.getMessage());
+        if (!isValidDoctorant) {
+            throw new IllegalArgumentException(
+                    "L'utilisateur avec l'ID " + request.getDoctorantId() +
+                            " n'existe pas ou n'a pas le rôle DOCTORANT");
         }
 
         request.setSubmissionDate(LocalDateTime.now());
@@ -60,10 +44,24 @@ public class DefenseRequestService {
             request.setStatus(DefenseRequestStatus.SUBMITTED);
         }
 
-        // Si un prerequisitesId est fourni, charger l'entité depuis la DB
+        // ✅ CRITIQUE 2 : Validation des Prerequisites
         if (prerequisitesId != null) {
             Prerequisites prerequisites = prerequisitesRepository.findById(prerequisitesId)
                     .orElseThrow(() -> new ResourceNotFoundException("Prerequisites not found"));
+
+            // ✅ Vérifier que les prérequis sont validés
+            if (!prerequisites.isValid()) {
+                throw new IllegalStateException(
+                        "Les prérequis doivent être validés par le directeur avant de créer une demande de soutenance");
+            }
+
+            // ✅ Vérifier que les prérequis appartiennent au doctorant
+            if (!prerequisites.getDoctorantId().equals(request.getDoctorantId())) {
+                throw new IllegalArgumentException(
+                        "Les prérequis (ID: " + prerequisitesId + ") n'appartiennent pas au doctorant (ID: " +
+                                request.getDoctorantId() + ")");
+            }
+
             request.setPrerequisites(prerequisites);
         }
 

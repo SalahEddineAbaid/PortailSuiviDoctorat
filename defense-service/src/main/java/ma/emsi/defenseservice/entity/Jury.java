@@ -12,7 +12,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "juries")
+@Table(name = "juries", indexes = {
+        @Index(name = "idx_director_id", columnList = "director_id"),
+        @Index(name = "idx_defense_request_id", columnList = "defense_request_id"),
+        @Index(name = "idx_status", columnList = "status")
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -23,6 +27,7 @@ public class Jury {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "director_id", nullable = false)
     private Long directorId;
 
     @Enumerated(EnumType.STRING)
