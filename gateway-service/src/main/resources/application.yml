@@ -7,6 +7,7 @@ spring:
   cloud:
     gateway:
       routes:
+        # User Service Routes
         - id: user-service-users
           uri: lb://USER-SERVICE
           predicates:
@@ -15,6 +16,37 @@ spring:
           uri: lb://USER-SERVICE
           predicates:
             - Path=/api/auth/**
+        
+        # Inscription Service Routes
+        - id: inscription-service-campagnes
+          uri: lb://INSCRIPTION-SERVICE
+          predicates:
+            - Path=/api/campagnes/**
+        - id: inscription-service-inscriptions
+          uri: lb://INSCRIPTION-SERVICE
+          predicates:
+            - Path=/api/inscriptions/**
+        - id: inscription-service-documents
+          uri: lb://INSCRIPTION-SERVICE
+          predicates:
+            - Path=/api/documents/**
+      
+      # Configuration globale
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:4200"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
+    
     eureka:
         client:
             defaultZone: http://localhost:8761/eureka/

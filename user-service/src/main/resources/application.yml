@@ -5,7 +5,7 @@ spring:
     import: optional:configserver:http://localhost:8889
 
   datasource:
-    url: jdbc:mariadb://localhost:3306/userdb
+    url: jdbc:mariadb://localhost:3307/userdb
     username: root
     password: amthroot
     driver-class-name: org.mariadb.jdbc.Driver

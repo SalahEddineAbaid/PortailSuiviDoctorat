@@ -1,0 +1,370 @@
+{
+  "info": {
+    "name": "Inscription Service",
+    "_postman_id": "inscription-service-collection",
+    "description": "Collection complète pour tester le microservice inscription-service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8082",
+      "type": "string"
+    },
+    {
+      "key": "campagneId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "inscriptionId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "doctorantId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "directeurId",
+      "value": "2",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Campagnes",
+      "item": [
+        {
+          "name": "Créer campagne inscription",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"libelle\": \"Campagne Inscription 2025-2026\",\n  \"type\": \"INSCRIPTION\",\n  \"dateDebut\": \"2025-09-01\",\n  \"dateFin\": \"2025-10-31\",\n  \"anneeUniversitaire\": 2025\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/campagnes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "campagnes"]
+            }
+          }
+        },
+        {
+          "name": "Créer campagne réinscription",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"libelle\": \"Campagne Réinscription 2025-2026\",\n  \"type\": \"REINSCRIPTION\",\n  \"dateDebut\": \"2025-11-01\",\n  \"dateFin\": \"2025-11-30\",\n  \"anneeUniversitaire\": 2025\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/campagnes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "campagnes"]
+            }
+          }
+        },
+        {
+          "name": "Lister toutes les campagnes",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/campagnes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "campagnes"]
+            }
+          }
+        },
+        {
+          "name": "Lister campagnes actives",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/campagnes/actives",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "campagnes", "actives"]
+            }
+          }
+        },
+        {
+          "name": "Récupérer campagne par ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/campagnes/{{campagneId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "campagnes", "{{campagneId}}"]
+            }
+          }
+        },
+        {
+          "name": "Modifier campagne",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"libelle\": \"Campagne Inscription 2025-2026 (Modifiée)\",\n  \"type\": \"INSCRIPTION\",\n  \"dateDebut\": \"2025-09-01\",\n  \"dateFin\": \"2025-11-15\",\n  \"anneeUniversitaire\": 2025\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/campagnes/{{campagneId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "campagnes", "{{campagneId}}"]
+            }
+          }
+        },
+        {
+          "name": "Fermer campagne",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{baseUrl}}/api/campagnes/{{campagneId}}/fermer",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "campagnes", "{{campagneId}}", "fermer"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Inscriptions",
+      "item": [
+        {
+          "name": "Créer première inscription",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"doctorantId\": 1,\n  \"directeurTheseId\": 2,\n  \"campagneId\": 1,\n  \"sujetThese\": \"Intelligence Artificielle appliquée à la médecine\",\n  \"type\": \"PREMIERE_INSCRIPTION\",\n  \"anneeInscription\": 2024,\n  \"cin\": \"AB123456\",\n  \"cne\": \"R123456789\",\n  \"telephone\": \"0612345678\",\n  \"adresse\": \"123 Rue Mohammed V\",\n  \"ville\": \"Casablanca\",\n  \"pays\": \"Maroc\",\n  \"dateNaissance\": \"1995-05-15\",\n  \"lieuNaissance\": \"Rabat\",\n  \"nationalite\": \"Marocaine\",\n  \"titreThese\": \"IA et diagnostic médical automatisé\",\n  \"discipline\": \"Informatique\",\n  \"laboratoire\": \"LRIT\",\n  \"etablissementAccueil\": \"Faculté des Sciences\",\n  \"cotutelle\": false,\n  \"dateDebutPrevue\": \"2025-09-01\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/inscriptions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "inscriptions"]
+            }
+          }
+        },
+        {
+          "name": "Créer inscription en cotutelle",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"doctorantId\": 3,\n  \"directeurTheseId\": 4,\n  \"campagneId\": 1,\n  \"sujetThese\": \"Blockchain et sécurité des données\",\n  \"type\": \"PREMIERE_INSCRIPTION\",\n  \"anneeInscription\": 2024,\n  \"cin\": \"CD789012\",\n  \"cne\": \"R987654321\",\n  \"telephone\": \"0698765432\",\n  \"adresse\": \"456 Avenue Hassan II\",\n  \"ville\": \"Rabat\",\n  \"pays\": \"Maroc\",\n  \"dateNaissance\": \"1994-08-20\",\n  \"lieuNaissance\": \"Casablanca\",\n  \"nationalite\": \"Marocaine\",\n  \"titreThese\": \"Blockchain pour la sécurité des transactions\",\n  \"discipline\": \"Informatique\",\n  \"laboratoire\": \"LISI\",\n  \"etablissementAccueil\": \"ENSIAS\",\n  \"cotutelle\": true,\n  \"universitePartenaire\": \"Université Paris-Saclay\",\n  \"paysPartenaire\": \"France\",\n  \"dateDebutPrevue\": \"2025-09-01\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/inscriptions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "inscriptions"]
+            }
+          }
+        },
+        {
+          "name": "Récupérer inscription par ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/inscriptions/{{inscriptionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "inscriptions", "{{inscriptionId}}"]
+            }
+          }
+        },
+        {
+          "name": "Inscriptions d'un doctorant",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/inscriptions/doctorant/{{doctorantId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "inscriptions", "doctorant", "{{doctorantId}}"]
+            }
+          }
+        },
+        {
+          "name": "Soumettre inscription",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/inscriptions/{{inscriptionId}}/soumettre?doctorantId={{doctorantId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "inscriptions", "{{inscriptionId}}", "soumettre"],
+              "query": [
+                {
+                  "key": "doctorantId",
+                  "value": "{{doctorantId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Inscriptions en attente directeur",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/inscriptions/directeur/{{directeurId}}/en-attente",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "inscriptions", "directeur", "{{directeurId}}", "en-attente"]
+            }
+          }
+        },
+        {
+          "name": "Valider par directeur (Approuvée)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inscriptionId\": 1,\n  \"approuve\": true,\n  \"commentaire\": \"Dossier complet et conforme. Le sujet de thèse est pertinent.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/inscriptions/{{inscriptionId}}/valider-directeur?directeurId={{directeurId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "inscriptions", "{{inscriptionId}}", "valider-directeur"],
+              "query": [
+                {
+                  "key": "directeurId",
+                  "value": "{{directeurId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Valider par directeur (Rejetée)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inscriptionId\": 1,\n  \"approuve\": false,\n  \"commentaire\": \"Le sujet nécessite plus de précisions.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/inscriptions/{{inscriptionId}}/valider-directeur?directeurId={{directeurId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "inscriptions", "{{inscriptionId}}", "valider-directeur"],
+              "query": [
+                {
+                  "key": "directeurId",
+                  "value": "{{directeurId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Inscriptions en attente admin",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/inscriptions/admin/en-attente",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "inscriptions", "admin", "en-attente"]
+            }
+          }
+        },
+        {
+          "name": "Valider par admin (Approuvée)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inscriptionId\": 1,\n  \"approuve\": true,\n  \"commentaire\": \"Inscription validée. Tous les documents sont conformes.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/inscriptions/{{inscriptionId}}/valider-admin",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "inscriptions", "{{inscriptionId}}", "valider-admin"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Documents",
+      "item": [
+        {
+          "name": "Lister documents d'une inscription",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/documents/{{inscriptionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "documents", "{{inscriptionId}}"]
+            }
+          }
+        },
+        {
+          "name": "Télécharger un document",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/documents/download/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "documents", "download", "1"]
+            }
+          }
+        },
+        {
+          "name": "Supprimer un document",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/documents/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "documents", "1"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
