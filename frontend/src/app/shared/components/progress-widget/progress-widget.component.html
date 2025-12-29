@@ -1,0 +1,17 @@
+<div class="progress-widget" [ngClass]="getProgressClass()">
+  <div class="progress-header">
+    <span class="progress-label">{{ progress.label }}</span>
+    <span class="progress-value">{{ progress.current }}/{{ progress.total }}</span>
+  </div>
+  
+  <div class="progress-bar-container">
+    <div class="progress-bar-background">
+      <div 
+        class="progress-bar-fill" 
+        [style.width.%]="progress.percentage"
+        [style.background-color]="getProgressColor()"
+      ></div>
+    </div>
+    <span class="progress-percentage">{{ progress.percentage }}%</span>
+  </div>
+</div>

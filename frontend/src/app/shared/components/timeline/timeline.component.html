@@ -1,0 +1,42 @@
+<div class="timeline-container">
+  <div class="timeline-header">
+    <h3>{{ title }}</h3>
+  </div>
+
+  <div class="timeline" *ngIf="events.length > 0">
+    <div 
+      class="timeline-item" 
+      *ngFor="let event of events; trackBy: trackByEventId"
+      [ngClass]="getStatusClass(event.status)"
+    >
+      <div class="timeline-marker">
+        <i [class]="getStatusIcon(event.status)"></i>
+      </div>
+      
+      <div class="timeline-content">
+        <div class="timeline-header-item">
+          <div class="timeline-type">
+            <i [class]="getTypeIcon(event.type)"></i>
+          </div>
+          <div class="timeline-date">
+            {{ event.date | date:'dd/MM/yyyy' }}
+          </div>
+        </div>
+        
+        <h4 class="timeline-title">{{ event.title }}</h4>
+        <p class="timeline-description">{{ event.description }}</p>
+        
+        <div class="timeline-status" [ngClass]="getStatusClass(event.status)">
+          <span class="status-label">
+            {{ getStatusLabel(event.status) }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="timeline-empty" *ngIf="events.length === 0">
+    <i class="fas fa-calendar-alt"></i>
+    <p>Aucun événement dans la timeline</p>
+  </div>
+</div>

@@ -1,0 +1,143 @@
+<div class="prerequis-check" [ngClass]="globalStatusClass">
+  <!-- Titre -->
+  <div class="prerequis-header" *ngIf="showTitle">
+    <h3 class="prerequis-title">
+      <i class="fas fa-check-circle"></i>
+      Vérification des Prérequis
+    </h3>
+    <button 
+      type="button" 
+      class="btn btn-sm btn-outline-primary refresh-btn"
+      (click)="refreshPrerequis()"
+      [disabled]="loading$ | async"
+      title="Actualiser les prérequis">
+      <i class="fas fa-sync-alt" [class.fa-spin]="loading$ | async"></i>
+      Actualiser
+    </button>
+  </div>
+
+  <!-- État de chargement -->
+  <div class="loading-state" *ngIf="loading$ | async">
+    <div class="spinner-border spinner-border-sm" role="status">
+      <span class="visually-hidden">Chargement...</span>
+    </div>
+    <span class="loading-text">Vérification des prérequis en cours...</span>
+  </div>
+
+  <!-- État d'erreur -->
+  <div class="error-state alert alert-danger" *ngIf="error$ | async as error">
+    <i class="fas fa-exclamation-triangle"></i>
+    {{ error }}
+    <button 
+      type="button" 
+      class="btn btn-sm btn-outline-danger ms-2"
+      (click)="refreshPrerequis()">
+      Réessayer
+    </button>
+  </div>
+
+  <!-- Résultats des prérequis -->
+  <div class="prerequis-results" *ngIf="prerequisStatus$ | async as status">
+    
+    <!-- Résumé global -->
+    <div class="prerequis-summary" [ngClass]="{'compact': compact}">
+      <div class="summary-content">
+        <div class="summary-icon">
+          <i class="fas" [ngClass]="{
+            'fa-check-circle text-success': allPrerequisMet,
+            'fa-exclamation-circle text-warning': !allPrerequisMet
+          }"></i>
+        </div>
+        <div class="summary-text">
+          <div class="summary-message">{{ globalMessage }}</div>
+          <div class="summary-progress" *ngIf="!compact">
+            <div class="progress">
+              <div 
+                class="progress-bar" 
+                [ngClass]="{
+                  'bg-success': allPrerequisMet,
+                  'bg-warning': !allPrerequisMet
+                }"
+                [style.width.%]="completionPercentage">
+              </div>
+            </div>
+            <small class="progress-text">{{ validPrerequisCount }}/{{ totalPrerequisCount }} prérequis validés</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Liste détaillée des prérequis -->
+    <div class="prerequis-details" *ngIf="!compact">
+      <div class="prerequis-list">
+        <div 
+          class="prerequis-item" 
+          *ngFor="let detail of status.details; trackBy: trackByPrerequisDetail"
+          [ngClass]="getPrerequisClass(detail.valide)">
+          
+          <div class="prerequis-item-content">
+            <div class="prerequis-item-header">
+              <span class="prerequis-icon">{{ getPrerequisIcon(detail.valide) }}</span>
+              <span class="prerequis-label">{{ getCritereLabel(detail.critere) }}</span>
+              <span class="prerequis-status" [ngClass]="{
+                'badge bg-success': detail.valide,
+                'badge bg-danger': !detail.valide
+              }">
+                {{ detail.valide ? 'Validé' : 'Non validé' }}
+              </span>
+            </div>
+            
+            <div class="prerequis-item-details" *ngIf="getCritereHelp(detail)">
+              <small class="text-muted">
+                <i class="fas fa-info-circle"></i>
+                {{ getCritereHelp(detail) }}
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions selon l'état -->
+    <div class="prerequis-actions" *ngIf="!compact">
+      <div class="alert" [ngClass]="{
+        'alert-success': allPrerequisMet,
+        'alert-warning': !allPrerequisMet
+      }">
+        <div class="d-flex align-items-center">
+          <i class="fas" [ngClass]="{
+            'fa-check-circle': allPrerequisMet,
+            'fa-exclamation-triangle': !allPrerequisMet
+          }"></i>
+          <div class="ms-2">
+            <strong *ngIf="allPrerequisMet">Prérequis validés</strong>
+            <strong *ngIf="!allPrerequisMet">Prérequis incomplets</strong>
+            <div class="mt-1">
+              <span *ngIf="allPrerequisMet">
+                Vous pouvez maintenant soumettre votre demande de soutenance.
+              </span>
+              <span *ngIf="!allPrerequisMet">
+                Veuillez compléter tous les prérequis avant de soumettre votre demande.
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- État vide -->
+  <div class="empty-state" *ngIf="!loading$.value && !error$.value && !(prerequisStatus$ | async)">
+    <div class="text-center text-muted">
+      <i class="fas fa-clipboard-check fa-2x mb-2"></i>
+      <p>Aucune vérification de prérequis effectuée</p>
+      <button 
+        type="button" 
+        class="btn btn-primary"
+        (click)="checkPrerequis()"
+        [disabled]="!doctorantId">
+        Vérifier les prérequis
+      </button>
+    </div>
+  </div>
+</div>

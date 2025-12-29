@@ -14,52 +14,175 @@
         <p>Chargement des données...</p>
       </div>
 
-      <!-- Welcome Section -->
-      <div *ngIf="!isLoading" class="welcome-container">
-        <div class="welcome-card">
-          <div class="welcome-icon">
-            <i class="fas fa-graduation-cap"></i>
+      <!-- Error State -->
+      <div *ngIf="error && !isLoading" class="error-container">
+        <div class="error-card">
+          <i class="fas fa-exclamation-triangle"></i>
+          <h3>Erreur de chargement</h3>
+          <p>{{ error }}</p>
+          <button class="retry-btn" (click)="refreshDashboard()">
+            <i class="fas fa-redo"></i>
+            Réessayer
+          </button>
+        </div>
+      </div>
+
+      <!-- Dashboard Content -->
+      <div *ngIf="!isLoading && !error" class="dashboard-container">
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+          <div class="welcome-header">
+            <div class="welcome-text">
+              <h1>{{ getWelcomeMessage() }}, {{ getUserName() }} ! 👋</h1>
+              <p>Bienvenue sur votre portail de doctorant</p>
+            </div>
+            <div class="welcome-actions">
+              <button class="refresh-btn" (click)="refreshDashboard()" title="Actualiser">
+                <i class="fas fa-sync-alt"></i>
+              </button>
+            </div>
           </div>
-          <h1>{{ getWelcomeMessage() }}, {{ getUserName() }} ! 👋</h1>
-          <p class="welcome-text">
-            Bienvenue sur votre portail de doctorant
-          </p>
-          <div class="welcome-info">
+
+          <!-- User Info -->
+          <div class="user-info" *ngIf="userInfo">
             <div class="info-item">
               <i class="fas fa-envelope"></i>
-              <span>{{ userInfo?.email }}</span>
+              <span>{{ userInfo.email }}</span>
             </div>
             <div class="info-item">
               <i class="fas fa-user-tag"></i>
               <span>Doctorant</span>
             </div>
           </div>
+        </div>
 
-          <div class="welcome-message">
-            <i class="fas fa-info-circle"></i>
-            <p>
-              Les fonctionnalités complètes (gestion de thèse, publications, etc.) 
-              seront disponibles via les microservices dédiés.
-            </p>
+        <!-- Alerts Section -->
+        <div class="alerts-section" *ngIf="hasAlerts()">
+          <h2>Alertes et notifications</h2>
+          <div class="alerts-container">
+            <app-alert 
+              *ngFor="let alert of dashboardData!.alertes" 
+              [alert]="alert"
+              (dismiss)="onAlertDismiss($event)"
+            ></app-alert>
           </div>
         </div>
 
-        <!-- Quick Info Cards -->
-        <div class="info-grid">
-          <div class="info-card">
+        <!-- Status Widgets -->
+        <div class="widgets-section">
+          <h2>Vue d'ensemble</h2>
+          <div class="widgets-grid">
+            <app-status-widget 
+              *ngFor="let widget of statusWidgets" 
+              [data]="widget"
+              size="medium"
+            ></app-status-widget>
+          </div>
+        </div>
+
+        <!-- Progress Indicators -->
+        <div class="progress-section" *ngIf="progressIndicators.length > 0">
+          <h2>Progression</h2>
+          <div class="progress-grid">
+            <app-progress-widget 
+              *ngFor="let indicator of progressIndicators; let i = index" 
+              [progress]="indicator"
+              [color]="i === 0 ? 'blue' : 'green'"
+              size="medium"
+            ></app-progress-widget>
+          </div>
+        </div>
+
+        <!-- Main Dashboard Grid -->
+        <div class="dashboard-grid">
+          <!-- Timeline Section -->
+          <div class="timeline-section" *ngIf="hasTimeline()">
+            <app-timeline 
+              [events]="dashboardData!.timeline" 
+              title="Historique de votre parcours"
+            ></app-timeline>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="quick-actions-section">
+            <div class="quick-actions-card">
+              <h3>Actions rapides</h3>
+              <div class="actions-grid">
+                <a routerLink="/inscription" class="action-item">
+                  <i class="fas fa-user-plus"></i>
+                  <span>Inscription</span>
+                </a>
+                <a routerLink="/soutenance" class="action-item">
+                  <i class="fas fa-graduation-cap"></i>
+                  <span>Soutenance</span>
+                </a>
+                <a routerLink="/notifications" class="action-item">
+                  <i class="fas fa-bell"></i>
+                  <span>Notifications</span>
+                  <span class="badge" *ngIf="getNotificationCount() > 0">{{ getNotificationCount() }}</span>
+                </a>
+                <a routerLink="/auth/profile" class="action-item">
+                  <i class="fas fa-user"></i>
+                  <span>Profil</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Notifications -->
+          <div class="notifications-section" *ngIf="dashboardData?.notifications && dashboardData.notifications.length > 0">
+            <div class="notifications-card">
+              <div class="card-header">
+                <h3>Notifications récentes</h3>
+                <a routerLink="/notifications" class="view-all-link">Voir toutes</a>
+              </div>
+              <div class="notifications-list">
+                <div 
+                  *ngFor="let notification of dashboardData.notifications.slice(0, 3)" 
+                  class="notification-item"
+                  [ngClass]="{ 'unread': !notification.lue }"
+                >
+                  <div class="notification-icon">
+                    <i class="fas fa-bell"></i>
+                  </div>
+                  <div class="notification-content">
+                    <h4>{{ notification.titre }}</h4>
+                    <p>{{ notification.message }}</p>
+                    <span class="notification-date">{{ notification.dateCreation | date:'dd/MM/yyyy HH:mm' }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Documents Status -->
+          <div class="documents-section" *ngIf="dashboardData?.documentsManquants && dashboardData.documentsManquants.length > 0">
+            <div class="documents-card">
+              <h3>Documents manquants</h3>
+              <div class="documents-list">
+                <div *ngFor="let document of dashboardData.documentsManquants" class="document-item">
+                  <i class="fas fa-file-alt"></i>
+                  <span>{{ document }}</span>
+                </div>
+              </div>
+              <a routerLink="/inscription" class="upload-link">
+                <i class="fas fa-upload"></i>
+                Télécharger les documents
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty State for New Users -->
+        <div *ngIf="!hasTimeline() && !hasAlerts() && statusWidgets.length === 0" class="empty-state">
+          <div class="empty-card">
             <i class="fas fa-rocket"></i>
-            <h3>Nouveau portail</h3>
-            <p>Interface moderne et intuitive pour gérer votre parcours doctoral</p>
-          </div>
-          <div class="info-card">
-            <i class="fas fa-shield-alt"></i>
-            <h3>Sécurisé</h3>
-            <p>Vos données sont protégées avec JWT et Spring Security</p>
-          </div>
-          <div class="info-card">
-            <i class="fas fa-cogs"></i>
-            <h3>Microservices</h3>
-            <p>Architecture moderne avec services indépendants</p>
+            <h3>Bienvenue dans votre espace doctorant !</h3>
+            <p>Commencez par créer votre première inscription pour accéder à toutes les fonctionnalités.</p>
+            <a routerLink="/inscription" class="start-btn">
+              <i class="fas fa-plus"></i>
+              Commencer mon inscription
+            </a>
           </div>
         </div>
       </div>

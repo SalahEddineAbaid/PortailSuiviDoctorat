@@ -1,0 +1,191 @@
+<div class="campagne-info" [class.compact]="compact">
+  
+  <!-- Header -->
+  <div class="info-header" *ngIf="showTitle">
+    <h2>{{ compact ? 'Campagne active' : 'Campagnes d\'inscription' }}</h2>
+    <button class="btn btn-outline-primary" (click)="onRefresh()" [disabled]="loading" *ngIf="showActions">
+      <i class="fas fa-sync-alt" [class.fa-spin]="loading"></i>
+      Actualiser
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Chargement des campagnes...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error" class="alert alert-danger">
+    <i class="fas fa-exclamation-triangle"></i>
+    {{ error }}
+    <button class="btn btn-sm btn-outline-primary" (click)="onRefresh()">
+      Réessayer
+    </button>
+  </div>
+
+  <!-- Compact View (Active Campaign Only) -->
+  <div *ngIf="!loading && !error && compact" class="compact-view">
+    <div *ngIf="campagneActive$ | async as campagne; else noCampagneActive" class="campagne-card compact">
+      <div class="card-header">
+        <div class="campagne-title">
+          <h3>{{ campagne.nom }}</h3>
+          <span class="campagne-year">{{ campagne.anneeUniversitaire }}</span>
+        </div>
+        <div class="status-badge" [class]="getCampagneStatusClass(campagne)">
+          <i class="material-icons">{{ getCampagneStatusIcon(campagne) }}</i>
+          <span>{{ getCampagneStatusLabel(campagne) }}</span>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <div class="campagne-details">
+          <div class="detail-item">
+            <i class="material-icons">{{ getTypeIcon(campagne.typeInscription) }}</i>
+            <span>{{ getTypeLabel(campagne.typeInscription) }}</span>
+          </div>
+          
+          <div class="detail-item">
+            <i class="material-icons">event</i>
+            <span>{{ campagne.dateOuverture | date:'dd/MM/yyyy' }} - {{ campagne.dateFermeture | date:'dd/MM/yyyy' }}</span>
+          </div>
+
+          <div class="detail-item urgency" [class]="getUrgencyClass(campagne)" *ngIf="isCampagneOpen(campagne)">
+            <i class="material-icons">schedule</i>
+            <span>{{ getDaysRemainingLabel(campagne) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #noCampagneActive>
+      <div class="no-campagne">
+        <div class="no-campagne-icon">
+          <i class="fas fa-calendar-times"></i>
+        </div>
+        <h3>Aucune campagne active</h3>
+        <p>Il n'y a actuellement aucune campagne d'inscription ouverte.</p>
+      </div>
+    </ng-template>
+  </div>
+
+  <!-- Full View (All Campaigns) -->
+  <div *ngIf="!loading && !error && !compact" class="full-view">
+    <div *ngIf="campagnes$ | async as campagnes; else noCampagnes">
+      <div *ngIf="campagnes.length > 0; else emptyCampagnes" class="campagnes-grid">
+        
+        <div 
+          *ngFor="let campagne of campagnes" 
+          class="campagne-card"
+          [class]="getCampagneStatusClass(campagne)"
+        >
+          <!-- Card Header -->
+          <div class="card-header">
+            <div class="campagne-title">
+              <h3>{{ campagne.nom }}</h3>
+              <span class="campagne-year">{{ campagne.anneeUniversitaire }}</span>
+            </div>
+            <div class="status-badge" [class]="getCampagneStatusClass(campagne)">
+              <i class="material-icons">{{ getCampagneStatusIcon(campagne) }}</i>
+              <span>{{ getCampagneStatusLabel(campagne) }}</span>
+            </div>
+          </div>
+
+          <!-- Card Body -->
+          <div class="card-body">
+            <div class="campagne-info-grid">
+              <div class="info-item">
+                <strong>Type:</strong>
+                <div class="type-info">
+                  <i class="material-icons">{{ getTypeIcon(campagne.typeInscription) }}</i>
+                  <span>{{ getTypeLabel(campagne.typeInscription) }}</span>
+                </div>
+              </div>
+
+              <div class="info-item">
+                <strong>Période:</strong>
+                <div class="period-info">
+                  <span class="date-range">
+                    {{ campagne.dateOuverture | date:'dd/MM/yyyy' }} - {{ campagne.dateFermeture | date:'dd/MM/yyyy' }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="info-item" *ngIf="campagne.active">
+                <strong>Statut:</strong>
+                <div class="status-info" [class]="getUrgencyClass(campagne)">
+                  <i class="material-icons">schedule</i>
+                  <span>{{ getDaysRemainingLabel(campagne) }}</span>
+                </div>
+              </div>
+
+              <div class="info-item">
+                <strong>Créée le:</strong>
+                <span>{{ campagne.dateCreation | date:'dd/MM/yyyy' }}</span>
+              </div>
+            </div>
+
+            <!-- Progress Bar for Open Campaigns -->
+            <div *ngIf="isCampagneOpen(campagne)" class="campaign-progress">
+              <div class="progress-info">
+                <span class="progress-label">Progression de la campagne</span>
+                <span class="progress-days">{{ getDaysRemainingLabel(campagne) }}</span>
+              </div>
+              <div class="progress-bar">
+                <div 
+                  class="progress-fill" 
+                  [style.width.%]="100 - (getDaysRemaining(campagne) / 30 * 100)"
+                  [class]="getUrgencyClass(campagne)"
+                ></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card Footer -->
+          <div class="card-footer" *ngIf="showActions && isCampagneOpen(campagne)">
+            <div class="action-buttons">
+              <button 
+                class="btn btn-primary" 
+                routerLink="/inscription/nouvelle"
+                *ngIf="campagne.typeInscription === 'PREMIERE'"
+              >
+                <i class="fas fa-plus"></i>
+                Nouvelle inscription
+              </button>
+              
+              <button 
+                class="btn btn-primary" 
+                routerLink="/inscription/reinscription"
+                *ngIf="campagne.typeInscription === 'REINSCRIPTION'"
+              >
+                <i class="fas fa-refresh"></i>
+                Réinscription
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty States -->
+    <ng-template #emptyCampagnes>
+      <div class="empty-state">
+        <div class="empty-icon">
+          <i class="fas fa-calendar-alt"></i>
+        </div>
+        <h3>Aucune campagne trouvée</h3>
+        <p>Il n'y a actuellement aucune campagne d'inscription configurée.</p>
+      </div>
+    </ng-template>
+
+    <ng-template #noCampagnes>
+      <div class="empty-state">
+        <div class="empty-icon">
+          <i class="fas fa-calendar-alt"></i>
+        </div>
+        <h3>Aucune campagne</h3>
+        <p>Les campagnes d'inscription seront affichées ici.</p>
+      </div>
+    </ng-template>
+  </div>
+</div>

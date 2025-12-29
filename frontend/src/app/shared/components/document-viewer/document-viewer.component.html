@@ -1,0 +1,98 @@
+<div class="document-viewer" [class.fullscreen]="isFullscreen">
+  <!-- Toolbar -->
+  <div class="viewer-toolbar" *ngIf="showToolbar">
+    <div class="document-info">
+      <mat-icon class="document-icon">{{ documentIcon }}</mat-icon>
+      <div class="document-details">
+        <h4 class="document-name">{{ document.nom }}</h4>
+        <div class="document-meta">
+          <span class="document-type">{{ documentTypeLabel }}</span>
+          <span class="separator">•</span>
+          <span class="document-size">{{ formattedFileSize }}</span>
+          <span class="separator">•</span>
+          <span class="document-date">{{ formattedDate }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="toolbar-actions">
+      <button 
+        mat-icon-button 
+        *ngIf="showDownload"
+        (click)="onDownload()"
+        matTooltip="Télécharger"
+        class="action-button">
+        <mat-icon>download</mat-icon>
+      </button>
+      
+      <button 
+        mat-icon-button 
+        *ngIf="showFullscreen && canPreview"
+        (click)="onFullscreen()"
+        [matTooltip]="isFullscreen ? 'Quitter le plein écran' : 'Plein écran'"
+        class="action-button">
+        <mat-icon>{{ isFullscreen ? 'fullscreen_exit' : 'fullscreen' }}</mat-icon>
+      </button>
+
+      <button 
+        mat-icon-button 
+        *ngIf="isFullscreen"
+        (click)="onCloseFullscreen()"
+        matTooltip="Fermer"
+        class="action-button close-button">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="viewer-loading" *ngIf="loading$ | async">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Chargement du document...</p>
+  </div>
+
+  <!-- Error State -->
+  <div class="viewer-error" *ngIf="error$ | async as error">
+    <mat-icon class="error-icon">error_outline</mat-icon>
+    <h4>Erreur de chargement</h4>
+    <p>{{ error }}</p>
+    <button mat-raised-button color="primary" (click)="onRetry()">
+      <mat-icon>refresh</mat-icon>
+      Réessayer
+    </button>
+  </div>
+
+  <!-- Document Content -->
+  <div class="viewer-content" 
+       *ngIf="!(loading$ | async) && !(error$ | async) && documentUrl"
+       [style.height]="viewerHeight"
+       [style.width]="viewerWidth">
+    
+    <!-- PDF Viewer -->
+    <iframe 
+      *ngIf="isPdf"
+      [src]="documentUrl"
+      class="pdf-viewer"
+      frameborder="0">
+    </iframe>
+
+    <!-- Image Viewer -->
+    <div *ngIf="isImage" class="image-viewer">
+      <img [src]="documentUrl" [alt]="document.nom" class="document-image">
+    </div>
+
+    <!-- Unsupported Format -->
+    <div *ngIf="!canPreview" class="unsupported-format">
+      <mat-icon class="format-icon">insert_drive_file</mat-icon>
+      <h4>Aperçu non disponible</h4>
+      <p>Ce type de document ne peut pas être prévisualisé dans le navigateur.</p>
+      <button mat-raised-button color="primary" (click)="onDownload()">
+        <mat-icon>download</mat-icon>
+        Télécharger le document
+      </button>
+    </div>
+  </div>
+
+  <!-- Fullscreen Overlay -->
+  <div class="fullscreen-overlay" *ngIf="isFullscreen" (click)="onCloseFullscreen()"></div>
+</div>

@@ -1,0 +1,175 @@
+.statistics-container {
+  @apply w-full;
+}
+
+.statistics-header {
+  @apply mb-6;
+}
+
+.statistics-title {
+  @apply text-xl font-semibold text-gray-900;
+}
+
+.statistics-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4;
+}
+
+.statistic-card {
+  @apply p-6 rounded-lg border-2 transition-all duration-200 hover:shadow-md;
+}
+
+.statistic-content {
+  @apply flex items-start space-x-4;
+}
+
+.statistic-icon {
+  @apply flex-shrink-0;
+  
+  i {
+    @apply text-2xl;
+  }
+}
+
+.statistic-info {
+  @apply flex-1 min-w-0;
+}
+
+.statistic-value {
+  @apply text-3xl font-bold leading-none;
+}
+
+.statistic-title-small {
+  @apply text-sm font-medium mt-1;
+}
+
+.statistic-subtitle {
+  @apply text-xs opacity-75 mt-1;
+}
+
+.statistic-trend {
+  @apply mt-4 pt-4 border-t border-current border-opacity-20;
+}
+
+.trend-indicator {
+  @apply flex items-center space-x-1 text-sm font-medium;
+  
+  i {
+    @apply text-xs;
+  }
+}
+
+.trend-label {
+  @apply text-xs opacity-75 mt-1;
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .statistics-grid {
+    @apply grid-cols-1;
+  }
+  
+  .statistic-card {
+    @apply p-4;
+  }
+  
+  .statistic-value {
+    @apply text-2xl;
+  }
+}
+
+// Color variants
+.bg-blue-50 {
+  @apply bg-blue-50;
+}
+
+.border-blue-200 {
+  @apply border-blue-200;
+}
+
+.text-blue-800 {
+  @apply text-blue-800;
+}
+
+.text-blue-600 {
+  @apply text-blue-600;
+}
+
+.bg-green-50 {
+  @apply bg-green-50;
+}
+
+.border-green-200 {
+  @apply border-green-200;
+}
+
+.text-green-800 {
+  @apply text-green-800;
+}
+
+.text-green-600 {
+  @apply text-green-600;
+}
+
+.bg-orange-50 {
+  @apply bg-orange-50;
+}
+
+.border-orange-200 {
+  @apply border-orange-200;
+}
+
+.text-orange-800 {
+  @apply text-orange-800;
+}
+
+.text-orange-600 {
+  @apply text-orange-600;
+}
+
+.bg-red-50 {
+  @apply bg-red-50;
+}
+
+.border-red-200 {
+  @apply border-red-200;
+}
+
+.text-red-800 {
+  @apply text-red-800;
+}
+
+.text-red-600 {
+  @apply text-red-600;
+}
+
+.bg-purple-50 {
+  @apply bg-purple-50;
+}
+
+.border-purple-200 {
+  @apply border-purple-200;
+}
+
+.text-purple-800 {
+  @apply text-purple-800;
+}
+
+.text-purple-600 {
+  @apply text-purple-600;
+}
+
+.bg-gray-50 {
+  @apply bg-gray-50;
+}
+
+.border-gray-200 {
+  @apply border-gray-200;
+}
+
+.text-gray-800 {
+  @apply text-gray-800;
+}
+
+.text-gray-600 {
+  @apply text-gray-600;
+}

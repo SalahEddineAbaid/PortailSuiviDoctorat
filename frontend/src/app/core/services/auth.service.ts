@@ -34,6 +34,20 @@ export interface TokenRefreshRequest {
   refreshToken: string;
 }
 
+export interface UpdateProfileRequest {
+  FirstName: string;
+  LastName: string;
+  phoneNumber: string;
+  adresse: string;
+  ville: string;
+  pays: string;
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
 // ✅ DTOs Response - SANS tokenType
 export interface TokenResponse {
   accessToken: string;
@@ -302,5 +316,75 @@ export class AuthService {
    */
   isDoctorant(): boolean {
     return this.hasRole('ROLE_DOCTORANT');
+  }
+
+  /**
+   * 👤 Mettre à jour le profil utilisateur
+   */
+  updateProfile(data: UpdateProfileRequest): Observable<UserResponse> {
+    console.log('📤 [AUTH SERVICE] Mise à jour du profil utilisateur');
+    
+    return this.http.put<UserResponse>(`${this.USER_API_URL}/profile`, data).pipe(
+      tap(response => {
+        console.log('✅ [AUTH SERVICE] Profil mis à jour:', response);
+        // Recharger les informations utilisateur
+        this.loadCurrentUser();
+      }),
+      catchError(error => {
+        console.error('❌ [AUTH SERVICE] Erreur mise à jour profil:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * 🔐 Changer le mot de passe
+   */
+  changePassword(data: ChangePasswordRequest): Observable<void> {
+    console.log('📤 [AUTH SERVICE] Changement de mot de passe');
+    
+    return this.http.put<void>(`${this.USER_API_URL}/change-password`, data).pipe(
+      tap(() => {
+        console.log('✅ [AUTH SERVICE] Mot de passe changé avec succès');
+      }),
+      catchError(error => {
+        console.error('❌ [AUTH SERVICE] Erreur changement mot de passe:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * 📧 Demander la réinitialisation du mot de passe
+   */
+  forgotPassword(data: ForgotPasswordRequest): Observable<any> {
+    console.log('📤 [AUTH SERVICE] Demande de réinitialisation mot de passe:', data.email);
+    
+    return this.http.post(`${this.API_URL}/forgot-password`, data).pipe(
+      tap(response => {
+        console.log('✅ [AUTH SERVICE] Email de réinitialisation envoyé');
+      }),
+      catchError(error => {
+        console.error('❌ [AUTH SERVICE] Erreur demande réinitialisation:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * 🔄 Réinitialiser le mot de passe avec token
+   */
+  resetPassword(data: ResetPasswordRequest): Observable<any> {
+    console.log('📤 [AUTH SERVICE] Réinitialisation mot de passe avec token');
+    
+    return this.http.post(`${this.API_URL}/reset-password`, data).pipe(
+      tap(response => {
+        console.log('✅ [AUTH SERVICE] Mot de passe réinitialisé');
+      }),
+      catchError(error => {
+        console.error('❌ [AUTH SERVICE] Erreur réinitialisation mot de passe:', error);
+        return throwError(() => error);
+      })
+    );
   }
 }

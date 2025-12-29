@@ -1,0 +1,29 @@
+<div class="alert" [ngClass]="'alert-' + alert.type">
+  <div class="alert-icon">
+    <i [class]="getAlertIcon(alert.type)"></i>
+  </div>
+  
+  <div class="alert-content">
+    <h4 class="alert-title">{{ alert.title }}</h4>
+    <p class="alert-message">{{ alert.message }}</p>
+    
+    <div class="alert-actions" *ngIf="alert.actionLabel && alert.actionRoute">
+      <a 
+        [routerLink]="alert.actionRoute" 
+        class="alert-action-btn"
+        (click)="onAction()"
+      >
+        {{ alert.actionLabel }}
+      </a>
+    </div>
+  </div>
+  
+  <button 
+    *ngIf="alert.dismissible" 
+    class="alert-dismiss"
+    (click)="onDismiss()"
+    aria-label="Fermer l'alerte"
+  >
+    <i class="fas fa-times"></i>
+  </button>
+</div>

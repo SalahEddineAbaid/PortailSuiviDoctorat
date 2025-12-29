@@ -1,0 +1,132 @@
+<div class="inscription-dashboard">
+  <div class="dashboard-header">
+    <h1>Mes Inscriptions</h1>
+    <button class="btn btn-primary" routerLink="/inscription/nouvelle">
+      <i class="fas fa-plus"></i>
+      Nouvelle Inscription
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Chargement des données...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error" class="error-container">
+    <div class="alert alert-danger">
+      <i class="fas fa-exclamation-triangle"></i>
+      {{ error }}
+      <button class="btn btn-sm btn-outline-primary" (click)="onRefresh()">
+        Réessayer
+      </button>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="!loading && !error" class="dashboard-content">
+    
+    <!-- Campagne Active Info -->
+    <div class="campagne-info" *ngIf="campagneActive$ | async as campagne">
+      <div class="card">
+        <div class="card-header">
+          <h3>Campagne Active</h3>
+        </div>
+        <div class="card-body">
+          <h4>{{ campagne.nom }}</h4>
+          <p><strong>Année universitaire:</strong> {{ campagne.anneeUniversitaire }}</p>
+          <p><strong>Type:</strong> {{ campagne.typeInscription }}</p>
+          <p><strong>Date d'ouverture:</strong> {{ campagne.dateOuverture | date:'dd/MM/yyyy' }}</p>
+          <p><strong>Date de fermeture:</strong> {{ campagne.dateFermeture | date:'dd/MM/yyyy' }}</p>
+          <span class="badge badge-success" *ngIf="campagne.active">Ouverte</span>
+          <span class="badge badge-secondary" *ngIf="!campagne.active">Fermée</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mes Inscriptions -->
+    <div class="inscriptions-section">
+      <h2>Historique de mes inscriptions</h2>
+      
+      <div *ngIf="inscriptions$ | async as inscriptions; else noInscriptions">
+        <div *ngIf="inscriptions.length > 0; else emptyInscriptions" class="inscriptions-grid">
+          <div *ngFor="let inscription of inscriptions" class="inscription-card">
+            <div class="card">
+              <div class="card-header">
+                <div class="inscription-header">
+                  <h4>{{ inscription.campagne.nom }}</h4>
+                  <span class="badge" [ngClass]="getStatusClass(inscription.statut)">
+                    {{ getStatusLabel(inscription.statut) }}
+                  </span>
+                </div>
+              </div>
+              <div class="card-body">
+                <p><strong>Sujet de thèse:</strong> {{ inscription.sujetThese }}</p>
+                <p><strong>Laboratoire:</strong> {{ inscription.laboratoire }}</p>
+                <p><strong>Spécialité:</strong> {{ inscription.specialite }}</p>
+                <p><strong>Directeur:</strong> {{ inscription.directeur.FirstName }} {{ inscription.directeur.LastName }}</p>
+                <p><strong>Date d'inscription:</strong> {{ inscription.dateInscription | date:'dd/MM/yyyy' }}</p>
+                
+                <!-- Avis Directeur -->
+                <div *ngIf="inscription.avisDirecteur" class="avis-section">
+                  <h5>Avis du Directeur</h5>
+                  <p class="avis-text">{{ inscription.avisDirecteur.avis }}</p>
+                  <span class="badge" [ngClass]="inscription.avisDirecteur.valide ? 'badge-success' : 'badge-danger'">
+                    {{ inscription.avisDirecteur.valide ? 'Favorable' : 'Défavorable' }}
+                  </span>
+                </div>
+
+                <!-- Validation Admin -->
+                <div *ngIf="inscription.validationAdmin" class="validation-section">
+                  <h5>Validation Administrative</h5>
+                  <p class="validation-text">{{ inscription.validationAdmin.commentaire }}</p>
+                  <span class="badge" [ngClass]="inscription.validationAdmin.valide ? 'badge-success' : 'badge-danger'">
+                    {{ inscription.validationAdmin.valide ? 'Validée' : 'Rejetée' }}
+                  </span>
+                </div>
+              </div>
+              <div class="card-footer">
+                <button class="btn btn-outline-primary" [routerLink]="['/inscription', inscription.id]">
+                  Voir détails
+                </button>
+                <button 
+                  *ngIf="inscription.statut === 'BROUILLON'" 
+                  class="btn btn-primary" 
+                  [routerLink]="['/inscription', inscription.id, 'edit']">
+                  Modifier
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #emptyInscriptions>
+        <div class="empty-state">
+          <div class="empty-icon">
+            <i class="fas fa-file-alt"></i>
+          </div>
+          <h3>Aucune inscription trouvée</h3>
+          <p>Vous n'avez pas encore d'inscription enregistrée.</p>
+          <button class="btn btn-primary" routerLink="/inscription/nouvelle">
+            Créer ma première inscription
+          </button>
+        </div>
+      </ng-template>
+
+      <ng-template #noInscriptions>
+        <div class="empty-state">
+          <div class="empty-icon">
+            <i class="fas fa-file-alt"></i>
+          </div>
+          <h3>Aucune inscription</h3>
+          <p>Commencez par créer votre première inscription.</p>
+          <button class="btn btn-primary" routerLink="/inscription/nouvelle">
+            Nouvelle inscription
+          </button>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+</div>

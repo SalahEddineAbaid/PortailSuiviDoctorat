@@ -1,0 +1,435 @@
+.jury-proposal {
+  .section-header {
+    margin-bottom: 2rem;
+
+    h3 {
+      color: var(--text-primary);
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .section-description {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+  }
+
+  .jury-rules {
+    background: var(--info-light, #e3f2fd);
+    border: 1px solid var(--info-color, #2196f3);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+
+    h4 {
+      color: var(--info-color, #2196f3);
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .rules-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 1rem 0;
+
+      li {
+        position: relative;
+        padding-left: 1.5rem;
+        margin-bottom: 0.5rem;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+
+        &::before {
+          content: '•';
+          position: absolute;
+          left: 0;
+          color: var(--info-color, #2196f3);
+          font-weight: bold;
+        }
+      }
+    }
+  }
+
+  .rules-toggle {
+    margin-bottom: 2rem;
+
+    .btn-link {
+      color: var(--info-color, #2196f3);
+      text-decoration: none;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      &:hover {
+        text-decoration: underline;
+      }
+
+      .icon-info {
+        font-size: 1rem;
+      }
+    }
+  }
+
+  .jury-validation {
+    background: var(--surface-color, #ffffff);
+    border: 1px solid var(--border-color, #e0e0e0);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+
+    .validation-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+      font-size: 0.9rem;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      .icon {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: bold;
+      }
+
+      &.valid {
+        color: var(--success-color, #4caf50);
+
+        .icon {
+          background: var(--success-color, #4caf50);
+          color: white;
+        }
+      }
+
+      &.invalid {
+        color: var(--error-color, #f44336);
+
+        .icon {
+          background: var(--error-color, #f44336);
+          color: white;
+        }
+      }
+    }
+  }
+
+  .jury-members {
+    margin-bottom: 2rem;
+
+    .member-card {
+      background: var(--surface-color, #ffffff);
+      border: 1px solid var(--border-color, #e0e0e0);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      transition: all 0.2s ease;
+
+      &:hover {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      &.director {
+        border-color: var(--primary-color, #1976d2);
+        background: var(--primary-light, #e3f2fd);
+      }
+
+      .member-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+
+        h4 {
+          color: var(--text-primary);
+          font-size: 1.1rem;
+          font-weight: 600;
+          margin: 0;
+        }
+
+        .member-actions {
+          .btn-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+
+            &.btn-danger {
+              background: var(--error-light, #ffebee);
+              color: var(--error-color, #f44336);
+
+              &:hover:not(:disabled) {
+                background: var(--error-color, #f44336);
+                color: white;
+              }
+
+              &:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+              }
+            }
+          }
+        }
+      }
+
+      .member-form {
+        .form-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1rem;
+          margin-bottom: 1rem;
+
+          @media (max-width: 768px) {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        .form-group {
+          display: flex;
+          flex-direction: column;
+
+          label {
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+          }
+
+          input, select {
+            padding: 0.75rem;
+            border: 1px solid var(--border-color, #e0e0e0);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            transition: border-color 0.2s ease;
+
+            &:focus {
+              outline: none;
+              border-color: var(--primary-color, #1976d2);
+              box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.1);
+            }
+
+            &.error {
+              border-color: var(--error-color, #f44336);
+            }
+
+            &:disabled {
+              background: var(--background-color, #f5f5f5);
+              color: var(--text-secondary);
+              cursor: not-allowed;
+            }
+          }
+
+          .checkbox-label {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            cursor: pointer;
+            margin-bottom: 0.5rem;
+
+            input[type="checkbox"] {
+              margin: 0;
+              width: auto;
+            }
+
+            .checkbox-text {
+              font-weight: 500;
+              color: var(--text-primary);
+            }
+          }
+
+          .help-text {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+          }
+
+          .error-message {
+            color: var(--error-color, #f44336);
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+          }
+        }
+
+        .member-indicators {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.5rem;
+          margin-top: 1rem;
+
+          .indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+
+            &.external {
+              background: var(--info-light, #e3f2fd);
+              color: var(--info-color, #2196f3);
+            }
+
+            &.rapporteur {
+              background: var(--warning-light, #fff3e0);
+              color: var(--warning-color, #ff9800);
+            }
+
+            &.president {
+              background: var(--success-light, #e8f5e8);
+              color: var(--success-color, #4caf50);
+            }
+
+            &.director {
+              background: var(--primary-light, #e3f2fd);
+              color: var(--primary-color, #1976d2);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .add-member-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: var(--background-color, #f5f5f5);
+    border-radius: 8px;
+
+    .btn-outline {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border: 2px solid var(--primary-color, #1976d2);
+      background: transparent;
+      color: var(--primary-color, #1976d2);
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover:not(:disabled) {
+        background: var(--primary-color, #1976d2);
+        color: white;
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+
+    .member-count {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+  }
+
+  .error-alert {
+    background: var(--error-light, #ffebee);
+    border: 1px solid var(--error-color, #f44336);
+    color: var(--error-color, #f44336);
+    padding: 1rem;
+    border-radius: 6px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    .icon-alert-circle {
+      font-size: 1.2rem;
+    }
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color, #e0e0e0);
+
+    .btn {
+      padding: 0.75rem 2rem;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+
+      &.btn-secondary {
+        background: var(--background-color, #f5f5f5);
+        color: var(--text-primary);
+
+        &:hover {
+          background: var(--border-color, #e0e0e0);
+        }
+      }
+
+      &.btn-primary {
+        background: var(--primary-color, #1976d2);
+        color: white;
+
+        &:hover:not(:disabled) {
+          background: var(--primary-dark, #1565c0);
+        }
+
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+      }
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .jury-proposal {
+    .jury-validation {
+      padding: 1rem;
+    }
+
+    .member-card {
+      padding: 1rem;
+
+      .member-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+    }
+
+    .add-member-actions {
+      flex-direction: column;
+      gap: 1rem;
+      text-align: center;
+    }
+
+    .form-actions {
+      flex-direction: column;
+
+      .btn {
+        width: 100%;
+      }
+    }
+  }
+}

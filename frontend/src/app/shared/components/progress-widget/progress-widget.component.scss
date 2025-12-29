@@ -1,0 +1,127 @@
+.progress-widget {
+  background: white;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+
+    .progress-label {
+      font-weight: 500;
+      color: #374151;
+    }
+
+    .progress-value {
+      font-size: 0.875rem;
+      color: #6b7280;
+      font-weight: 600;
+    }
+  }
+
+  .progress-bar-container {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    .progress-bar-background {
+      flex: 1;
+      height: 8px;
+      background: #e5e7eb;
+      border-radius: 4px;
+      overflow: hidden;
+
+      .progress-bar-fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.3s ease;
+      }
+    }
+
+    .progress-percentage {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #6b7280;
+      min-width: 35px;
+      text-align: right;
+    }
+  }
+
+  // Size variants
+  &.progress-small {
+    padding: 0.75rem;
+
+    .progress-header {
+      margin-bottom: 0.5rem;
+
+      .progress-label {
+        font-size: 0.875rem;
+      }
+
+      .progress-value {
+        font-size: 0.75rem;
+      }
+    }
+
+    .progress-bar-container {
+      gap: 0.5rem;
+
+      .progress-bar-background {
+        height: 6px;
+      }
+
+      .progress-percentage {
+        font-size: 0.7rem;
+        min-width: 30px;
+      }
+    }
+  }
+
+  &.progress-large {
+    padding: 1.5rem;
+
+    .progress-header {
+      margin-bottom: 1rem;
+
+      .progress-label {
+        font-size: 1.125rem;
+      }
+
+      .progress-value {
+        font-size: 1rem;
+      }
+    }
+
+    .progress-bar-container {
+      gap: 1rem;
+
+      .progress-bar-background {
+        height: 12px;
+      }
+
+      .progress-percentage {
+        font-size: 0.875rem;
+        min-width: 40px;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .progress-widget {
+    .progress-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.25rem;
+    }
+
+    .progress-bar-container {
+      .progress-percentage {
+        min-width: 30px;
+      }
+    }
+  }
+}

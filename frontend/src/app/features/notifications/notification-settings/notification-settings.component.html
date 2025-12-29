@@ -1,0 +1,216 @@
+<div class="notification-settings-container">
+  <!-- En-tête -->
+  <div class="settings-header">
+    <div class="header-content">
+      <h2>
+        <i class="material-icons">settings</i>
+        Paramètres des notifications
+      </h2>
+      <p class="header-description">
+        Configurez vos préférences de notification pour rester informé des événements importants.
+      </p>
+    </div>
+  </div>
+
+  <!-- Chargement -->
+  <div class="loading-container" *ngIf="loading">
+    <div class="loading-spinner">
+      <i class="material-icons spinning">refresh</i>
+      <p>Chargement des paramètres...</p>
+    </div>
+  </div>
+
+  <!-- Formulaire de paramètres -->
+  <form [formGroup]="settingsForm" (ngSubmit)="onSaveSettings()" *ngIf="!loading">
+    
+    <!-- État des connexions -->
+    <div class="settings-section">
+      <h3>
+        <i class="material-icons">wifi</i>
+        État des connexions
+      </h3>
+      
+      <div class="connection-status">
+        <!-- État WebSocket -->
+        <div class="status-item">
+          <div class="status-info">
+            <span class="status-label">Notifications temps réel</span>
+            <span 
+              class="status-value"
+              [class]="'status-' + getWebSocketStateColor((webSocketState$ | async))"
+            >
+              {{ getWebSocketStateText((webSocketState$ | async)) }}
+            </span>
+          </div>
+          <div class="status-actions">
+            <button 
+              type="button"
+              class="btn btn-sm btn-outline-primary"
+              (click)="connectWebSocket()"
+              *ngIf="(webSocketState$ | async) === WebSocketState.DISCONNECTED"
+            >
+              <i class="material-icons">wifi</i>
+              Connecter
+            </button>
+            <button 
+              type="button"
+              class="btn btn-sm btn-outline-secondary"
+              (click)="disconnectWebSocket()"
+              *ngIf="(webSocketState$ | async) === WebSocketState.CONNECTED"
+            >
+              <i class="material-icons">wifi_off</i>
+              Déconnecter
+            </button>
+          </div>
+        </div>
+
+        <!-- Permission notifications système -->
+        <div class="status-item">
+          <div class="status-info">
+            <span class="status-label">Permission navigateur</span>
+            <span 
+              class="status-value"
+              [class]="'status-' + getPermissionColor()"
+            >
+              {{ getPermissionText() }}
+            </span>
+          </div>
+          <div class="status-actions">
+            <button 
+              type="button"
+              class="btn btn-sm btn-outline-primary"
+              (click)="requestNotificationPermission()"
+              *ngIf="systemNotificationPermission !== 'granted'"
+            >
+              <i class="material-icons">notifications</i>
+              Autoriser
+            </button>
+            <button 
+              type="button"
+              class="btn btn-sm btn-outline-success"
+              (click)="testNotification()"
+              *ngIf="systemNotificationPermission === 'granted'"
+            >
+              <i class="material-icons">notifications_active</i>
+              Tester
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Canaux de notification -->
+    <div class="settings-section">
+      <h3>
+        <i class="material-icons">send</i>
+        Canaux de notification
+      </h3>
+      
+      <div class="settings-grid">
+        <div 
+          class="setting-item"
+          *ngFor="let channel of notificationChannels"
+        >
+          <div class="setting-content">
+            <div class="setting-icon">
+              <i class="material-icons">{{ channel.icon }}</i>
+            </div>
+            <div class="setting-info">
+              <h4>{{ channel.label }}</h4>
+              <p>{{ channel.description }}</p>
+            </div>
+          </div>
+          <div class="setting-control">
+            <label class="toggle-switch">
+              <input 
+                type="checkbox"
+                [formControlName]="channel.key"
+                [disabled]="channel.key === 'pushEnabled' && !isPushNotificationAvailable()"
+              >
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Avertissement notifications push -->
+      <div class="notification-warning" *ngIf="!isPushNotificationAvailable()">
+        <i class="material-icons">warning</i>
+        <span>
+          Les notifications push nécessitent l'autorisation du navigateur.
+          <button 
+            type="button" 
+            class="btn-link"
+            (click)="requestNotificationPermission()"
+          >
+            Cliquez ici pour l'activer
+          </button>
+        </span>
+      </div>
+    </div>
+
+    <!-- Types de notification -->
+    <div class="settings-section">
+      <h3>
+        <i class="material-icons">category</i>
+        Types de notification
+      </h3>
+      
+      <div class="settings-grid">
+        <div 
+          class="setting-item"
+          *ngFor="let type of notificationTypes"
+        >
+          <div class="setting-content">
+            <div class="setting-icon">
+              <i class="material-icons">{{ type.icon }}</i>
+            </div>
+            <div class="setting-info">
+              <h4>{{ type.label }}</h4>
+              <p>{{ type.description }}</p>
+            </div>
+          </div>
+          <div class="setting-control">
+            <label class="toggle-switch">
+              <input 
+                type="checkbox"
+                [formControlName]="type.key"
+              >
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="settings-actions">
+      <button 
+        type="button"
+        class="btn btn-outline-secondary"
+        (click)="onResetForm()"
+        [disabled]="loading || saving || !isFormDirty()"
+      >
+        <i class="material-icons">refresh</i>
+        Réinitialiser
+      </button>
+
+      <button 
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="loading || saving || settingsForm.invalid"
+      >
+        <i class="material-icons" [class.spinning]="saving">
+          {{ saving ? 'refresh' : 'save' }}
+        </i>
+        {{ saving ? 'Sauvegarde...' : 'Sauvegarder' }}
+      </button>
+    </div>
+
+    <!-- Indicateur de modifications -->
+    <div class="form-status" *ngIf="isFormDirty()">
+      <i class="material-icons">info</i>
+      <span>Vous avez des modifications non sauvegardées</span>
+    </div>
+  </form>
+</div>

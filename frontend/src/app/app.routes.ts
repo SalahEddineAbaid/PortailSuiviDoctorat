@@ -1,9 +1,10 @@
 import { Routes } from '@angular/router';
 import { Login } from './features/auth/login/login';
 import { Register } from './features/auth/register/register';
+import { ProfileComponent } from './features/auth/profile/profile.component';
 import { DashboardContainer } from './features/dashboard/dashboard-container/dashboard-container';
 import { DoctorantDashboard } from './features/dashboard/doctorant-dashboard/doctorant-dashboard';
-import { DirecteurDashboard } from './features/dashboard/directeur-dashboard/directeur-dashboard';
+import { DirecteurDashboardComponent } from './features/dashboard/directeur-dashboard/directeur-dashboard.component';
 import { AdminDashboard } from './features/dashboard/admin-dashboard/admin-dashboard';
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
@@ -16,6 +17,13 @@ export const routes: Routes = [
   // Routes publiques
   { path: 'login', component: Login },
   { path: 'register', component: Register },
+
+  // Routes protégées (profil)
+  { 
+    path: 'profile', 
+    component: ProfileComponent,
+    canActivate: [authGuard]
+  },
 
   // Routes protégées (dashboard)
   {
@@ -32,7 +40,7 @@ export const routes: Routes = [
       },
       {
         path: 'directeur',
-        component: DirecteurDashboard,
+        component: DirecteurDashboardComponent,
         canActivate: [roleGuard],
         data: { role: RoleName.DIRECTEUR }
       },
@@ -43,6 +51,24 @@ export const routes: Routes = [
         data: { role: RoleName.ADMIN }
       }
     ]
+  },
+
+  // Routes protégées (inscription)
+  {
+    path: 'inscription',
+    loadChildren: () => import('./features/inscription/inscription.routes').then(m => m.inscriptionRoutes)
+  },
+
+  // Routes protégées (soutenance)
+  {
+    path: 'soutenance',
+    loadChildren: () => import('./features/soutenance/soutenance.routes').then(m => m.soutenanceRoutes)
+  },
+
+  // Routes protégées (administration)
+  {
+    path: 'admin',
+    loadChildren: () => import('./features/admin/admin.routes').then(m => m.adminRoutes)
   },
 
   // Route 404

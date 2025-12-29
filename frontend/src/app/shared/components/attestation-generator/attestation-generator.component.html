@@ -1,0 +1,169 @@
+<div class="attestation-generator">
+  <div class="generator-header">
+    <h3>Génération d'attestation</h3>
+    <p class="header-description">
+      Générez et téléchargez vos attestations officielles
+    </p>
+  </div>
+
+  <form [formGroup]="attestationForm" (ngSubmit)="onGenerate()" class="attestation-form">
+    
+    <!-- Inscription Selection -->
+    <div class="form-group" *ngIf="showInscriptionSelector">
+      <label for="inscriptionId" class="form-label">
+        Inscription <span class="required">*</span>
+      </label>
+      <select 
+        id="inscriptionId"
+        formControlName="inscriptionId"
+        class="form-control"
+        [class.invalid]="isFieldInvalid('inscriptionId')">
+        <option value="">Sélectionnez une inscription</option>
+        <option *ngFor="let inscription of inscriptions" [value]="inscription.id">
+          {{ inscription.anneeUniversitaire }} - {{ inscription.sujetThese }}
+        </option>
+      </select>
+      <div class="field-error" *ngIf="isFieldInvalid('inscriptionId')">
+        {{ getFieldError('inscriptionId') }}
+      </div>
+    </div>
+
+    <!-- Attestation Type -->
+    <div class="form-group">
+      <label for="type" class="form-label">
+        Type d'attestation <span class="required">*</span>
+      </label>
+      <select 
+        id="type"
+        formControlName="type"
+        class="form-control"
+        [class.invalid]="isFieldInvalid('type')">
+        <option *ngFor="let type of attestationTypes | keyvalue" [value]="type.key">
+          {{ typeLabels[type.key] }}
+        </option>
+      </select>
+      <div class="field-error" *ngIf="isFieldInvalid('type')">
+        {{ getFieldError('type') }}
+      </div>
+    </div>
+
+    <!-- Language Selection -->
+    <div class="form-group">
+      <label for="langue" class="form-label">
+        Langue <span class="required">*</span>
+      </label>
+      <div class="radio-group">
+        <label class="radio-option">
+          <input type="radio" formControlName="langue" value="FR">
+          <span class="radio-label">Français</span>
+        </label>
+        <label class="radio-option">
+          <input type="radio" formControlName="langue" value="EN">
+          <span class="radio-label">Anglais</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Motif (conditional) -->
+    <div class="form-group" *ngIf="requiresMotif">
+      <label for="motif" class="form-label">
+        Motif de la demande <span class="required">*</span>
+      </label>
+      <textarea 
+        id="motif"
+        formControlName="motif"
+        class="form-control textarea"
+        [class.invalid]="isFieldInvalid('motif')"
+        placeholder="Précisez le motif de votre demande d'attestation"
+        rows="3">
+      </textarea>
+      <div class="field-error" *ngIf="isFieldInvalid('motif')">
+        {{ getFieldError('motif') }}
+      </div>
+    </div>
+
+    <!-- Destinataire (conditional) -->
+    <div class="form-group" *ngIf="requiresMotif">
+      <label for="destinataire" class="form-label">
+        Destinataire <span class="required">*</span>
+      </label>
+      <input 
+        type="text"
+        id="destinataire"
+        formControlName="destinataire"
+        class="form-control"
+        [class.invalid]="isFieldInvalid('destinataire')"
+        placeholder="Nom de l'organisme ou de la personne destinataire">
+      <div class="field-error" *ngIf="isFieldInvalid('destinataire')">
+        {{ getFieldError('destinataire') }}
+      </div>
+    </div>
+
+    <!-- Preview Information -->
+    <div class="attestation-preview" *ngIf="selectedInscription && selectedType">
+      <h4>Aperçu de l'attestation</h4>
+      <div class="preview-content">
+        <div class="preview-item">
+          <span class="preview-label">Type:</span>
+          <span class="preview-value">{{ typeLabel }}</span>
+        </div>
+        <div class="preview-item">
+          <span class="preview-label">Étudiant:</span>
+          <span class="preview-value">
+            {{ selectedInscription.doctorant.FirstName }} {{ selectedInscription.doctorant.LastName }}
+          </span>
+        </div>
+        <div class="preview-item">
+          <span class="preview-label">Année universitaire:</span>
+          <span class="preview-value">{{ selectedInscription.anneeUniversitaire }}</span>
+        </div>
+        <div class="preview-item">
+          <span class="preview-label">Sujet de thèse:</span>
+          <span class="preview-value">{{ selectedInscription.sujetThese }}</span>
+        </div>
+        <div class="preview-item">
+          <span class="preview-label">Langue:</span>
+          <span class="preview-value">
+            {{ attestationForm.get('langue')?.value === 'FR' ? 'Français' : 'Anglais' }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Messages -->
+    <div class="message success" *ngIf="success$ | async as success">
+      <mat-icon>check_circle</mat-icon>
+      <span>{{ success }}</span>
+    </div>
+
+    <div class="message error" *ngIf="error$ | async as error">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error }}</span>
+    </div>
+
+    <!-- Actions -->
+    <div class="form-actions">
+      <button 
+        type="button"
+        mat-stroked-button
+        (click)="onReset()"
+        [disabled]="generating$ | async">
+        Réinitialiser
+      </button>
+      
+      <button 
+        type="submit"
+        mat-raised-button
+        color="primary"
+        [disabled]="!canGenerate">
+        
+        <mat-spinner *ngIf="generating$ | async" diameter="20" class="button-spinner"></mat-spinner>
+        <mat-icon *ngIf="!(generating$ | async)">description</mat-icon>
+        
+        <span>
+          {{ (generating$ | async) ? 'Génération...' : 'Générer l\'attestation' }}
+        </span>
+      </button>
+    </div>
+  </form>
+</div>

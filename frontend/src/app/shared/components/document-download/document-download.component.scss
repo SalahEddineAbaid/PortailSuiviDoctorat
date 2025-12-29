@@ -1,0 +1,171 @@
+.download-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 120px;
+  
+  .download-spinner {
+    margin-right: 4px;
+  }
+  
+  .button-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+  
+  .document-name {
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+  }
+  
+  .document-size {
+    font-size: 12px;
+    opacity: 0.8;
+  }
+}
+
+.download-icon-button {
+  color: var(--primary-color, #1976d2);
+  
+  &:hover:not(:disabled) {
+    background: rgba(25, 118, 210, 0.04);
+  }
+  
+  &:disabled {
+    color: var(--text-disabled, #bdbdbd);
+  }
+}
+
+.download-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--text-primary, #212121);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  
+  &:hover:not(.disabled) {
+    background: var(--hover-color, #f5f5f5);
+    color: var(--primary-color, #1976d2);
+    
+    .download-icon {
+      color: var(--primary-color, #1976d2);
+    }
+  }
+  
+  &.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+}
+
+.link-icon {
+  color: var(--primary-color, #1976d2);
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+}
+
+.link-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.document-name {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.document-meta {
+  font-size: 14px;
+  color: var(--text-secondary, #757575);
+}
+
+.link-spinner {
+  margin-left: auto;
+}
+
+.download-icon {
+  color: var(--text-secondary, #757575);
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  margin-left: auto;
+}
+
+.download-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--error-background, #ffebee);
+  border: 1px solid var(--error-color, #f44336);
+  border-radius: 4px;
+  margin-top: 8px;
+  
+  .error-icon {
+    color: var(--error-color, #f44336);
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+  
+  .error-message {
+    flex: 1;
+    font-size: 14px;
+    color: var(--error-color, #f44336);
+  }
+  
+  button {
+    color: var(--error-color, #f44336);
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .download-button {
+    min-width: 100px;
+    
+    .button-content {
+      .document-name {
+        max-width: 150px;
+      }
+    }
+  }
+  
+  .download-link {
+    padding: 8px;
+    gap: 8px;
+  }
+  
+  .link-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+// Animation for loading state
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.download-spinner,
+.link-spinner {
+  animation: spin 1s linear infinite;
+}

@@ -1,0 +1,360 @@
+<div class="parametrage-container">
+  <div class="header">
+    <h2>Paramétrage Système</h2>
+    <div class="header-actions">
+      <button 
+        type="button" 
+        class="btn btn-outline-secondary"
+        (click)="exportConfiguration()"
+        [disabled]="loading">
+        <i class="fas fa-download"></i>
+        Exporter
+      </button>
+      <button 
+        type="button" 
+        class="btn btn-outline-primary"
+        (click)="fileInput.click()"
+        [disabled]="loading">
+        <i class="fas fa-upload"></i>
+        Importer
+      </button>
+      <input 
+        #fileInput 
+        type="file" 
+        accept=".json" 
+        style="display: none"
+        (change)="onFileSelected($event)">
+    </div>
+  </div>
+
+  <div class="tabs-container">
+    <ul class="nav nav-tabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button 
+          class="nav-link" 
+          [class.active]="activeTab === 'seuils'"
+          (click)="setActiveTab('seuils')"
+          type="button">
+          <i class="fas fa-sliders-h"></i>
+          Seuils et Limites
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button 
+          class="nav-link" 
+          [class.active]="activeTab === 'documents'"
+          (click)="setActiveTab('documents')"
+          type="button">
+          <i class="fas fa-file-alt"></i>
+          Types de Documents
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button 
+          class="nav-link" 
+          [class.active]="activeTab === 'notifications'"
+          (click)="setActiveTab('notifications')"
+          type="button">
+          <i class="fas fa-bell"></i>
+          Notifications
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button 
+          class="nav-link" 
+          [class.active]="activeTab === 'general'"
+          (click)="setActiveTab('general')"
+          type="button">
+          <i class="fas fa-cog"></i>
+          Général
+        </button>
+      </li>
+    </ul>
+
+    <div class="tab-content">
+      <!-- Onglet Seuils -->
+      <div class="tab-pane" [class.active]="activeTab === 'seuils'">
+        <div class="section-header">
+          <h4>Configuration des Seuils</h4>
+          <button 
+            type="button" 
+            class="btn btn-primary"
+            (click)="saveSeuils()"
+            [disabled]="loading || seuilsForm.invalid">
+            <i class="fas fa-save"></i>
+            Sauvegarder
+          </button>
+        </div>
+
+        <form [formGroup]="seuilsForm" class="configuration-form">
+          <div class="row" *ngFor="let seuil of seuils; let i = index">
+            <div class="col-md-4">
+              <label class="form-label">{{ seuil.nom }}</label>
+            </div>
+            <div class="col-md-3">
+              <input 
+                type="number" 
+                class="form-control"
+                [formControlName]="'seuil_' + seuil.id"
+                [placeholder]="seuil.valeur.toString()">
+            </div>
+            <div class="col-md-2">
+              <span class="form-text">{{ seuil.unite }}</span>
+            </div>
+            <div class="col-md-3">
+              <small class="form-text text-muted">{{ seuil.description }}</small>
+            </div>
+          </div>
+        </form>
+
+        <div class="reset-section">
+          <button 
+            type="button" 
+            class="btn btn-outline-warning"
+            (click)="resetSeuils()"
+            [disabled]="loading">
+            <i class="fas fa-undo"></i>
+            Réinitialiser aux valeurs par défaut
+          </button>
+        </div>
+      </div>
+
+      <!-- Onglet Documents -->
+      <div class="tab-pane" [class.active]="activeTab === 'documents'">
+        <div class="section-header">
+          <h4>Configuration des Types de Documents</h4>
+          <button 
+            type="button" 
+            class="btn btn-success"
+            (click)="addDocumentType()"
+            [disabled]="loading">
+            <i class="fas fa-plus"></i>
+            Ajouter un type
+          </button>
+        </div>
+
+        <div class="document-types-list">
+          <div class="document-type-card" *ngFor="let docType of documentTypes; let i = index">
+            <div class="card">
+              <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                  <h6 class="mb-0">{{ docType.nom }}</h6>
+                  <div class="actions">
+                    <button 
+                      type="button" 
+                      class="btn btn-sm btn-outline-primary"
+                      (click)="editDocumentType(docType)">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button 
+                      type="button" 
+                      class="btn btn-sm btn-outline-danger"
+                      (click)="deleteDocumentType(docType.id)"
+                      [disabled]="loading">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <small><strong>Catégorie:</strong> {{ docType.category }}</small><br>
+                    <small><strong>Obligatoire:</strong> 
+                      <span class="badge" [class]="docType.obligatoire ? 'badge-success' : 'badge-secondary'">
+                        {{ docType.obligatoire ? 'Oui' : 'Non' }}
+                      </span>
+                    </small>
+                  </div>
+                  <div class="col-md-6">
+                    <small><strong>Formats:</strong> {{ docType.formatAutorise.join(', ') }}</small><br>
+                    <small><strong>Taille max:</strong> {{ docType.tailleMaxMo }} Mo</small>
+                  </div>
+                </div>
+                <div class="mt-2">
+                  <small class="text-muted">{{ docType.description }}</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Onglet Notifications -->
+      <div class="tab-pane" [class.active]="activeTab === 'notifications'">
+        <div class="section-header">
+          <h4>Configuration des Notifications</h4>
+          <button 
+            type="button" 
+            class="btn btn-primary"
+            (click)="saveNotifications()"
+            [disabled]="loading">
+            <i class="fas fa-save"></i>
+            Sauvegarder
+          </button>
+        </div>
+
+        <div class="notifications-list">
+          <div class="notification-card" *ngFor="let notif of notifications; let i = index">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                  <div class="flex-grow-1">
+                    <h6>{{ notif.nom }}</h6>
+                    <p class="text-muted mb-2">{{ notif.type }}</p>
+                    <div class="form-check form-switch">
+                      <input 
+                        class="form-check-input" 
+                        type="checkbox" 
+                        [id]="'notif_' + notif.id"
+                        [checked]="notif.actif"
+                        (change)="toggleNotification(notif.id, $event)">
+                      <label class="form-check-label" [for]="'notif_' + notif.id">
+                        Actif
+                      </label>
+                    </div>
+                  </div>
+                  <div class="notification-actions">
+                    <button 
+                      type="button" 
+                      class="btn btn-sm btn-outline-primary"
+                      (click)="editNotification(notif)">
+                      <i class="fas fa-edit"></i>
+                      Modifier
+                    </button>
+                  </div>
+                </div>
+                <div class="mt-3">
+                  <small><strong>Destinataires:</strong> {{ notif.destinataires.join(', ') }}</small>
+                  <div class="mt-1" *ngIf="notif.delaiRappel">
+                    <small><strong>Délai de rappel:</strong> {{ notif.delaiRappel }} jours</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Onglet Général -->
+      <div class="tab-pane" [class.active]="activeTab === 'general'">
+        <div class="section-header">
+          <h4>Configuration Générale</h4>
+          <button 
+            type="button" 
+            class="btn btn-primary"
+            (click)="saveGeneralConfig()"
+            [disabled]="loading || generalForm.invalid">
+            <i class="fas fa-save"></i>
+            Sauvegarder
+          </button>
+        </div>
+
+        <form [formGroup]="generalForm" class="configuration-form">
+          <div class="row" *ngFor="let config of generalConfigurations; let i = index">
+            <div class="col-md-4">
+              <label class="form-label">{{ config.description }}</label>
+            </div>
+            <div class="col-md-4">
+              <input 
+                *ngIf="config.type === 'STRING' || config.type === 'NUMBER'"
+                [type]="config.type === 'NUMBER' ? 'number' : 'text'"
+                class="form-control"
+                [formControlName]="'config_' + config.id"
+                [placeholder]="config.value">
+              <div 
+                *ngIf="config.type === 'BOOLEAN'"
+                class="form-check form-switch">
+                <input 
+                  class="form-check-input" 
+                  type="checkbox" 
+                  [id]="'config_' + config.id"
+                  [formControlName]="'config_' + config.id">
+                <label class="form-check-label" [for]="'config_' + config.id">
+                  Activé
+                </label>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <small class="form-text text-muted">{{ config.key }}</small>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading overlay -->
+  <div class="loading-overlay" *ngIf="loading">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Chargement...</span>
+    </div>
+  </div>
+</div>
+
+<!-- Modal pour édition de type de document -->
+<div class="modal fade" id="documentTypeModal" tabindex="-1" *ngIf="showDocumentTypeModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          {{ editingDocumentType?.id ? 'Modifier' : 'Ajouter' }} un type de document
+        </h5>
+        <button type="button" class="btn-close" (click)="closeDocumentTypeModal()"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="documentTypeForm">
+          <div class="mb-3">
+            <label class="form-label">Nom *</label>
+            <input type="text" class="form-control" formControlName="nom">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Type *</label>
+            <input type="text" class="form-control" formControlName="type">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Catégorie *</label>
+            <select class="form-select" formControlName="category">
+              <option value="INSCRIPTION">Inscription</option>
+              <option value="SOUTENANCE">Soutenance</option>
+              <option value="ADMINISTRATIF">Administratif</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" formControlName="description" rows="3"></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Taille maximale (Mo) *</label>
+            <input type="number" class="form-control" formControlName="tailleMaxMo">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Formats autorisés *</label>
+            <input type="text" class="form-control" formControlName="formatAutoriseStr" 
+                   placeholder="PDF,JPG,PNG (séparés par des virgules)">
+          </div>
+          <div class="mb-3">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" formControlName="obligatoire">
+              <label class="form-check-label">
+                Document obligatoire
+              </label>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeDocumentTypeModal()">
+          Annuler
+        </button>
+        <button 
+          type="button" 
+          class="btn btn-primary"
+          (click)="saveDocumentType()"
+          [disabled]="documentTypeForm.invalid || loading">
+          {{ editingDocumentType?.id ? 'Modifier' : 'Ajouter' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

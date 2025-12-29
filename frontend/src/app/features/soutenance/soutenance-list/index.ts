@@ -1,0 +1,1 @@
+export { SoutenanceList } from './soutenance-list';

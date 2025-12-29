@@ -1,0 +1,386 @@
+.dossier-consultation {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+
+  .dossier-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+
+    .dossier-type {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+
+      i {
+        font-size: 1.5rem;
+        color: #3b82f6;
+      }
+
+      h3 {
+        margin: 0;
+        color: #1f2937;
+        font-size: 1.25rem;
+        font-weight: 600;
+      }
+    }
+
+    .dossier-status {
+      .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+
+        &.status-green {
+          background: #d1fae5;
+          color: #065f46;
+        }
+
+        &.status-orange {
+          background: #fed7aa;
+          color: #92400e;
+        }
+
+        &.status-red {
+          background: #fee2e2;
+          color: #991b1b;
+        }
+
+        &.status-blue {
+          background: #dbeafe;
+          color: #1e40af;
+        }
+
+        &.status-gray {
+          background: #f3f4f6;
+          color: #374151;
+        }
+      }
+    }
+  }
+
+  .dossier-content {
+    padding: 1.5rem;
+
+    .section {
+      margin-bottom: 2rem;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      h4 {
+        margin: 0 0 1rem 0;
+        color: #1f2937;
+        font-size: 1.125rem;
+        font-weight: 600;
+        border-bottom: 2px solid #e5e7eb;
+        padding-bottom: 0.5rem;
+      }
+
+      h5 {
+        margin: 1rem 0 0.75rem 0;
+        color: #374151;
+        font-size: 1rem;
+        font-weight: 600;
+      }
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+
+      .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+
+        .label {
+          font-size: 0.875rem;
+          font-weight: 500;
+          color: #6b7280;
+        }
+
+        .value {
+          font-size: 1rem;
+          color: #1f2937;
+          font-weight: 500;
+        }
+      }
+    }
+
+    .jury-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+
+      .jury-member {
+        padding: 1rem;
+        background: #f9fafb;
+        border-radius: 8px;
+        border-left: 3px solid #3b82f6;
+
+        .member-info {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 0.5rem;
+
+          .member-name {
+            font-weight: 600;
+            color: #1f2937;
+          }
+
+          .member-role {
+            background: #3b82f6;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+          }
+        }
+
+        .member-details {
+          display: flex;
+          gap: 1rem;
+          font-size: 0.875rem;
+          color: #6b7280;
+
+          .member-institution {
+            font-weight: 500;
+          }
+        }
+      }
+    }
+
+    .documents-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+
+      .document-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: #f9fafb;
+        border-radius: 8px;
+        transition: background 0.2s;
+
+        &:hover {
+          background: #f3f4f6;
+        }
+
+        .document-icon {
+          width: 40px;
+          height: 40px;
+          background: #3b82f6;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          i {
+            color: white;
+            font-size: 1.25rem;
+          }
+        }
+
+        .document-info {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 0.25rem;
+
+          .document-name {
+            font-weight: 500;
+            color: #1f2937;
+          }
+
+          .document-type {
+            font-size: 0.875rem;
+            color: #6b7280;
+          }
+        }
+
+        .document-status {
+          .status-indicator {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            &.valid {
+              background: #d1fae5;
+              color: #065f46;
+            }
+
+            &.pending {
+              background: #fed7aa;
+              color: #92400e;
+            }
+
+            i {
+              font-size: 0.875rem;
+            }
+          }
+        }
+      }
+    }
+
+    .avis-container {
+      background: #f9fafb;
+      border-radius: 8px;
+      padding: 1rem;
+      border-left: 3px solid #3b82f6;
+
+      .avis-status {
+        margin-bottom: 0.75rem;
+
+        .status-badge {
+          padding: 0.25rem 0.75rem;
+          border-radius: 12px;
+          font-size: 0.75rem;
+          font-weight: 600;
+          text-transform: uppercase;
+
+          &.status-green {
+            background: #d1fae5;
+            color: #065f46;
+          }
+
+          &.status-red {
+            background: #fee2e2;
+            color: #991b1b;
+          }
+        }
+      }
+
+      .avis-content {
+        p {
+          margin: 0 0 0.75rem 0;
+          color: #1f2937;
+          line-height: 1.6;
+        }
+
+        .avis-date {
+          font-size: 0.875rem;
+          color: #6b7280;
+          font-style: italic;
+        }
+      }
+    }
+  }
+
+  .dossier-actions {
+    display: flex;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: #f9fafb;
+    border-top: 1px solid #e5e7eb;
+
+    .action-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      &.secondary {
+        background: #f3f4f6;
+        color: #374151;
+
+        &:hover:not(:disabled) {
+          background: #e5e7eb;
+          transform: translateY(-1px);
+        }
+      }
+
+      &.success {
+        background: #10b981;
+        color: white;
+
+        &:hover:not(:disabled) {
+          background: #059669;
+          transform: translateY(-1px);
+        }
+      }
+
+      &.danger {
+        background: #ef4444;
+        color: white;
+
+        &:hover:not(:disabled) {
+          background: #dc2626;
+          transform: translateY(-1px);
+        }
+      }
+
+      i {
+        font-size: 0.875rem;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .dossier-consultation {
+    .dossier-header {
+      flex-direction: column;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+
+    .dossier-content {
+      padding: 1rem;
+
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .jury-list .jury-member .member-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+      }
+
+      .documents-list .document-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+      }
+    }
+
+    .dossier-actions {
+      flex-direction: column;
+      gap: 0.75rem;
+
+      .action-btn {
+        justify-content: center;
+      }
+    }
+  }
+}

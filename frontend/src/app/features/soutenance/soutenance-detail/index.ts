@@ -1,0 +1,1 @@
+export { SoutenanceDetail } from './soutenance-detail';

@@ -1,0 +1,200 @@
+.user-management {
+  padding: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+
+    h2 {
+      margin: 0;
+      color: #333;
+      font-weight: 500;
+    }
+
+    button {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+  }
+
+  .filters-card {
+    margin-bottom: 1.5rem;
+
+    .filters {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 1rem;
+      align-items: start;
+
+      @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+      }
+
+      .search-form {
+        width: 100%;
+
+        mat-form-field {
+          width: 100%;
+        }
+      }
+
+      mat-form-field {
+        width: 100%;
+      }
+    }
+  }
+
+  .table-card {
+    .table-container {
+      overflow-x: auto;
+      min-height: 400px;
+      position: relative;
+
+      .users-table {
+        width: 100%;
+        min-width: 800px;
+
+        th {
+          font-weight: 600;
+          color: #666;
+          background-color: #f5f5f5;
+        }
+
+        td {
+          padding: 1rem 0.5rem;
+          border-bottom: 1px solid #e0e0e0;
+        }
+
+        .user-name {
+          strong {
+            color: #333;
+          }
+        }
+
+        .roles-container {
+          .role-chip {
+            margin-right: 0.5rem;
+            font-size: 0.75rem;
+            
+            &.role-role_admin {
+              background-color: #f44336;
+              color: white;
+            }
+            
+            &.role-role_directeur {
+              background-color: #ff9800;
+              color: white;
+            }
+            
+            &.role-role_doctorant {
+              background-color: #4caf50;
+              color: white;
+            }
+          }
+        }
+
+        .actions {
+          display: flex;
+          gap: 0.5rem;
+
+          button {
+            &:hover {
+              background-color: rgba(0, 0, 0, 0.04);
+            }
+          }
+        }
+      }
+
+      .loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem;
+        color: #666;
+
+        mat-spinner {
+          margin-bottom: 1rem;
+        }
+      }
+
+      .no-data {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem;
+        color: #999;
+
+        mat-icon {
+          font-size: 3rem;
+          width: 3rem;
+          height: 3rem;
+          margin-bottom: 1rem;
+        }
+
+        p {
+          margin: 0;
+          font-size: 1.1rem;
+        }
+      }
+    }
+
+    mat-paginator {
+      border-top: 1px solid #e0e0e0;
+      margin-top: 1rem;
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .user-management {
+    padding: 1rem;
+
+    .header {
+      flex-direction: column;
+      gap: 1rem;
+      align-items: stretch;
+
+      button {
+        justify-content: center;
+      }
+    }
+
+    .table-card .table-container .users-table {
+      min-width: 600px;
+    }
+  }
+}
+
+// Material Design overrides
+::ng-deep {
+  .mat-mdc-slide-toggle {
+    .mdc-switch {
+      &.mdc-switch--selected {
+        .mdc-switch__track {
+          background-color: #4caf50;
+        }
+        
+        .mdc-switch__handle {
+          .mdc-switch__ripple {
+            background-color: #4caf50;
+          }
+        }
+      }
+    }
+  }
+
+  .mat-mdc-chip-listbox {
+    .mat-mdc-chip {
+      border-radius: 12px;
+      font-weight: 500;
+    }
+  }
+}

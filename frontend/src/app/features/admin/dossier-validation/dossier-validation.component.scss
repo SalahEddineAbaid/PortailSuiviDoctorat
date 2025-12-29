@@ -1,0 +1,488 @@
+.dossier-validation {
+  .page-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+    border-radius: 8px;
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
+
+      .page-title {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+
+        i {
+          margin-right: 1rem;
+          font-size: 1.8rem;
+        }
+      }
+
+      .header-stats {
+        display: flex;
+        gap: 2rem;
+
+        .stat-item {
+          text-align: center;
+          background: rgba(255, 255, 255, 0.1);
+          padding: 1rem;
+          border-radius: 8px;
+          min-width: 80px;
+
+          &.urgent {
+            background: rgba(220, 53, 69, 0.2);
+            border: 1px solid rgba(220, 53, 69, 0.3);
+          }
+
+          .stat-number {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: 700;
+          }
+
+          .stat-label {
+            display: block;
+            font-size: 0.85rem;
+            opacity: 0.9;
+          }
+        }
+      }
+    }
+  }
+
+  .filters-section {
+    margin-bottom: 2rem;
+
+    .card {
+      border: none;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+
+      .card-body {
+        padding: 1.5rem;
+      }
+    }
+
+    .filters-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      align-items: end;
+
+      .filter-group {
+        .filter-label {
+          display: block;
+          font-weight: 500;
+          margin-bottom: 0.5rem;
+          color: #495057;
+          font-size: 0.9rem;
+        }
+
+        .form-control-sm {
+          border-radius: 6px;
+          border: 1px solid #ced4da;
+          transition: border-color 0.15s ease-in-out;
+
+          &:focus {
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+          }
+        }
+
+        &.search-group {
+          grid-column: span 2;
+
+          .search-input {
+            position: relative;
+
+            .search-icon {
+              position: absolute;
+              right: 10px;
+              top: 50%;
+              transform: translateY(-50%);
+              color: #6c757d;
+              pointer-events: none;
+            }
+
+            .form-control {
+              padding-right: 2.5rem;
+            }
+          }
+        }
+      }
+
+      .filter-actions {
+        display: flex;
+        gap: 0.5rem;
+
+        .btn-sm {
+          border-radius: 6px;
+          font-weight: 500;
+          transition: all 0.2s ease;
+
+          i {
+            margin-right: 0.5rem;
+          }
+        }
+      }
+    }
+  }
+
+  .dossiers-section {
+    .dossiers-list {
+      display: grid;
+      gap: 1rem;
+
+      .dossier-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        &.urgent {
+          border-left: 4px solid #dc3545;
+        }
+
+        .card {
+          border: none;
+          border-radius: 8px;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+          .card-header {
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            padding: 1.25rem;
+            border-radius: 8px 8px 0 0;
+
+            .dossier-info {
+              flex: 1;
+
+              .dossier-title {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                margin-bottom: 1rem;
+
+                h4 {
+                  margin: 0;
+                  font-size: 1.1rem;
+                  font-weight: 600;
+                  color: #495057;
+                  flex: 1;
+                  margin-right: 1rem;
+                  line-height: 1.3;
+                }
+
+                .dossier-badges {
+                  display: flex;
+                  gap: 0.5rem;
+                  flex-wrap: wrap;
+
+                  .badge {
+                    font-size: 0.75rem;
+                    padding: 0.25rem 0.5rem;
+                    border-radius: 4px;
+                  }
+                }
+              }
+
+              .dossier-meta {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 1rem;
+
+                .meta-item {
+                  display: flex;
+                  align-items: center;
+                  font-size: 0.85rem;
+                  color: #6c757d;
+
+                  i {
+                    margin-right: 0.5rem;
+                    width: 14px;
+                    text-align: center;
+                  }
+                }
+              }
+            }
+
+            .dossier-actions {
+              display: flex;
+              gap: 0.5rem;
+              flex-shrink: 0;
+
+              .btn-sm {
+                border-radius: 6px;
+                font-weight: 500;
+                transition: all 0.2s ease;
+                min-width: 90px;
+
+                i {
+                  margin-right: 0.25rem;
+                }
+              }
+            }
+          }
+
+          .card-body {
+            padding: 1rem 1.25rem;
+
+            .documents-manquants {
+              .documents-title {
+                font-size: 0.9rem;
+                font-weight: 600;
+                margin-bottom: 0.5rem;
+                color: #856404;
+
+                i {
+                  margin-right: 0.5rem;
+                }
+              }
+
+              .documents-list {
+                margin: 0;
+                padding-left: 1.5rem;
+                font-size: 0.85rem;
+                color: #6c757d;
+
+                li {
+                  margin-bottom: 0.25rem;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: #6c757d;
+
+      i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+      }
+
+      h3 {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+        color: #495057;
+      }
+
+      p {
+        font-size: 1rem;
+        margin: 0;
+      }
+    }
+  }
+
+  // Modal styles
+  .modal {
+    &.show {
+      display: block !important;
+    }
+
+    .modal-dialog {
+      max-width: 600px;
+      margin: 2rem auto;
+    }
+
+    .modal-content {
+      border: none;
+      border-radius: 8px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+
+      .modal-header {
+        background: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+        border-radius: 8px 8px 0 0;
+        padding: 1.25rem;
+
+        .modal-title {
+          font-weight: 600;
+          color: #495057;
+        }
+
+        .btn-close {
+          background: none;
+          border: none;
+          font-size: 1.25rem;
+          cursor: pointer;
+          opacity: 0.5;
+          transition: opacity 0.2s ease;
+
+          &:hover {
+            opacity: 1;
+          }
+        }
+      }
+
+      .modal-body {
+        padding: 1.5rem;
+      }
+
+      .modal-footer {
+        background: #f8f9fa;
+        border-top: 1px solid #dee2e6;
+        border-radius: 0 0 8px 8px;
+        padding: 1rem 1.5rem;
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.75rem;
+
+        .btn {
+          min-width: 100px;
+          font-weight: 500;
+          border-radius: 6px;
+
+          i {
+            margin-right: 0.5rem;
+          }
+        }
+      }
+    }
+  }
+
+  .modal-backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+
+    &.show {
+      opacity: 1;
+    }
+  }
+}
+
+// Badges
+.badge-primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.badge-info {
+  background-color: #17a2b8;
+  color: white;
+}
+
+.badge-success {
+  background-color: #28a745;
+  color: white;
+}
+
+.badge-warning {
+  background-color: #ffc107;
+  color: #212529;
+}
+
+.badge-danger {
+  background-color: #dc3545;
+  color: white;
+}
+
+.badge-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+// Responsive design
+@media (max-width: 992px) {
+  .dossier-validation {
+    .page-header {
+      .header-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 1.5rem;
+
+        .header-stats {
+          justify-content: center;
+        }
+      }
+    }
+
+    .filters-section {
+      .filters-grid {
+        grid-template-columns: 1fr;
+
+        .filter-group.search-group {
+          grid-column: span 1;
+        }
+
+        .filter-actions {
+          justify-content: center;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .dossier-validation {
+    .dossiers-section {
+      .dossiers-list {
+        .dossier-card {
+          .card {
+            .card-header {
+              flex-direction: column;
+              gap: 1rem;
+
+              .dossier-info {
+                .dossier-title {
+                  flex-direction: column;
+                  align-items: flex-start;
+                  gap: 0.5rem;
+
+                  h4 {
+                    margin-right: 0;
+                  }
+                }
+
+                .dossier-meta {
+                  flex-direction: column;
+                  gap: 0.5rem;
+                }
+              }
+
+              .dossier-actions {
+                flex-wrap: wrap;
+                justify-content: center;
+
+                .btn-sm {
+                  flex: 1;
+                  min-width: 80px;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .modal {
+      .modal-dialog {
+        margin: 1rem;
+        max-width: none;
+      }
+
+      .modal-footer {
+        flex-direction: column;
+
+        .btn {
+          width: 100%;
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,139 @@
+<div class="avis-form-container">
+  <div class="form-header">
+    <div class="header-info">
+      <i [class]="getTypeIcon()"></i>
+      <div class="header-text">
+        <h3>Donner un avis sur la {{ getTypeLabel() }}</h3>
+        <p>Doctorant: <strong>{{ avisData.doctorantName }}</strong></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Avis existant -->
+  <div class="current-avis" *ngIf="hasCurrentAvis()">
+    <h4>Avis actuel</h4>
+    <div class="avis-display">
+      <div class="avis-status">
+        <span 
+          class="status-badge" 
+          [ngClass]="'status-' + getStatusColor(avisData.currentAvis!.statut)"
+        >
+          {{ getStatusLabel(avisData.currentAvis!.statut) }}
+        </span>
+      </div>
+      <div class="avis-content">
+        <p>{{ avisData.currentAvis!.commentaire }}</p>
+        <div class="avis-date">
+          Donné le {{ avisData.currentAvis!.dateAvis | date:'dd/MM/yyyy HH:mm' }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Formulaire d'avis -->
+  <form [formGroup]="avisForm" (ngSubmit)="onSubmit()" class="avis-form">
+    <div class="form-section">
+      <h4>{{ hasCurrentAvis() ? 'Modifier l\'avis' : 'Nouvel avis' }}</h4>
+      
+      <!-- Statut -->
+      <div class="form-group">
+        <label for="statut">Statut de l'avis *</label>
+        <div class="radio-group">
+          <div class="radio-option">
+            <input 
+              type="radio" 
+              id="favorable" 
+              value="FAVORABLE" 
+              formControlName="statut"
+            >
+            <label for="favorable" class="radio-label favorable">
+              <i class="fas fa-check-circle"></i>
+              Favorable
+            </label>
+          </div>
+          <div class="radio-option">
+            <input 
+              type="radio" 
+              id="reserve" 
+              value="RESERVE" 
+              formControlName="statut"
+            >
+            <label for="reserve" class="radio-label reserve">
+              <i class="fas fa-exclamation-circle"></i>
+              Avec réserves
+            </label>
+          </div>
+          <div class="radio-option">
+            <input 
+              type="radio" 
+              id="defavorable" 
+              value="DEFAVORABLE" 
+              formControlName="statut"
+            >
+            <label for="defavorable" class="radio-label defavorable">
+              <i class="fas fa-times-circle"></i>
+              Défavorable
+            </label>
+          </div>
+        </div>
+        <div 
+          class="error-message" 
+          *ngIf="avisForm.get('statut')?.invalid && avisForm.get('statut')?.touched"
+        >
+          Veuillez sélectionner un statut
+        </div>
+      </div>
+
+      <!-- Commentaire -->
+      <div class="form-group">
+        <label for="commentaire">Commentaire détaillé *</label>
+        <textarea 
+          id="commentaire"
+          formControlName="commentaire"
+          rows="6"
+          placeholder="Veuillez détailler votre avis, les points positifs, les réserves éventuelles ou les raisons du refus..."
+          [class.error]="avisForm.get('commentaire')?.invalid && avisForm.get('commentaire')?.touched"
+        ></textarea>
+        <div class="field-info">
+          <span class="char-count">
+            {{ avisForm.get('commentaire')?.value?.length || 0 }} caractères
+          </span>
+          <span class="min-length">Minimum 10 caractères</span>
+        </div>
+        <div 
+          class="error-message" 
+          *ngIf="avisForm.get('commentaire')?.invalid && avisForm.get('commentaire')?.touched"
+        >
+          <span *ngIf="avisForm.get('commentaire')?.errors?.['required']">
+            Le commentaire est obligatoire
+          </span>
+          <span *ngIf="avisForm.get('commentaire')?.errors?.['minlength']">
+            Le commentaire doit contenir au moins 10 caractères
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="form-actions">
+      <button 
+        type="button" 
+        class="btn secondary" 
+        (click)="onCancel()"
+        [disabled]="isLoading"
+      >
+        <i class="fas fa-times"></i>
+        Annuler
+      </button>
+      <button 
+        type="submit" 
+        class="btn primary" 
+        [disabled]="!isFormValid() || isLoading"
+      >
+        <i class="fas fa-spinner fa-spin" *ngIf="isLoading"></i>
+        <i class="fas fa-paper-plane" *ngIf="!isLoading"></i>
+        {{ hasCurrentAvis() ? 'Modifier l\'avis' : 'Soumettre l\'avis' }}
+      </button>
+    </div>
+  </form>
+</div>

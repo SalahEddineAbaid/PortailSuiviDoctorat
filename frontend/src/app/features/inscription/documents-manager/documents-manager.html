@@ -1,0 +1,108 @@
+<div class="documents-manager">
+  
+  <!-- Header -->
+  <div class="manager-header" *ngIf="showTitle">
+    <h2>Documents requis</h2>
+    <div class="completion-status">
+      <div class="progress-info">
+        <span class="progress-text">
+          {{ getCompletionStatus().completed }} / {{ getCompletionStatus().total }} documents uploadés
+        </span>
+        <div class="progress-bar">
+          <div 
+            class="progress-fill" 
+            [style.width.%]="getCompletionStatus().percentage"
+            [class.complete]="isAllRequiredDocumentsUploaded()"
+          ></div>
+        </div>
+      </div>
+      <div class="completion-badge" [class.complete]="isAllRequiredDocumentsUploaded()">
+        <i class="fas" [class.fa-check-circle]="isAllRequiredDocumentsUploaded()" [class.fa-clock]="!isAllRequiredDocumentsUploaded()"></i>
+        {{ isAllRequiredDocumentsUploaded() ? 'Complet' : 'En cours' }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Chargement des documents...</p>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="error" class="alert alert-danger">
+    <i class="fas fa-exclamation-triangle"></i>
+    {{ error }}
+    <button class="btn btn-sm btn-outline-primary" (click)="loadDocuments()">
+      Réessayer
+    </button>
+  </div>
+
+  <!-- Missing Documents Alert -->
+  <div *ngIf="!loading && getMissingRequiredDocuments().length > 0" class="alert alert-warning">
+    <i class="fas fa-exclamation-triangle"></i>
+    <div class="alert-content">
+      <strong>Documents manquants :</strong>
+      <ul class="missing-docs-list">
+        <li *ngFor="let config of getMissingRequiredDocuments()">
+          {{ config.label }}
+        </li>
+      </ul>
+      <p class="alert-note">Ces documents sont obligatoires pour valider votre inscription.</p>
+    </div>
+  </div>
+
+  <!-- Success Message -->
+  <div *ngIf="!loading && isAllRequiredDocumentsUploaded()" class="alert alert-success">
+    <i class="fas fa-check-circle"></i>
+    <strong>Félicitations !</strong> Tous les documents obligatoires ont été uploadés.
+  </div>
+
+  <!-- Documents Upload Components -->
+  <div class="documents-grid" *ngIf="!loading">
+    <app-document-upload
+      *ngFor="let config of documentConfigs"
+      [config]="config"
+      [inscriptionId]="inscriptionId"
+      [existingDocument]="getExistingDocument(config.type)"
+      [disabled]="disabled"
+      (documentUploaded)="onDocumentUploaded($event)"
+      (documentDeleted)="onDocumentDeleted($event)"
+      (uploadError)="onUploadError($event)"
+    ></app-document-upload>
+  </div>
+
+  <!-- Instructions -->
+  <div class="upload-instructions" *ngIf="!loading">
+    <div class="instructions-card">
+      <h3>Instructions importantes</h3>
+      <div class="instructions-content">
+        <div class="instruction-item">
+          <i class="fas fa-file-alt"></i>
+          <div class="instruction-text">
+            <strong>Formats acceptés :</strong> PDF pour les documents officiels, JPEG/PNG pour les photos
+          </div>
+        </div>
+        <div class="instruction-item">
+          <i class="fas fa-weight-hanging"></i>
+          <div class="instruction-text">
+            <strong>Taille maximale :</strong> 10MB par document (5MB pour les images)
+          </div>
+        </div>
+        <div class="instruction-item">
+          <i class="fas fa-shield-alt"></i>
+          <div class="instruction-text">
+            <strong>Sécurité :</strong> Vos documents sont stockés de manière sécurisée et ne sont accessibles qu'aux personnes autorisées
+          </div>
+        </div>
+        <div class="instruction-item">
+          <i class="fas fa-edit"></i>
+          <div class="instruction-text">
+            <strong>Modification :</strong> Vous pouvez remplacer un document à tout moment avant la validation finale
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

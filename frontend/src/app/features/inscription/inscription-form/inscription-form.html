@@ -1,0 +1,189 @@
+<div class="inscription-form-container">
+  <div class="form-header">
+    <h1>{{ isEditMode ? 'Modifier l\'inscription' : 'Nouvelle inscription' }}</h1>
+    <p class="form-description">
+      Remplissez tous les champs obligatoires pour {{ isEditMode ? 'modifier votre' : 'créer votre' }} demande d'inscription.
+    </p>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>{{ isEditMode ? 'Chargement des données...' : 'Enregistrement en cours...' }}</p>
+  </div>
+
+  <!-- Success Message -->
+  <div *ngIf="success" class="alert alert-success">
+    <i class="fas fa-check-circle"></i>
+    {{ success }}
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="error" class="alert alert-danger">
+    <i class="fas fa-exclamation-triangle"></i>
+    {{ error }}
+  </div>
+
+  <!-- Campagne Info -->
+  <div *ngIf="campagneActive$ | async as campagne" class="campagne-info">
+    <div class="info-card">
+      <h3>Campagne d'inscription active</h3>
+      <div class="campagne-details">
+        <p><strong>{{ campagne.nom }}</strong></p>
+        <p>Année universitaire: {{ campagne.anneeUniversitaire }}</p>
+        <p>Type: {{ campagne.typeInscription }}</p>
+        <p>Fermeture: {{ campagne.dateFermeture | date:'dd/MM/yyyy' }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <form [formGroup]="inscriptionForm" (ngSubmit)="onSubmit()" class="inscription-form" *ngIf="!loading">
+    
+    <!-- Directeur de thèse -->
+    <div class="form-section">
+      <h2>Directeur de thèse</h2>
+      
+      <div class="form-group">
+        <label for="directeurSearch">Rechercher un directeur *</label>
+        <input
+          type="text"
+          id="directeurSearch"
+          formControlName="directeurSearch"
+          class="form-control"
+          placeholder="Tapez le nom ou l'email du directeur..."
+          [class.is-invalid]="isFieldInvalid('directeurId')"
+        />
+        <div class="invalid-feedback" *ngIf="isFieldInvalid('directeurId')">
+          {{ getFieldError('directeurId') }}
+        </div>
+      </div>
+
+      <!-- Directeurs filtrés -->
+      <div class="directeurs-list" *ngIf="filteredDirecteurs$ | async as directeurs">
+        <div 
+          *ngFor="let directeur of directeurs" 
+          class="directeur-item"
+          [class.selected]="inscriptionForm.get('directeurId')?.value === directeur.id"
+          (click)="onDirecteurSelect(directeur)"
+        >
+          <div class="directeur-info">
+            <h4>{{ directeur.FirstName }} {{ directeur.LastName }}</h4>
+            <p>{{ directeur.email }}</p>
+          </div>
+          <div class="directeur-actions">
+            <i class="fas fa-check" *ngIf="inscriptionForm.get('directeurId')?.value === directeur.id"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Informations de la thèse -->
+    <div class="form-section">
+      <h2>Informations de la thèse</h2>
+      
+      <div class="form-group">
+        <label for="sujetThese">Sujet de thèse *</label>
+        <textarea
+          id="sujetThese"
+          formControlName="sujetThese"
+          class="form-control"
+          rows="4"
+          placeholder="Décrivez le sujet de votre thèse..."
+          [class.is-invalid]="isFieldInvalid('sujetThese')"
+        ></textarea>
+        <div class="form-text">
+          Minimum 10 caractères, maximum 500 caractères
+        </div>
+        <div class="invalid-feedback" *ngIf="isFieldInvalid('sujetThese')">
+          {{ getFieldError('sujetThese') }}
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="laboratoire">Laboratoire *</label>
+          <select
+            id="laboratoire"
+            formControlName="laboratoire"
+            class="form-control"
+            [class.is-invalid]="isFieldInvalid('laboratoire')"
+          >
+            <option value="">Sélectionnez un laboratoire</option>
+            <option *ngFor="let lab of laboratoires" [value]="lab">{{ lab }}</option>
+          </select>
+          <div class="invalid-feedback" *ngIf="isFieldInvalid('laboratoire')">
+            {{ getFieldError('laboratoire') }}
+          </div>
+        </div>
+
+        <div class="form-group" *ngIf="inscriptionForm.get('laboratoire')?.value === 'Autre'">
+          <label for="laboratoireAutre">Précisez le laboratoire *</label>
+          <input
+            type="text"
+            id="laboratoireAutre"
+            formControlName="laboratoireAutre"
+            class="form-control"
+            placeholder="Nom du laboratoire"
+            [class.is-invalid]="isFieldInvalid('laboratoireAutre')"
+          />
+          <div class="invalid-feedback" *ngIf="isFieldInvalid('laboratoireAutre')">
+            {{ getFieldError('laboratoireAutre') }}
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="specialite">Spécialité *</label>
+          <select
+            id="specialite"
+            formControlName="specialite"
+            class="form-control"
+            [class.is-invalid]="isFieldInvalid('specialite')"
+          >
+            <option value="">Sélectionnez une spécialité</option>
+            <option *ngFor="let spec of specialites" [value]="spec">{{ spec }}</option>
+          </select>
+          <div class="invalid-feedback" *ngIf="isFieldInvalid('specialite')">
+            {{ getFieldError('specialite') }}
+          </div>
+        </div>
+
+        <div class="form-group" *ngIf="inscriptionForm.get('specialite')?.value === 'Autre'">
+          <label for="specialiteAutre">Précisez la spécialité *</label>
+          <input
+            type="text"
+            id="specialiteAutre"
+            formControlName="specialiteAutre"
+            class="form-control"
+            placeholder="Nom de la spécialité"
+            [class.is-invalid]="isFieldInvalid('specialiteAutre')"
+          />
+          <div class="invalid-feedback" *ngIf="isFieldInvalid('specialiteAutre')">
+            {{ getFieldError('specialiteAutre') }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" (click)="onCancel()" [disabled]="loading">
+        Annuler
+      </button>
+      <button type="submit" class="btn btn-primary" [disabled]="loading || inscriptionForm.invalid">
+        <i class="fas fa-save"></i>
+        {{ isEditMode ? 'Modifier' : 'Créer' }} l'inscription
+      </button>
+    </div>
+  </form>
+
+  <!-- Form Debug (Development only) -->
+  <!-- <div class="form-debug" *ngIf="!environment.production">
+    <h4>Debug Form</h4>
+    <p>Form Valid: {{ inscriptionForm.valid }}</p>
+    <p>Form Value: {{ inscriptionForm.value | json }}</p>
+    <p>Form Errors: {{ inscriptionForm.errors | json }}</p>
+  </div> -->
+</div>

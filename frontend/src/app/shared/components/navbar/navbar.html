@@ -1,23 +1,78 @@
-<nav class="navbar" *ngIf="currentUser">
+<nav class="navbar" *ngIf="currentUser" role="navigation" aria-label="Navigation principale">
   <div class="navbar-container">
     <!-- Logo/Brand -->
     <div class="navbar-brand">
-      <i class="fas fa-graduation-cap"></i>
-      <span class="brand-text">Portail Doctorat</span>
+      <a routerLink="/dashboard" class="brand-link" [attr.aria-label]="'Retour au tableau de bord'">
+        <span class="material-icons brand-icon" aria-hidden="true">school</span>
+        <span class="brand-text">Portail Doctorat</span>
+      </a>
     </div>
+
+    <!-- Desktop Navigation -->
+    <div class="navbar-nav desktop-nav" *ngIf="navItems.length > 0">
+      <div 
+        *ngFor="let item of navItems; trackBy: trackByRoute"
+        class="nav-item"
+        [class.has-children]="hasChildren(item)"
+        [class.active]="isActiveRoute(item.route)"
+      >
+        <a 
+          *ngIf="!hasChildren(item)"
+          [routerLink]="item.route"
+          routerLinkActive="active"
+          class="nav-link"
+          [attr.aria-label]="item.label"
+        >
+          <span *ngIf="item.icon" class="material-icons nav-icon" aria-hidden="true">{{ item.icon }}</span>
+          <span class="nav-text">{{ item.label }}</span>
+          <span *ngIf="item.badge" class="nav-badge" [attr.aria-label]="item.badge + ' éléments'">{{ item.badge }}</span>
+        </a>
+        
+        <div *ngIf="hasChildren(item)" class="nav-dropdown">
+          <button 
+            class="nav-link dropdown-toggle"
+            [attr.aria-expanded]="false"
+            [attr.aria-label]="item.label + ', ouvrir le sous-menu'"
+          >
+            <span *ngIf="item.icon" class="material-icons nav-icon" aria-hidden="true">{{ item.icon }}</span>
+            <span class="nav-text">{{ item.label }}</span>
+            <span *ngIf="item.badge" class="nav-badge" [attr.aria-label]="item.badge + ' éléments'">{{ item.badge }}</span>
+            <span class="material-icons dropdown-arrow" aria-hidden="true">expand_more</span>
+          </button>
+          
+          <div class="dropdown-menu" role="menu">
+            <a 
+              *ngFor="let child of item.children"
+              [routerLink]="child.route"
+              routerLinkActive="active"
+              class="dropdown-item"
+              role="menuitem"
+            >
+              {{ child.label }}
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Menu Button -->
+    <button 
+      class="mobile-menu-btn"
+      (click)="toggleMobileMenu($event)"
+      [attr.aria-expanded]="showMobileMenu"
+      aria-label="Ouvrir le menu de navigation"
+    >
+      <span class="material-icons" aria-hidden="true">
+        {{ showMobileMenu ? 'close' : 'menu' }}
+      </span>
+    </button>
 
     <!-- Actions -->
     <div class="navbar-actions">
       <!-- Notifications -->
-      <button class="navbar-icon-btn" title="Notifications">
-        <i class="fas fa-bell"></i>
-        <span class="badge">3</span>
-      </button>
-
-      <!-- Messages -->
-      <button class="navbar-icon-btn" title="Messages">
-        <i class="fas fa-envelope"></i>
-        <span class="badge">5</span>
+      <button class="navbar-icon-btn" title="Notifications" aria-label="Notifications">
+        <span class="material-icons" aria-hidden="true">notifications</span>
+        <span class="badge" aria-label="3 notifications non lues">3</span>
       </button>
 
       <!-- User Menu -->
@@ -25,10 +80,12 @@
         <button 
           class="user-menu-trigger"
           [class.active]="showUserMenu"
-          (click)="toggleUserMenu()"
+          (click)="toggleUserMenu($event)"
+          [attr.aria-expanded]="showUserMenu"
+          aria-label="Menu utilisateur"
         >
-          <div class="user-avatar">
-            {{ currentUser.FirstName.charAt(0) }}{{ currentUser.LastName.charAt(0) }}
+          <div class="user-avatar" [attr.aria-label]="'Avatar de ' + currentUser.FirstName + ' ' + currentUser.LastName">
+            {{ getUserInitials() }}
           </div>
           
           <div class="user-info">
@@ -36,14 +93,14 @@
             <span class="user-role">{{ getUserRoleLabel() }}</span>
           </div>
           
-          <i class="fas fa-chevron-down"></i>
+          <span class="material-icons dropdown-arrow" aria-hidden="true">expand_more</span>
         </button>
 
         <!-- Dropdown Menu -->
-        <div class="user-dropdown" *ngIf="showUserMenu">
+        <div class="user-dropdown" *ngIf="showUserMenu" role="menu">
           <div class="dropdown-header">
             <div class="user-avatar-large">
-              {{ currentUser.FirstName.charAt(0) }}{{ currentUser.LastName.charAt(0) }}
+              {{ getUserInitials() }}
             </div>
             <div class="user-details">
               <strong>{{ currentUser.FirstName }} {{ currentUser.LastName }}</strong>
@@ -52,29 +109,72 @@
             </div>
           </div>
 
-          <div class="dropdown-divider"></div>
+          <div class="dropdown-divider" role="separator"></div>
 
-          <button class="dropdown-item" (click)="goToProfile()">
-            <i class="fas fa-user"></i>
+          <button class="dropdown-item" (click)="goToProfile()" role="menuitem">
+            <span class="material-icons" aria-hidden="true">person</span>
             <span>Mon profil</span>
           </button>
 
-          <button class="dropdown-item" (click)="goToSettings()">
-            <i class="fas fa-cog"></i>
+          <button class="dropdown-item" (click)="goToSettings()" role="menuitem">
+            <span class="material-icons" aria-hidden="true">settings</span>
             <span>Paramètres</span>
           </button>
 
-          <div class="dropdown-divider"></div>
+          <div class="dropdown-divider" role="separator"></div>
 
-          <button class="dropdown-item logout" (click)="logout()">
-            <i class="fas fa-sign-out-alt"></i>
+          <button class="dropdown-item logout" (click)="logout()" role="menuitem">
+            <span class="material-icons" aria-hidden="true">logout</span>
             <span>Se déconnecter</span>
           </button>
         </div>
       </div>
     </div>
   </div>
+
+  <!-- Mobile Navigation -->
+  <div class="mobile-nav" *ngIf="showMobileMenu && navItems.length > 0" role="navigation" aria-label="Navigation mobile">
+    <div class="mobile-nav-content">
+      <div *ngFor="let item of navItems; trackBy: trackByRoute" class="mobile-nav-item">
+        <a 
+          *ngIf="!hasChildren(item)"
+          [routerLink]="item.route"
+          routerLinkActive="active"
+          class="mobile-nav-link"
+          (click)="showMobileMenu = false"
+        >
+          <span *ngIf="item.icon" class="material-icons" aria-hidden="true">{{ item.icon }}</span>
+          <span>{{ item.label }}</span>
+          <span *ngIf="item.badge" class="nav-badge">{{ item.badge }}</span>
+        </a>
+        
+        <div *ngIf="hasChildren(item)" class="mobile-nav-group">
+          <div class="mobile-nav-group-title">
+            <span *ngIf="item.icon" class="material-icons" aria-hidden="true">{{ item.icon }}</span>
+            <span>{{ item.label }}</span>
+            <span *ngIf="item.badge" class="nav-badge">{{ item.badge }}</span>
+          </div>
+          <div class="mobile-nav-children">
+            <a 
+              *ngFor="let child of item.children"
+              [routerLink]="child.route"
+              routerLinkActive="active"
+              class="mobile-nav-child-link"
+              (click)="showMobileMenu = false"
+            >
+              {{ child.label }}
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </nav>
 
-<!-- Overlay pour fermer le menu -->
-<div class="overlay" *ngIf="showUserMenu" (click)="toggleUserMenu()"></div>
+<!-- Overlay pour fermer les menus -->
+<div 
+  class="overlay" 
+  *ngIf="showUserMenu || showMobileMenu" 
+  (click)="showUserMenu = false; showMobileMenu = false"
+  aria-hidden="true"
+></div>

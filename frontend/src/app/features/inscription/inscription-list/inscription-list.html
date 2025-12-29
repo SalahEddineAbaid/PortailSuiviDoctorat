@@ -1,0 +1,196 @@
+<div class="inscription-list">
+  
+  <!-- Header -->
+  <div class="list-header" *ngIf="showTitle">
+    <h2>Liste des inscriptions</h2>
+    <button class="btn btn-outline-primary" (click)="onRefresh()" [disabled]="loading">
+      <i class="fas fa-sync-alt" [class.fa-spin]="loading"></i>
+      Actualiser
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Chargement des inscriptions...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error" class="alert alert-danger">
+    <i class="fas fa-exclamation-triangle"></i>
+    {{ error }}
+    <button class="btn btn-sm btn-outline-primary" (click)="onRefresh()">
+      Réessayer
+    </button>
+  </div>
+
+  <!-- Inscriptions List -->
+  <div *ngIf="!loading && !error" class="inscriptions-container">
+    <div *ngIf="inscriptions$ | async as inscriptions; else noInscriptions">
+      <div *ngIf="inscriptions.length > 0; else emptyInscriptions" class="inscriptions-grid">
+        
+        <div 
+          *ngFor="let inscription of inscriptions | slice:0:maxItems" 
+          class="inscription-card"
+          [class]="getStatusClass(inscription.statut)"
+        >
+          <!-- Card Header -->
+          <div class="card-header">
+            <div class="inscription-title">
+              <h3>{{ inscription.campagne.nom }}</h3>
+              <span class="inscription-date">
+                {{ inscription.dateInscription | date:'dd/MM/yyyy' }}
+              </span>
+            </div>
+            <div class="status-badge" [class]="getStatusClass(inscription.statut)">
+              <i class="material-icons">{{ getStatusIcon(inscription.statut) }}</i>
+              <span>{{ getStatusLabel(inscription.statut) }}</span>
+            </div>
+          </div>
+
+          <!-- Card Body -->
+          <div class="card-body">
+            <!-- Basic Information -->
+            <div class="inscription-info">
+              <div class="info-item">
+                <strong>Sujet de thèse:</strong>
+                <p class="subject-text">{{ inscription.sujetThese }}</p>
+              </div>
+              
+              <div class="info-row">
+                <div class="info-item">
+                  <strong>Laboratoire:</strong>
+                  <span>{{ inscription.laboratoire }}</span>
+                </div>
+                <div class="info-item">
+                  <strong>Spécialité:</strong>
+                  <span>{{ inscription.specialite }}</span>
+                </div>
+              </div>
+
+              <div class="info-item">
+                <strong>Directeur de thèse:</strong>
+                <span>{{ inscription.directeur.FirstName }} {{ inscription.directeur.LastName }}</span>
+                <small class="director-email">({{ inscription.directeur.email }})</small>
+              </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="progress-section">
+              <div class="progress-header">
+                <span class="progress-label">{{ getProgressLabel(inscription) }}</span>
+                <span class="progress-percentage">{{ getProgressPercentage(inscription) }}%</span>
+              </div>
+              <div class="progress-bar">
+                <div 
+                  class="progress-fill" 
+                  [style.width.%]="getProgressPercentage(inscription)"
+                  [class]="getStatusClass(inscription.statut)"
+                ></div>
+              </div>
+            </div>
+
+            <!-- Avis Directeur -->
+            <div *ngIf="inscription.avisDirecteur" class="avis-section">
+              <h4>Avis du Directeur</h4>
+              <div class="avis-content">
+                <p class="avis-text">{{ inscription.avisDirecteur.avis }}</p>
+                <div class="avis-meta">
+                  <span class="avis-status" [class.favorable]="inscription.avisDirecteur.valide" [class.defavorable]="!inscription.avisDirecteur.valide">
+                    <i class="fas" [class.fa-check]="inscription.avisDirecteur.valide" [class.fa-times]="!inscription.avisDirecteur.valide"></i>
+                    {{ inscription.avisDirecteur.valide ? 'Favorable' : 'Défavorable' }}
+                  </span>
+                  <span class="avis-date">{{ inscription.avisDirecteur.dateAvis | date:'dd/MM/yyyy' }}</span>
+                </div>
+                <p *ngIf="inscription.avisDirecteur.commentaire" class="avis-comment">
+                  <strong>Commentaire:</strong> {{ inscription.avisDirecteur.commentaire }}
+                </p>
+              </div>
+            </div>
+
+            <!-- Validation Admin -->
+            <div *ngIf="inscription.validationAdmin" class="validation-section">
+              <h4>Validation Administrative</h4>
+              <div class="validation-content">
+                <div class="validation-meta">
+                  <span class="validation-status" [class.validee]="inscription.validationAdmin.valide" [class.rejetee]="!inscription.validationAdmin.valide">
+                    <i class="fas" [class.fa-check]="inscription.validationAdmin.valide" [class.fa-times]="!inscription.validationAdmin.valide"></i>
+                    {{ inscription.validationAdmin.valide ? 'Validée' : 'Rejetée' }}
+                  </span>
+                  <span class="validation-date">{{ inscription.validationAdmin.dateValidation | date:'dd/MM/yyyy' }}</span>
+                </div>
+                <p class="validation-comment">
+                  <strong>Commentaire:</strong> {{ inscription.validationAdmin.commentaire }}
+                </p>
+                <p class="validation-by">
+                  <strong>Validé par:</strong> {{ inscription.validationAdmin.validateur.FirstName }} {{ inscription.validationAdmin.validateur.LastName }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card Footer -->
+          <div class="card-footer" *ngIf="showActions">
+            <div class="action-buttons">
+              <button 
+                class="btn btn-outline-primary" 
+                [routerLink]="['/inscription', inscription.id]"
+                title="Voir les détails"
+              >
+                <i class="fas fa-eye"></i>
+                Détails
+              </button>
+              
+              <button 
+                *ngIf="canEdit(inscription)"
+                class="btn btn-outline-warning" 
+                [routerLink]="['/inscription', inscription.id, 'edit']"
+                title="Modifier l'inscription"
+              >
+                <i class="fas fa-edit"></i>
+                Modifier
+              </button>
+
+              <button 
+                *ngIf="canSubmit(inscription)"
+                class="btn btn-primary" 
+                (click)="onSubmitInscription(inscription)"
+                title="Soumettre pour validation"
+              >
+                <i class="fas fa-paper-plane"></i>
+                Soumettre
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <ng-template #emptyInscriptions>
+      <div class="empty-state">
+        <div class="empty-icon">
+          <i class="fas fa-file-alt"></i>
+        </div>
+        <h3>Aucune inscription trouvée</h3>
+        <p>Vous n'avez pas encore d'inscription enregistrée.</p>
+        <button class="btn btn-primary" routerLink="/inscription/nouvelle">
+          Créer ma première inscription
+        </button>
+      </div>
+    </ng-template>
+
+    <ng-template #noInscriptions>
+      <div class="empty-state">
+        <div class="empty-icon">
+          <i class="fas fa-file-alt"></i>
+        </div>
+        <h3>Aucune inscription</h3>
+        <p>Commencez par créer votre première inscription.</p>
+        <button class="btn btn-primary" routerLink="/inscription/nouvelle">
+          Nouvelle inscription
+        </button>
+      </div>
+    </ng-template>
+  </div>
+</div>

@@ -1,0 +1,14 @@
+.soutenance-dashboard {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.dashboard-header {
+    margin-bottom: var(--spacing-xl, 32px);
+    text-align: center;
+
+    h1 {
+        color: var(--primary-color, #1976d2);
+        font-size: 2rem;
+    }
+}

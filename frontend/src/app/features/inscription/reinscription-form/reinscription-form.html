@@ -1,0 +1,290 @@
+<div class="reinscription-form-container">
+  <div class="form-header">
+    <h1>Réinscription en doctorat</h1>
+    <p class="form-description">
+      Mettez à jour vos informations pour votre réinscription. Les données de votre inscription précédente ont été pré-remplies.
+    </p>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading || loadingPreviousData" class="loading-container">
+    <div class="spinner"></div>
+    <p>{{ loadingPreviousData ? 'Chargement des données précédentes...' : 'Enregistrement en cours...' }}</p>
+  </div>
+
+  <!-- Success Message -->
+  <div *ngIf="success" class="alert alert-success">
+    <i class="fas fa-check-circle"></i>
+    {{ success }}
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="error" class="alert alert-danger">
+    <i class="fas fa-exclamation-triangle"></i>
+    {{ error }}
+  </div>
+
+  <!-- Campagne Info -->
+  <div *ngIf="campagneActive$ | async as campagne" class="campagne-info">
+    <div class="info-card">
+      <h3>Campagne de réinscription active</h3>
+      <div class="campagne-details">
+        <p><strong>{{ campagne.nom }}</strong></p>
+        <p>Année universitaire: {{ campagne.anneeUniversitaire }}</p>
+        <p>Type: {{ campagne.typeInscription }}</p>
+        <p>Fermeture: {{ campagne.dateFermeture | date:'dd/MM/yyyy' }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Previous Inscription Info -->
+  <div *ngIf="previousInscription$ | async as previousInscription" class="previous-inscription-info">
+    <div class="info-card">
+      <div class="card-header">
+        <h3>Données de votre inscription précédente</h3>
+        <button type="button" class="btn btn-sm btn-outline-primary" (click)="onResetToOriginal()">
+          <i class="fas fa-undo"></i>
+          Restaurer les données originales
+        </button>
+      </div>
+      <div class="previous-data">
+        <div class="data-item">
+          <strong>Directeur:</strong> {{ previousInscription.directeur.FirstName }} {{ previousInscription.directeur.LastName }}
+        </div>
+        <div class="data-item">
+          <strong>Laboratoire:</strong> {{ previousInscription.laboratoire }}
+        </div>
+        <div class="data-item">
+          <strong>Spécialité:</strong> {{ previousInscription.specialite }}
+        </div>
+        <div class="data-item">
+          <strong>Date d'inscription:</strong> {{ previousInscription.dateInscription | date:'dd/MM/yyyy' }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <form [formGroup]="reinscriptionForm" (ngSubmit)="onSubmit()" class="reinscription-form" *ngIf="!loading && !loadingPreviousData">
+    
+    <!-- Directeur de thèse -->
+    <div class="form-section">
+      <h2>Directeur de thèse</h2>
+      
+      <div class="form-group">
+        <label for="directeurSearch">Rechercher un directeur *</label>
+        <input
+          type="text"
+          id="directeurSearch"
+          formControlName="directeurSearch"
+          class="form-control"
+          placeholder="Tapez le nom ou l'email du directeur..."
+          [class.is-invalid]="isFieldInvalid('directeurId')"
+        />
+        <div class="invalid-feedback" *ngIf="isFieldInvalid('directeurId')">
+          {{ getFieldError('directeurId') }}
+        </div>
+      </div>
+
+      <!-- Directeurs filtrés -->
+      <div class="directeurs-list" *ngIf="filteredDirecteurs$ | async as directeurs">
+        <div 
+          *ngFor="let directeur of directeurs" 
+          class="directeur-item"
+          [class.selected]="reinscriptionForm.get('directeurId')?.value === directeur.id"
+          (click)="onDirecteurSelect(directeur)"
+        >
+          <div class="directeur-info">
+            <h4>{{ directeur.FirstName }} {{ directeur.LastName }}</h4>
+            <p>{{ directeur.email }}</p>
+          </div>
+          <div class="directeur-actions">
+            <i class="fas fa-check" *ngIf="reinscriptionForm.get('directeurId')?.value === directeur.id"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Informations de la thèse -->
+    <div class="form-section">
+      <h2>Informations de la thèse</h2>
+      
+      <div class="form-group">
+        <label for="sujetThese">Sujet de thèse *</label>
+        <textarea
+          id="sujetThese"
+          formControlName="sujetThese"
+          class="form-control"
+          rows="4"
+          placeholder="Décrivez le sujet de votre thèse..."
+          [class.is-invalid]="isFieldInvalid('sujetThese')"
+        ></textarea>
+        <div class="form-text">
+          Minimum 10 caractères, maximum 500 caractères
+        </div>
+        <div class="invalid-feedback" *ngIf="isFieldInvalid('sujetThese')">
+          {{ getFieldError('sujetThese') }}
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="laboratoire">Laboratoire *</label>
+          <select
+            id="laboratoire"
+            formControlName="laboratoire"
+            class="form-control"
+            [class.is-invalid]="isFieldInvalid('laboratoire')"
+          >
+            <option value="">Sélectionnez un laboratoire</option>
+            <option *ngFor="let lab of laboratoires" [value]="lab">{{ lab }}</option>
+          </select>
+          <div class="invalid-feedback" *ngIf="isFieldInvalid('laboratoire')">
+            {{ getFieldError('laboratoire') }}
+          </div>
+        </div>
+
+        <div class="form-group" *ngIf="reinscriptionForm.get('laboratoire')?.value === 'Autre'">
+          <label for="laboratoireAutre">Précisez le laboratoire *</label>
+          <input
+            type="text"
+            id="laboratoireAutre"
+            formControlName="laboratoireAutre"
+            class="form-control"
+            placeholder="Nom du laboratoire"
+            [class.is-invalid]="isFieldInvalid('laboratoireAutre')"
+          />
+          <div class="invalid-feedback" *ngIf="isFieldInvalid('laboratoireAutre')">
+            {{ getFieldError('laboratoireAutre') }}
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="specialite">Spécialité *</label>
+          <select
+            id="specialite"
+            formControlName="specialite"
+            class="form-control"
+            [class.is-invalid]="isFieldInvalid('specialite')"
+          >
+            <option value="">Sélectionnez une spécialité</option>
+            <option *ngFor="let spec of specialites" [value]="spec">{{ spec }}</option>
+          </select>
+          <div class="invalid-feedback" *ngIf="isFieldInvalid('specialite')">
+            {{ getFieldError('specialite') }}
+          </div>
+        </div>
+
+        <div class="form-group" *ngIf="reinscriptionForm.get('specialite')?.value === 'Autre'">
+          <label for="specialiteAutre">Précisez la spécialité *</label>
+          <input
+            type="text"
+            id="specialiteAutre"
+            formControlName="specialiteAutre"
+            class="form-control"
+            placeholder="Nom de la spécialité"
+            [class.is-invalid]="isFieldInvalid('specialiteAutre')"
+          />
+          <div class="invalid-feedback" *ngIf="isFieldInvalid('specialiteAutre')">
+            {{ getFieldError('specialiteAutre') }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Changements apportés -->
+    <div class="form-section">
+      <h2>Modifications par rapport à l'inscription précédente</h2>
+      
+      <div class="form-group">
+        <label for="changementsApportes">Changements apportés (optionnel)</label>
+        <textarea
+          id="changementsApportes"
+          formControlName="changementsApportes"
+          class="form-control"
+          rows="3"
+          placeholder="Décrivez les changements apportés depuis votre dernière inscription (directeur, sujet, laboratoire, etc.)..."
+          [class.is-invalid]="isFieldInvalid('changementsApportes')"
+        ></textarea>
+        <div class="form-text">
+          Maximum 1000 caractères. Laissez vide si aucun changement.
+        </div>
+        <div class="invalid-feedback" *ngIf="isFieldInvalid('changementsApportes')">
+          {{ getFieldError('changementsApportes') }}
+        </div>
+      </div>
+
+      <div class="form-group" *ngIf="hasChangesFromPrevious()">
+        <label for="justificationChangements">Justification des changements *</label>
+        <textarea
+          id="justificationChangements"
+          formControlName="justificationChangements"
+          class="form-control"
+          rows="3"
+          placeholder="Justifiez les raisons de ces changements..."
+          [class.is-invalid]="isFieldInvalid('justificationChangements')"
+        ></textarea>
+        <div class="form-text">
+          Minimum 20 caractères, maximum 1000 caractères. Obligatoire si des changements sont mentionnés.
+        </div>
+        <div class="invalid-feedback" *ngIf="isFieldInvalid('justificationChangements')">
+          {{ getFieldError('justificationChangements') }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Bilan et perspectives -->
+    <div class="form-section">
+      <h2>Bilan et perspectives</h2>
+      
+      <div class="form-group">
+        <label for="avancementTravaux">Avancement des travaux de recherche *</label>
+        <textarea
+          id="avancementTravaux"
+          formControlName="avancementTravaux"
+          class="form-control"
+          rows="5"
+          placeholder="Décrivez l'avancement de vos travaux de recherche depuis votre dernière inscription..."
+          [class.is-invalid]="isFieldInvalid('avancementTravaux')"
+        ></textarea>
+        <div class="form-text">
+          Minimum 50 caractères, maximum 2000 caractères. Décrivez vos réalisations, publications, etc.
+        </div>
+        <div class="invalid-feedback" *ngIf="isFieldInvalid('avancementTravaux')">
+          {{ getFieldError('avancementTravaux') }}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="objectifsAnneeProchaine">Objectifs pour l'année prochaine *</label>
+        <textarea
+          id="objectifsAnneeProchaine"
+          formControlName="objectifsAnneeProchaine"
+          class="form-control"
+          rows="5"
+          placeholder="Décrivez vos objectifs et planning pour l'année universitaire à venir..."
+          [class.is-invalid]="isFieldInvalid('objectifsAnneeProchaine')"
+        ></textarea>
+        <div class="form-text">
+          Minimum 50 caractères, maximum 2000 caractères. Détaillez vos objectifs de recherche.
+        </div>
+        <div class="invalid-feedback" *ngIf="isFieldInvalid('objectifsAnneeProchaine')">
+          {{ getFieldError('objectifsAnneeProchaine') }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" (click)="onCancel()" [disabled]="loading">
+        Annuler
+      </button>
+      <button type="submit" class="btn btn-primary" [disabled]="loading || reinscriptionForm.invalid">
+        <i class="fas fa-save"></i>
+        Créer la réinscription
+      </button>
+    </div>
+  </form>
+</div>

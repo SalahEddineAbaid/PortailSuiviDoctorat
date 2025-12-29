@@ -1,0 +1,98 @@
+<div class="notification-dropdown-container">
+  <!-- En-tête -->
+  <div class="dropdown-header" *ngIf="showHeader">
+    <div class="header-content">
+      <h3>Notifications</h3>
+      <span class="unread-count" *ngIf="(unreadCount$ | async) as unreadCount">
+        {{ unreadCount }} non lue{{ unreadCount > 1 ? 's' : '' }}
+      </span>
+    </div>
+    
+    <div class="header-actions" *ngIf="showActions">
+      <button 
+        class="btn-icon"
+        (click)="onMarkAllAsRead()"
+        *ngIf="(unreadCount$ | async) > 0"
+        title="Marquer toutes comme lues"
+      >
+        <i class="material-icons">done_all</i>
+      </button>
+      
+      <button 
+        class="btn-icon"
+        (click)="onClose()"
+        title="Fermer"
+      >
+        <i class="material-icons">close</i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Contenu des notifications -->
+  <div class="dropdown-content">
+    <ng-container *ngIf="(recentNotifications$ | async) as notifications">
+      <!-- Liste des notifications -->
+      <div class="notifications-list" *ngIf="notifications.length > 0">
+        <div 
+          class="notification-item"
+          *ngFor="let notification of notifications; trackBy: trackByNotificationId"
+          [class.unread]="!notification.lue"
+          [class.recent]="isRecentNotification(notification.dateCreation)"
+          (click)="onNotificationClick(notification)"
+        >
+          <!-- Icône de type -->
+          <div class="notification-icon" [class]="'type-' + getNotificationColor(notification.type)">
+            <i class="material-icons">{{ getNotificationIcon(notification.type) }}</i>
+          </div>
+
+          <!-- Contenu -->
+          <div class="notification-content">
+            <div class="notification-header">
+              <h4 class="notification-title">{{ notification.titre }}</h4>
+              <span class="notification-time">{{ getRelativeTime(notification.dateCreation) }}</span>
+            </div>
+            
+            <p class="notification-message">{{ notification.message }}</p>
+          </div>
+
+          <!-- Indicateur non lu -->
+          <div class="unread-indicator" *ngIf="!notification.lue"></div>
+        </div>
+      </div>
+
+      <!-- Aucune notification -->
+      <div class="no-notifications" *ngIf="notifications.length === 0">
+        <div class="empty-state">
+          <i class="material-icons">notifications_none</i>
+          <h4>Aucune notification</h4>
+          <p>Vous êtes à jour !</p>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+
+  <!-- Pied avec lien "Voir tout" -->
+  <div class="dropdown-footer" *ngIf="showFooter">
+    <ng-container *ngIf="(notifications$ | async) as allNotifications">
+      <button 
+        class="view-all-btn"
+        (click)="onViewAll()"
+        *ngIf="allNotifications.length > 0"
+      >
+        <i class="material-icons">list</i>
+        <span>Voir toutes les notifications</span>
+        <span 
+          class="more-count"
+          *ngIf="(hasMoreNotifications$ | async)"
+        >
+          ({{ getMoreNotificationsText(allNotifications.length) }})
+        </span>
+      </button>
+
+      <!-- Message si aucune notification -->
+      <div class="no-notifications-footer" *ngIf="allNotifications.length === 0">
+        <span>Aucune notification disponible</span>
+      </div>
+    </ng-container>
+  </div>
+</div>

@@ -1,0 +1,302 @@
+.documents-manager {
+  max-width: 1000px;
+  margin: 0 auto;
+
+  .manager-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+
+    h2 {
+      margin: 0;
+      color: #333;
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    .completion-status {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+
+      .progress-info {
+        text-align: right;
+
+        .progress-text {
+          display: block;
+          color: #666;
+          font-size: 0.9rem;
+          margin-bottom: 8px;
+        }
+
+        .progress-bar {
+          width: 200px;
+          height: 8px;
+          background-color: #e0e0e0;
+          border-radius: 4px;
+          overflow: hidden;
+
+          .progress-fill {
+            height: 100%;
+            background-color: #007bff;
+            transition: width 0.3s ease;
+
+            &.complete {
+              background-color: #28a745;
+            }
+          }
+        }
+      }
+
+      .completion-badge {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-weight: 500;
+        font-size: 0.9rem;
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+
+        &.complete {
+          background-color: #d4edda;
+          color: #155724;
+          border-color: #c3e6cb;
+        }
+
+        i {
+          font-size: 1.1rem;
+        }
+      }
+    }
+  }
+
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    text-align: center;
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #007bff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+
+    p {
+      color: #666;
+      font-size: 1.1rem;
+    }
+  }
+
+  .alert {
+    display: flex;
+    align-items: flex-start;
+    padding: 15px 20px;
+    border-radius: 6px;
+    margin-bottom: 25px;
+    font-weight: 500;
+
+    i {
+      margin-right: 12px;
+      font-size: 1.2rem;
+      margin-top: 2px;
+    }
+
+    &.alert-success {
+      background-color: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+    }
+
+    &.alert-danger {
+      background-color: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+    }
+
+    &.alert-warning {
+      background-color: #fff3cd;
+      border: 1px solid #ffeaa7;
+      color: #856404;
+    }
+
+    .alert-content {
+      flex: 1;
+
+      .missing-docs-list {
+        margin: 10px 0;
+        padding-left: 20px;
+
+        li {
+          margin-bottom: 5px;
+          font-weight: 600;
+        }
+      }
+
+      .alert-note {
+        margin: 10px 0 0 0;
+        font-weight: normal;
+        font-style: italic;
+      }
+    }
+
+    .btn {
+      margin-left: auto;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      border: 1px solid #007bff;
+      color: #007bff;
+      background-color: transparent;
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background-color: #007bff;
+        color: white;
+      }
+    }
+  }
+
+  .documents-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 25px;
+    margin-bottom: 40px;
+  }
+
+  .upload-instructions {
+    .instructions-card {
+      background-color: #f8f9fa;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 25px;
+      border-left: 4px solid #007bff;
+
+      h3 {
+        color: #333;
+        margin-bottom: 20px;
+        font-size: 1.2rem;
+        font-weight: 600;
+      }
+
+      .instructions-content {
+        .instruction-item {
+          display: flex;
+          align-items: flex-start;
+          gap: 15px;
+          margin-bottom: 15px;
+
+          &:last-child {
+            margin-bottom: 0;
+          }
+
+          i {
+            color: #007bff;
+            font-size: 1.2rem;
+            margin-top: 2px;
+            min-width: 20px;
+          }
+
+          .instruction-text {
+            color: #555;
+            line-height: 1.5;
+
+            strong {
+              color: #333;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .documents-manager {
+    .manager-header {
+      flex-direction: column;
+      gap: 20px;
+      text-align: center;
+
+      h2 {
+        font-size: 1.3rem;
+      }
+
+      .completion-status {
+        flex-direction: column;
+        gap: 15px;
+
+        .progress-info {
+          text-align: center;
+
+          .progress-bar {
+            width: 250px;
+          }
+        }
+      }
+    }
+
+    .alert {
+      flex-direction: column;
+      gap: 15px;
+
+      .btn {
+        margin-left: 0;
+        align-self: flex-start;
+      }
+    }
+
+    .upload-instructions {
+      .instructions-card {
+        padding: 20px 15px;
+
+        .instructions-content {
+          .instruction-item {
+            flex-direction: column;
+            gap: 8px;
+            text-align: center;
+
+            i {
+              align-self: center;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .documents-manager {
+    .manager-header {
+      .completion-status {
+        .progress-info {
+          .progress-bar {
+            width: 200px;
+          }
+        }
+      }
+    }
+  }
+}

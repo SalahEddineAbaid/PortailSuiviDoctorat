@@ -1,0 +1,85 @@
+<div class="doctorant-list-container">
+  <div class="list-header">
+    <h3>{{ title }}</h3>
+    <span class="count-badge">{{ doctorants.length }}</span>
+  </div>
+
+  <div class="doctorants-list" *ngIf="doctorants.length > 0">
+    <div 
+      *ngFor="let doctorant of doctorants; trackBy: trackByDoctorantId" 
+      class="doctorant-item"
+    >
+      <div class="doctorant-avatar">
+        <div class="avatar-circle">
+          {{ getInitials(doctorant.FirstName, doctorant.LastName) }}
+        </div>
+        <div class="status-indicator" *ngIf="doctorant.pendingActions && doctorant.pendingActions > 0">
+          {{ doctorant.pendingActions }}
+        </div>
+      </div>
+
+      <div class="doctorant-info">
+        <div class="doctorant-name">
+          {{ doctorant.FirstName }} {{ doctorant.LastName }}
+        </div>
+        <div class="doctorant-email">
+          <i class="fas fa-envelope"></i>
+          {{ doctorant.email }}
+        </div>
+        <div class="doctorant-phone" *ngIf="doctorant.phoneNumber">
+          <i class="fas fa-phone"></i>
+          {{ doctorant.phoneNumber }}
+        </div>
+      </div>
+
+      <div class="doctorant-status">
+        <div class="status-item" *ngIf="doctorant.inscriptionStatus">
+          <span class="status-label">Inscription:</span>
+          <span 
+            class="status-badge" 
+            [ngClass]="'status-' + getStatusColor(doctorant.inscriptionStatus)"
+          >
+            {{ getStatusLabel(doctorant.inscriptionStatus) }}
+          </span>
+        </div>
+        <div class="status-item" *ngIf="doctorant.soutenanceStatus">
+          <span class="status-label">Soutenance:</span>
+          <span 
+            class="status-badge" 
+            [ngClass]="'status-' + getStatusColor(doctorant.soutenanceStatus)"
+          >
+            {{ getStatusLabel(doctorant.soutenanceStatus) }}
+          </span>
+        </div>
+        <div class="last-activity" *ngIf="doctorant.lastActivity">
+          <i class="fas fa-clock"></i>
+          {{ formatLastActivity(doctorant.lastActivity) }}
+        </div>
+      </div>
+
+      <div class="doctorant-actions" *ngIf="showActions">
+        <button 
+          class="action-btn primary" 
+          (click)="onViewDetails(doctorant)"
+          title="Voir les détails"
+        >
+          <i class="fas fa-eye"></i>
+          Détails
+        </button>
+        <button 
+          class="action-btn secondary" 
+          (click)="onViewDossier(doctorant)"
+          title="Consulter le dossier"
+        >
+          <i class="fas fa-folder-open"></i>
+          Dossier
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="empty-state" *ngIf="doctorants.length === 0">
+    <i class="fas fa-users"></i>
+    <p>Aucun doctorant trouvé</p>
+  </div>
+</div>

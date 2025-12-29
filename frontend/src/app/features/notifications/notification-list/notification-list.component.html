@@ -1,0 +1,160 @@
+<div class="notification-list-container">
+  <!-- En-tête -->
+  <div class="notification-header">
+    <div class="header-title">
+      <h2>
+        <i class="material-icons">notifications</i>
+        Notifications
+      </h2>
+      <span class="unread-badge" *ngIf="(unreadCount$ | async) as unreadCount">
+        {{ unreadCount }} non lue{{ unreadCount > 1 ? 's' : '' }}
+      </span>
+    </div>
+
+    <div class="header-actions">
+      <button 
+        class="btn btn-outline-primary"
+        (click)="markAllAsRead()"
+        [disabled]="(unreadCount$ | async) === 0"
+      >
+        <i class="material-icons">done_all</i>
+        Tout marquer comme lu
+      </button>
+
+      <button 
+        class="btn btn-outline-secondary"
+        (click)="deleteAllRead()"
+      >
+        <i class="material-icons">delete_sweep</i>
+        Supprimer les lues
+      </button>
+
+      <button 
+        class="btn btn-primary"
+        (click)="loadNotifications()"
+        [disabled]="loading"
+      >
+        <i class="material-icons" [class.spinning]="loading">refresh</i>
+        Actualiser
+      </button>
+    </div>
+  </div>
+
+  <!-- Filtres -->
+  <div class="notification-filters">
+    <div class="filter-row">
+      <!-- Recherche -->
+      <div class="filter-group">
+        <label for="search">Rechercher</label>
+        <div class="search-input">
+          <i class="material-icons">search</i>
+          <input
+            id="search"
+            type="text"
+            [formControl]="searchControl"
+            placeholder="Rechercher dans les notifications..."
+            class="form-control"
+          >
+          <button 
+            *ngIf="searchControl.value"
+            class="clear-search"
+            (click)="searchControl.setValue('')"
+          >
+            <i class="material-icons">clear</i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Filtre par type -->
+      <div class="filter-group">
+        <label for="type-filter">Type</label>
+        <select id="type-filter" [formControl]="typeFilter" class="form-control">
+          <option *ngFor="let type of notificationTypes" [value]="type.value">
+            {{ type.label }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Filtre par statut -->
+      <div class="filter-group">
+        <label for="status-filter">Statut</label>
+        <select id="status-filter" [formControl]="statusFilter" class="form-control">
+          <option *ngFor="let status of statusOptions" [value]="status.value">
+            {{ status.label }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Réinitialiser -->
+      <div class="filter-group">
+        <button 
+          class="btn btn-outline-secondary"
+          (click)="resetFilters()"
+          [disabled]="!hasActiveFilters()"
+        >
+          <i class="material-icons">clear_all</i>
+          Réinitialiser
+        </button>
+      </div>
+    </div>
+
+    <!-- Résumé des filtres -->
+    <div class="filter-summary" *ngIf="getFilterSummary()">
+      <i class="material-icons">filter_list</i>
+      {{ getFilterSummary() }}
+    </div>
+  </div>
+
+  <!-- Liste des notifications -->
+  <div class="notification-content">
+    <!-- Chargement -->
+    <div class="loading-container" *ngIf="loading">
+      <div class="loading-spinner">
+        <i class="material-icons spinning">refresh</i>
+        <p>Chargement des notifications...</p>
+      </div>
+    </div>
+
+    <!-- Liste -->
+    <div class="notifications-list" *ngIf="!loading">
+      <ng-container *ngIf="(filteredNotifications$ | async) as notifications">
+        <!-- Notifications trouvées -->
+        <div *ngIf="notifications.length > 0" class="notifications-found">
+          <div class="results-info">
+            {{ notifications.length }} notification{{ notifications.length > 1 ? 's' : '' }} trouvée{{ notifications.length > 1 ? 's' : '' }}
+          </div>
+
+          <div class="notifications-container">
+            <app-notification
+              *ngFor="let notification of notifications; trackBy: trackByNotificationId"
+              [notification]="notification"
+              [showActions]="true"
+              [compact]="false"
+              (notificationClicked)="onNotificationClicked($event)"
+              (notificationRead)="onNotificationRead($event)"
+              (notificationDeleted)="onNotificationDeleted($event)"
+            ></app-notification>
+          </div>
+        </div>
+
+        <!-- Aucune notification -->
+        <div *ngIf="notifications.length === 0" class="no-notifications">
+          <div class="empty-state">
+            <i class="material-icons">notifications_none</i>
+            <h3>Aucune notification</h3>
+            <p *ngIf="!hasActiveFilters()">
+              Vous n'avez aucune notification pour le moment.
+            </p>
+            <p *ngIf="hasActiveFilters()">
+              Aucune notification ne correspond à vos critères de recherche.
+              <br>
+              <button class="btn btn-link" (click)="resetFilters()">
+                Réinitialiser les filtres
+              </button>
+            </p>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</div>

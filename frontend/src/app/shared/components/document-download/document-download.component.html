@@ -1,0 +1,60 @@
+<!-- Button Style -->
+<button 
+  *ngIf="isButtonStyle"
+  mat-raised-button
+  color="primary"
+  [disabled]="!canDownload"
+  (click)="onDownload()"
+  class="download-button">
+  
+  <mat-spinner *ngIf="downloading$ | async" diameter="20" class="download-spinner"></mat-spinner>
+  <mat-icon *ngIf="!(downloading$ | async) && showIcon">{{ documentIcon }}</mat-icon>
+  
+  <span class="button-content">
+    <span class="document-name" *ngIf="showLabel">{{ downloadLabel }}</span>
+    <span class="document-size" *ngIf="showSize">({{ formattedFileSize }})</span>
+  </span>
+</button>
+
+<!-- Icon Style -->
+<button 
+  *ngIf="isIconStyle"
+  mat-icon-button
+  [disabled]="!canDownload"
+  (click)="onDownload()"
+  [matTooltip]="'Télécharger ' + document.nom"
+  class="download-icon-button">
+  
+  <mat-spinner *ngIf="downloading$ | async" diameter="20"></mat-spinner>
+  <mat-icon *ngIf="!(downloading$ | async)">download</mat-icon>
+</button>
+
+<!-- Link Style -->
+<a 
+  *ngIf="isLinkStyle"
+  href="javascript:void(0)"
+  [class.disabled]="!canDownload"
+  (click)="onDownload()"
+  class="download-link">
+  
+  <mat-icon *ngIf="showIcon" class="link-icon">{{ documentIcon }}</mat-icon>
+  
+  <span class="link-content">
+    <span class="document-name">{{ downloadLabel }}</span>
+    <span class="document-meta" *ngIf="showSize">
+      {{ formattedFileSize }} • {{ formattedDate }}
+    </span>
+  </span>
+  
+  <mat-spinner *ngIf="downloading$ | async" diameter="16" class="link-spinner"></mat-spinner>
+  <mat-icon *ngIf="!(downloading$ | async)" class="download-icon">download</mat-icon>
+</a>
+
+<!-- Error Message -->
+<div *ngIf="error$ | async as error" class="download-error">
+  <mat-icon class="error-icon">error_outline</mat-icon>
+  <span class="error-message">{{ error }}</span>
+  <button mat-icon-button (click)="onDownload()" matTooltip="Réessayer">
+    <mat-icon>refresh</mat-icon>
+  </button>
+</div>

@@ -1,0 +1,277 @@
+.prerequis-check {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #fff;
+  overflow: hidden;
+
+  &.prerequis-loading {
+    border-color: #007bff;
+  }
+
+  &.prerequis-success {
+    border-color: #28a745;
+  }
+
+  &.prerequis-warning {
+    border-color: #ffc107;
+  }
+
+  &.prerequis-error {
+    border-color: #dc3545;
+  }
+}
+
+.prerequis-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e0e0e0;
+
+  .prerequis-title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+
+    i {
+      margin-right: 0.5rem;
+      color: #007bff;
+    }
+  }
+
+  .refresh-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    
+    i.fa-spin {
+      animation: spin 1s linear infinite;
+    }
+  }
+}
+
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  gap: 0.75rem;
+
+  .loading-text {
+    color: #6c757d;
+    font-size: 0.9rem;
+  }
+}
+
+.error-state {
+  margin: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  i {
+    margin-right: 0.5rem;
+  }
+}
+
+.prerequis-results {
+  padding: 1rem;
+}
+
+.prerequis-summary {
+  margin-bottom: 1.5rem;
+
+  &.compact {
+    margin-bottom: 0;
+  }
+
+  .summary-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .summary-icon {
+    font-size: 1.5rem;
+    margin-top: 0.25rem;
+  }
+
+  .summary-text {
+    flex: 1;
+  }
+
+  .summary-message {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: #333;
+  }
+
+  .summary-progress {
+    .progress {
+      height: 8px;
+      margin-bottom: 0.25rem;
+      background-color: #e9ecef;
+    }
+
+    .progress-text {
+      color: #6c757d;
+      font-size: 0.8rem;
+    }
+  }
+}
+
+.prerequis-details {
+  .prerequis-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .prerequis-item {
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 0.75rem;
+    transition: all 0.2s ease;
+
+    &.prerequis-valid {
+      border-color: #28a745;
+      background: #f8fff9;
+    }
+
+    &.prerequis-invalid {
+      border-color: #dc3545;
+      background: #fff8f8;
+    }
+
+    &:hover {
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  .prerequis-item-content {
+    .prerequis-item-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .prerequis-icon {
+      font-size: 1.1rem;
+      width: 20px;
+      text-align: center;
+    }
+
+    .prerequis-label {
+      flex: 1;
+      font-weight: 500;
+      color: #333;
+    }
+
+    .prerequis-status {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+    }
+
+    .prerequis-item-details {
+      margin-left: 2.5rem;
+      
+      small {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+      }
+    }
+  }
+}
+
+.prerequis-actions {
+  margin-top: 1.5rem;
+
+  .alert {
+    margin-bottom: 0;
+    
+    i {
+      font-size: 1.1rem;
+    }
+  }
+}
+
+.empty-state {
+  padding: 2rem;
+  text-align: center;
+
+  i {
+    color: #6c757d;
+  }
+
+  p {
+    margin: 0.5rem 0 1rem;
+    color: #6c757d;
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .prerequis-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+
+    .refresh-btn {
+      align-self: center;
+    }
+  }
+
+  .prerequis-summary .summary-content {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .prerequis-item-content .prerequis-item-header {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+
+    .prerequis-status {
+      order: 3;
+      flex-basis: 100%;
+      text-align: center;
+    }
+  }
+}
+
+// Animations
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.prerequis-item {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Print styles
+@media print {
+  .prerequis-header .refresh-btn,
+  .prerequis-actions {
+    display: none;
+  }
+  
+  .prerequis-check {
+    border: 1px solid #000;
+    box-shadow: none;
+  }
+}

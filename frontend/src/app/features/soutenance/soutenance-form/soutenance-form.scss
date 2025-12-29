@@ -1,0 +1,285 @@
+.soutenance-form {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+
+  .form-header {
+    margin-bottom: 2rem;
+    text-align: center;
+
+    h1 {
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 1rem;
+    }
+  }
+
+  .prerequis-section {
+    margin-bottom: 2rem;
+    
+    // The prerequis-check component will handle its own styling
+    // Just add some spacing and integration styles
+    app-prerequis-check {
+      display: block;
+      margin-bottom: 1rem;
+    }
+  }
+
+  .form-content {
+    .form-section {
+      margin-bottom: 2rem;
+
+      h3 {
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        font-size: 1.1rem;
+        border-bottom: 2px solid var(--primary-color);
+        padding-bottom: 0.5rem;
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+
+        @media (max-width: 768px) {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+
+        label {
+          display: block;
+          margin-bottom: 0.5rem;
+          font-weight: 600;
+          color: var(--text-primary);
+        }
+
+        input,
+        textarea {
+          width: 100%;
+          padding: 0.75rem;
+          border: 2px solid #e0e0e0;
+          border-radius: 4px;
+          font-size: 1rem;
+          transition: border-color 0.3s ease;
+
+          &:focus {
+            outline: none;
+            border-color: var(--primary-color);
+          }
+
+          &.error {
+            border-color: var(--error-color);
+          }
+
+          &::placeholder {
+            color: var(--text-secondary);
+          }
+        }
+
+        textarea {
+          resize: vertical;
+          min-height: 80px;
+        }
+
+        .error-message {
+          color: var(--error-color);
+          font-size: 0.875rem;
+          margin-top: 0.25rem;
+        }
+
+        .char-counter {
+          font-size: 0.875rem;
+          color: var(--text-secondary);
+          text-align: right;
+          margin-top: 0.25rem;
+        }
+      }
+
+      .section-description {
+        color: var(--text-secondary);
+        margin-bottom: 1.5rem;
+        font-style: italic;
+      }
+
+      .documents-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+
+        .document-upload-container {
+          border: 1px solid #e0e0e0;
+          border-radius: 8px;
+          padding: 1rem;
+          background: var(--surface-color);
+        }
+      }
+
+      .documents-summary {
+        background: rgba(33, 150, 243, 0.05);
+        border: 1px solid rgba(33, 150, 243, 0.2);
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-top: 2rem;
+
+        h4 {
+          color: var(--primary-color);
+          margin-bottom: 1rem;
+          font-size: 1rem;
+        }
+
+        .document-list {
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+
+          .document-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+
+            i {
+              color: var(--primary-color);
+              font-size: 1.25rem;
+            }
+
+            .document-name {
+              flex: 1;
+              font-weight: 500;
+              color: var(--text-primary);
+            }
+
+            .document-size {
+              font-size: 0.875rem;
+              color: var(--text-secondary);
+            }
+
+            .document-status {
+              padding: 0.25rem 0.75rem;
+              border-radius: 12px;
+              font-size: 0.75rem;
+              font-weight: 600;
+              text-transform: uppercase;
+
+              &.valid {
+                background: rgba(76, 175, 80, 0.1);
+                color: var(--success-color);
+              }
+
+              &.pending {
+                background: rgba(255, 152, 0, 0.1);
+                color: var(--warning-color);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+      padding-top: 2rem;
+      border-top: 1px solid #e0e0e0;
+
+      @media (max-width: 768px) {
+        flex-direction: column;
+      }
+
+      .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 4px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        &:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
+        &.btn-primary {
+          background: var(--primary-color);
+          color: white;
+
+          &:hover:not(:disabled) {
+            background: #1565c0;
+          }
+        }
+
+        &.btn-secondary {
+          background: var(--text-secondary);
+          color: white;
+
+          &:hover:not(:disabled) {
+            background: #616161;
+          }
+        }
+
+        &.btn-outline {
+          background: transparent;
+          color: var(--primary-color);
+          border: 2px solid var(--primary-color);
+
+          &:hover:not(:disabled) {
+            background: var(--primary-color);
+            color: white;
+          }
+        }
+      }
+    }
+  }
+
+  .error-alert,
+  .success-alert {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-top: 1rem;
+
+    i {
+      font-size: 1.25rem;
+    }
+  }
+
+  .error-alert {
+    background: rgba(244, 67, 54, 0.1);
+    color: var(--error-color);
+    border: 1px solid var(--error-color);
+
+    i {
+      color: var(--error-color);
+    }
+  }
+
+  .success-alert {
+    background: rgba(76, 175, 80, 0.1);
+    color: var(--success-color);
+    border: 1px solid var(--success-color);
+
+    i {
+      color: var(--success-color);
+    }
+  }
+}

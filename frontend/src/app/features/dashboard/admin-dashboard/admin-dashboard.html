@@ -1,1 +1,146 @@
-<p>admin-dashboard works!</p>
+<div class="admin-dashboard">
+  <!-- Header -->
+  <div class="dashboard-header">
+    <div class="header-content">
+      <h1 class="dashboard-title">
+        <i class="fas fa-tachometer-alt"></i>
+        Tableau de bord Administrateur
+      </h1>
+      <button 
+        type="button" 
+        (click)="onRefresh()" 
+        class="refresh-btn"
+        [disabled]="loading"
+        title="Actualiser les données"
+      >
+        <i class="fas fa-sync-alt" [class.fa-spin]="loading"></i>
+        Actualiser
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="loading">
+    <div class="loading-spinner">
+      <i class="fas fa-spinner fa-spin"></i>
+    </div>
+    <p>Chargement du tableau de bord...</p>
+  </div>
+
+  <!-- Dashboard Content -->
+  <div class="dashboard-content" *ngIf="!loading && (dashboardData$ | async) as dashboardData">
+    
+    <!-- Vue d'ensemble - Statistiques -->
+    <div class="dashboard-section">
+      <app-statistics 
+        [stats]="dashboardData.statistiques"
+        title="Vue d'ensemble des données"
+        [showTrends]="true">
+      </app-statistics>
+    </div>
+
+    <!-- Campagne Active -->
+    <div class="dashboard-section" *ngIf="dashboardData.campagneActive">
+      <div class="section-header">
+        <h2 class="section-title">
+          <i class="fas fa-calendar-alt"></i>
+          Campagne Active
+        </h2>
+      </div>
+      <div class="campagne-card">
+        <div class="campagne-info">
+          <h3 class="campagne-nom">{{ dashboardData.campagneActive.nom }}</h3>
+          <p class="campagne-details">
+            Année universitaire {{ dashboardData.campagneActive.anneeUniversitaire }}
+          </p>
+          <div class="campagne-dates">
+            <span class="date-item">
+              <i class="fas fa-calendar-plus"></i>
+              Ouverture: {{ dashboardData.campagneActive.dateOuverture | date:'dd/MM/yyyy' }}
+            </span>
+            <span class="date-item">
+              <i class="fas fa-calendar-minus"></i>
+              Fermeture: {{ dashboardData.campagneActive.dateFermeture | date:'dd/MM/yyyy' }}
+            </span>
+          </div>
+        </div>
+        <div class="campagne-status">
+          <span class="status-badge status-active">
+            <i class="fas fa-check-circle"></i>
+            Active
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dossiers en attente de validation -->
+    <div class="dashboard-section">
+      <app-dossier-validation-list
+        [dossiers]="dashboardData.dossiersEnAttente"
+        [loading]="false"
+        title="Dossiers en attente de validation"
+        [showFilters]="true"
+        [showActions]="true"
+        (actionClicked)="onValidationAction($event)"
+        (filterChanged)="onFilterChanged($event)">
+      </app-dossier-validation-list>
+    </div>
+
+    <!-- Raccourcis de gestion -->
+    <div class="dashboard-section">
+      <div class="section-header">
+        <h2 class="section-title">
+          <i class="fas fa-tools"></i>
+          Raccourcis de gestion
+        </h2>
+      </div>
+      <div class="shortcuts-grid">
+        <a 
+          *ngFor="let shortcut of managementShortcuts"
+          [routerLink]="shortcut.route"
+          class="shortcut-card"
+          [ngClass]="'shortcut-' + shortcut.color"
+        >
+          <div class="shortcut-icon">
+            <i [class]="shortcut.icon"></i>
+          </div>
+          <div class="shortcut-content">
+            <h3 class="shortcut-title">{{ shortcut.title }}</h3>
+            <p class="shortcut-description">{{ shortcut.description }}</p>
+          </div>
+          <div class="shortcut-arrow">
+            <i class="fas fa-chevron-right"></i>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Alertes système (si nécessaire) -->
+    <div class="dashboard-section" *ngIf="false">
+      <div class="section-header">
+        <h2 class="section-title">
+          <i class="fas fa-exclamation-triangle"></i>
+          Alertes système
+        </h2>
+      </div>
+      <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i>
+        Aucune alerte système pour le moment.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Error State -->
+  <div class="error-container" *ngIf="!loading && !(dashboardData$ | async)">
+    <div class="error-icon">
+      <i class="fas fa-exclamation-triangle"></i>
+    </div>
+    <h3>Erreur de chargement</h3>
+    <p>Impossible de charger les données du tableau de bord.</p>
+    <button type="button" (click)="onRefresh()" class="retry-btn">
+      <i class="fas fa-redo"></i>
+      Réessayer
+    </button>
+  </div>
+</div>

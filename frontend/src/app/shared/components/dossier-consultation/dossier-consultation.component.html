@@ -1,0 +1,168 @@
+<div class="dossier-consultation">
+  <div class="dossier-header">
+    <div class="dossier-type">
+      <i [class]="getTypeIcon()"></i>
+      <h3>{{ getTypeLabel() }}</h3>
+    </div>
+    <div class="dossier-status">
+      <span 
+        class="status-badge" 
+        [ngClass]="'status-' + getStatusColor(getStatus())"
+      >
+        {{ getStatusLabel(getStatus()) }}
+      </span>
+    </div>
+  </div>
+
+  <div class="dossier-content">
+    <!-- Informations du doctorant -->
+    <div class="section">
+      <h4>Informations du doctorant</h4>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="label">Nom complet:</span>
+          <span class="value">{{ getDoctorantName() }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">Email:</span>
+          <span class="value">{{ getDoctorantEmail() }}</span>
+        </div>
+        <div class="info-item" *ngIf="getSubmissionDate()">
+          <span class="label">Date de soumission:</span>
+          <span class="value">{{ getSubmissionDate() | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Détails spécifiques à l'inscription -->
+    <div class="section" *ngIf="dossier.type === 'inscription' && dossier.inscription">
+      <h4>Détails de l'inscription</h4>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="label">Sujet de thèse:</span>
+          <span class="value">{{ dossier.inscription.sujetThese }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">Laboratoire:</span>
+          <span class="value">{{ dossier.inscription.laboratoire }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">Spécialité:</span>
+          <span class="value">{{ dossier.inscription.specialite }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">Année universitaire:</span>
+          <span class="value">{{ dossier.inscription.campagne.anneeUniversitaire }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Détails spécifiques à la soutenance -->
+    <div class="section" *ngIf="dossier.type === 'soutenance' && dossier.soutenance">
+      <h4>Détails de la soutenance</h4>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="label">Titre de la thèse:</span>
+          <span class="value">{{ dossier.soutenance.titrethese }}</span>
+        </div>
+        <div class="info-item" *ngIf="dossier.soutenance.dateSoutenance">
+          <span class="label">Date prévue:</span>
+          <span class="value">{{ dossier.soutenance.dateSoutenance | date:'dd/MM/yyyy' }}</span>
+        </div>
+        <div class="info-item" *ngIf="dossier.soutenance.lieuSoutenance">
+          <span class="label">Lieu:</span>
+          <span class="value">{{ dossier.soutenance.lieuSoutenance }}</span>
+        </div>
+      </div>
+
+      <!-- Jury -->
+      <div class="jury-section" *ngIf="dossier.soutenance.jury && dossier.soutenance.jury.length > 0">
+        <h5>Composition du jury</h5>
+        <div class="jury-list">
+          <div *ngFor="let membre of dossier.soutenance.jury" class="jury-member">
+            <div class="member-info">
+              <span class="member-name">{{ membre.nom }} {{ membre.prenom }}</span>
+              <span class="member-role">{{ membre.role }}</span>
+            </div>
+            <div class="member-details">
+              <span class="member-institution">{{ membre.etablissement }}</span>
+              <span class="member-grade">{{ membre.grade }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Documents -->
+    <div class="section" *ngIf="getDocuments().length > 0">
+      <h4>Documents fournis</h4>
+      <div class="documents-list">
+        <div *ngFor="let document of getDocuments()" class="document-item">
+          <div class="document-icon">
+            <i class="fas fa-file-alt"></i>
+          </div>
+          <div class="document-info">
+            <span class="document-name">{{ document.nom }}</span>
+            <span class="document-type">{{ document.type }}</span>
+          </div>
+          <div class="document-status">
+            <span 
+              class="status-indicator" 
+              [ngClass]="document.valide ? 'valid' : 'pending'"
+            >
+              <i [class]="document.valide ? 'fas fa-check' : 'fas fa-clock'"></i>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Avis existant -->
+    <div class="section" *ngIf="dossier.inscription?.avisDirecteur">
+      <h4>Avis du directeur</h4>
+      <div class="avis-container">
+        <div class="avis-status">
+          <span 
+            class="status-badge" 
+            [ngClass]="'status-' + getStatusColor(dossier.inscription?.avisDirecteur?.statut || '')"
+          >
+            {{ getStatusLabel(dossier.inscription?.avisDirecteur?.statut || '') }}
+          </span>
+        </div>
+        <div class="avis-content">
+          <p>{{ dossier.inscription?.avisDirecteur?.commentaire }}</p>
+          <div class="avis-date">
+            Donné le {{ dossier.inscription?.avisDirecteur?.dateAvis | date:'dd/MM/yyyy HH:mm' }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="dossier-actions" *ngIf="showActions">
+    <button 
+      class="action-btn secondary" 
+      (click)="onGiveAdvice()"
+    >
+      <i class="fas fa-comment"></i>
+      Donner un avis
+    </button>
+    <button 
+      class="action-btn success" 
+      (click)="onValidate()"
+      [disabled]="!canValidate()"
+    >
+      <i class="fas fa-check"></i>
+      Valider
+    </button>
+    <button 
+      class="action-btn danger" 
+      (click)="onReject()"
+      [disabled]="!canReject()"
+    >
+      <i class="fas fa-times"></i>
+      Rejeter
+    </button>
+  </div>
+</div>

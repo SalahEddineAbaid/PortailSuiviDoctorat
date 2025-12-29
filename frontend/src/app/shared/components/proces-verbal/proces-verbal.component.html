@@ -1,0 +1,254 @@
+<div class="proces-verbal">
+  <div class="generator-header">
+    <h3>Procès-verbal de soutenance</h3>
+    <p class="header-description">
+      Générez le procès-verbal officiel de soutenance de thèse
+    </p>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="loading$ | async">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Chargement des informations...</p>
+  </div>
+
+  <form 
+    [formGroup]="procesVerbalForm" 
+    (ngSubmit)="onGenerate()" 
+    class="proces-verbal-form"
+    *ngIf="!(loading$ | async)">
+    
+    <!-- Soutenance Selection -->
+    <div class="form-group" *ngIf="showSoutenanceSelector">
+      <label for="soutenanceId" class="form-label">
+        Soutenance <span class="required">*</span>
+      </label>
+      <select 
+        id="soutenanceId"
+        formControlName="soutenanceId"
+        class="form-control"
+        [class.invalid]="isFieldInvalid('soutenanceId')">
+        <option value="">Sélectionnez une soutenance</option>
+        <option *ngFor="let soutenance of soutenances" [value]="soutenance.id">
+          {{ soutenance.titrethese }} ({{ soutenanceStatusLabel }})
+        </option>
+      </select>
+      <div class="field-error" *ngIf="isFieldInvalid('soutenanceId')">
+        {{ getFieldError('soutenanceId') }}
+      </div>
+    </div>
+
+    <!-- Soutenance Information -->
+    <div class="soutenance-info" *ngIf="selectedSoutenance">
+      <h4>Informations de la soutenance</h4>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">Titre:</span>
+          <span class="info-value">{{ selectedSoutenance.titrethese }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Doctorant:</span>
+          <span class="info-value">
+            {{ selectedSoutenance.doctorant.FirstName }} {{ selectedSoutenance.doctorant.LastName }}
+          </span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Directeur:</span>
+          <span class="info-value">
+            {{ selectedSoutenance.directeur.FirstName }} {{ selectedSoutenance.directeur.LastName }}
+          </span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Statut:</span>
+          <span class="info-value status" [class]="selectedSoutenance.statut.toLowerCase()">
+            {{ soutenanceStatusLabel }}
+          </span>
+        </div>
+      </div>
+      
+      <!-- Status Warning -->
+      <div class="status-warning" *ngIf="!isValidForProcesVerbal">
+        <mat-icon>warning</mat-icon>
+        <span>Cette soutenance n'est pas dans un état valide pour générer un procès-verbal.</span>
+      </div>
+    </div>
+
+    <!-- Jury Information -->
+    <div class="jury-section" *ngIf="selectedSoutenance && juryMembers.length > 0">
+      <h4>Composition du jury</h4>
+      <div class="jury-list">
+        <div class="jury-member" *ngFor="let member of juryMembers">
+          <div class="member-info">
+            <span class="member-name">{{ member.prenom }} {{ member.nom }}</span>
+            <span class="member-details">{{ member.grade }} - {{ member.etablissement }}</span>
+          </div>
+          <span class="member-role" [class]="member.role.toLowerCase()">{{ member.role }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Soutenance Details -->
+    <div class="soutenance-details" *ngIf="selectedSoutenance && isValidForProcesVerbal">
+      <h4>Détails de la soutenance</h4>
+      
+      <!-- Date et Heure -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="dateSoutenance" class="form-label">
+            Date de soutenance <span class="required">*</span>
+          </label>
+          <input 
+            type="date"
+            id="dateSoutenance"
+            formControlName="dateSoutenance"
+            class="form-control"
+            [class.invalid]="isFieldInvalid('dateSoutenance')">
+          <div class="field-error" *ngIf="isFieldInvalid('dateSoutenance')">
+            {{ getFieldError('dateSoutenance') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="heureSoutenance" class="form-label">
+            Heure de soutenance <span class="required">*</span>
+          </label>
+          <input 
+            type="time"
+            id="heureSoutenance"
+            formControlName="heureSoutenance"
+            class="form-control"
+            [class.invalid]="isFieldInvalid('heureSoutenance')">
+          <div class="field-error" *ngIf="isFieldInvalid('heureSoutenance')">
+            {{ getFieldError('heureSoutenance') }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Lieu -->
+      <div class="form-group">
+        <label for="lieuSoutenance" class="form-label">
+          Lieu de soutenance <span class="required">*</span>
+        </label>
+        <input 
+          type="text"
+          id="lieuSoutenance"
+          formControlName="lieuSoutenance"
+          class="form-control"
+          [class.invalid]="isFieldInvalid('lieuSoutenance')"
+          placeholder="Salle, bâtiment, adresse complète">
+        <div class="field-error" *ngIf="isFieldInvalid('lieuSoutenance')">
+          {{ getFieldError('lieuSoutenance') }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Résultats -->
+    <div class="resultats-section" *ngIf="selectedSoutenance && isValidForProcesVerbal">
+      <h4>Résultats de la soutenance</h4>
+      
+      <!-- Résultat -->
+      <div class="form-group">
+        <label for="resultat" class="form-label">
+          Résultat <span class="required">*</span>
+        </label>
+        <select 
+          id="resultat"
+          formControlName="resultat"
+          class="form-control"
+          [class.invalid]="isFieldInvalid('resultat')">
+          <option value="">Sélectionnez un résultat</option>
+          <option *ngFor="let resultat of resultats | keyvalue" [value]="resultat.key">
+            {{ resultatLabels[resultat.key] }}
+          </option>
+        </select>
+        <div class="field-error" *ngIf="isFieldInvalid('resultat')">
+          {{ getFieldError('resultat') }}
+        </div>
+      </div>
+
+      <!-- Mention (si admis) -->
+      <div class="form-group" *ngIf="requiresMention">
+        <label for="mention" class="form-label">
+          Mention <span class="required">*</span>
+        </label>
+        <select 
+          id="mention"
+          formControlName="mention"
+          class="form-control"
+          [class.invalid]="isFieldInvalid('mention')">
+          <option value="">Sélectionnez une mention</option>
+          <option *ngFor="let mention of mentions | keyvalue" [value]="mention.key">
+            {{ mentionLabels[mention.key] }}
+          </option>
+        </select>
+        <div class="field-error" *ngIf="isFieldInvalid('mention')">
+          {{ getFieldError('mention') }}
+        </div>
+      </div>
+
+      <!-- Observations -->
+      <div class="form-group">
+        <label for="observations" class="form-label">
+          Observations du jury
+        </label>
+        <textarea 
+          id="observations"
+          formControlName="observations"
+          class="form-control textarea"
+          placeholder="Observations et commentaires du jury sur la soutenance"
+          rows="4">
+        </textarea>
+      </div>
+
+      <!-- Recommandations -->
+      <div class="form-group">
+        <label for="recommandations" class="form-label">
+          Recommandations
+        </label>
+        <textarea 
+          id="recommandations"
+          formControlName="recommandations"
+          class="form-control textarea"
+          placeholder="Recommandations pour la suite du parcours"
+          rows="3">
+        </textarea>
+      </div>
+    </div>
+
+    <!-- Messages -->
+    <div class="message success" *ngIf="success$ | async as success">
+      <mat-icon>check_circle</mat-icon>
+      <span>{{ success }}</span>
+    </div>
+
+    <div class="message error" *ngIf="error$ | async as error">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error }}</span>
+    </div>
+
+    <!-- Actions -->
+    <div class="form-actions" *ngIf="selectedSoutenance && !readOnly">
+      <button 
+        type="button"
+        mat-stroked-button
+        (click)="onReset()"
+        [disabled]="generating$ | async">
+        Réinitialiser
+      </button>
+      
+      <button 
+        type="submit"
+        mat-raised-button
+        color="primary"
+        [disabled]="!canGenerate">
+        
+        <mat-spinner *ngIf="generating$ | async" diameter="20" class="button-spinner"></mat-spinner>
+        <mat-icon *ngIf="!(generating$ | async)">assignment</mat-icon>
+        
+        <span>
+          {{ (generating$ | async) ? 'Génération...' : 'Générer le procès-verbal' }}
+        </span>
+      </button>
+    </div>
+  </form>
+</div>

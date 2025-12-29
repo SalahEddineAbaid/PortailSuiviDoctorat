@@ -1,8 +1,15 @@
-// ✅ Exporter depuis jwt-payload.model.ts
+// ✅ Core models
 export * from './jwt-payload.model';
-
-// ✅ Exporter depuis role.model.ts
 export * from './role.model';
-
-// ✅ Exporter depuis user.model.ts
 export * from './user.model';
+
+// ✅ Feature models
+export * from './inscription.model';
+export * from './soutenance.model';
+export * from './document.model';
+export * from './notification.model';
+export * from './dashboard.model';
+export * from './parametrage.model';
+
+// ✅ API models
+export * from './api.model';

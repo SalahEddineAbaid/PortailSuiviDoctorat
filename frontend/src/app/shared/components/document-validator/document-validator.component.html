@@ -1,0 +1,121 @@
+<div class="document-validator">
+  <!-- Validation in Progress -->
+  <div class="validation-progress" *ngIf="validating$ | async">
+    <mat-spinner diameter="24"></mat-spinner>
+    <span>Validation en cours...</span>
+  </div>
+
+  <!-- Validation Results -->
+  <div class="validation-results" *ngIf="hasResult && !(validating$ | async)">
+    
+    <!-- Success State -->
+    <div class="validation-summary success" *ngIf="isValid">
+      <div class="summary-header">
+        <mat-icon class="status-icon">check_circle</mat-icon>
+        <div class="summary-text">
+          <h4>Document valide</h4>
+          <p>Le document respecte tous les critères de validation</p>
+        </div>
+      </div>
+      
+      <!-- Warnings (if any) -->
+      <div class="warnings-section" *ngIf="hasWarnings">
+        <h5>Avertissements ({{ warningCount }})</h5>
+        <div class="warning-item" *ngFor="let warning of (result$ | async)?.warnings">
+          <mat-icon class="warning-icon">warning</mat-icon>
+          <div class="warning-content">
+            <span class="warning-message">{{ warning.message }}</span>
+            <span class="warning-recommendation" *ngIf="warning.recommendation">
+              {{ warning.recommendation }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error State -->
+    <div class="validation-summary error" *ngIf="!isValid">
+      <div class="summary-header">
+        <mat-icon class="status-icon">error</mat-icon>
+        <div class="summary-text">
+          <h4>Document non valide</h4>
+          <p>{{ errorCount }} erreur(s) détectée(s)</p>
+        </div>
+      </div>
+      
+      <!-- Errors -->
+      <div class="errors-section">
+        <h5>Erreurs à corriger</h5>
+        <div class="error-item" *ngFor="let error of (result$ | async)?.errors">
+          <mat-icon class="error-icon">error_outline</mat-icon>
+          <div class="error-content">
+            <span class="error-message">{{ error.message }}</span>
+            <span class="error-code">({{ error.code }})</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Warnings -->
+      <div class="warnings-section" *ngIf="hasWarnings">
+        <h5>Avertissements ({{ warningCount }})</h5>
+        <div class="warning-item" *ngFor="let warning of (result$ | async)?.warnings">
+          <mat-icon class="warning-icon">warning</mat-icon>
+          <div class="warning-content">
+            <span class="warning-message">{{ warning.message }}</span>
+            <span class="warning-recommendation" *ngIf="warning.recommendation">
+              {{ warning.recommendation }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- File Information -->
+    <div class="file-info" *ngIf="(result$ | async)?.fileInfo as fileInfo">
+      <h5>Informations du fichier</h5>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">Nom:</span>
+          <span class="info-value">{{ fileInfo.name }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Taille:</span>
+          <span class="info-value">{{ formatFileSize(fileInfo.size) }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Type:</span>
+          <span class="info-value">{{ fileInfo.type }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Dernière modification:</span>
+          <span class="info-value">{{ fileInfo.lastModified | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="validation-actions">
+      <button 
+        mat-stroked-button 
+        (click)="onRetry()"
+        [disabled]="validating$ | async">
+        <mat-icon>refresh</mat-icon>
+        Revalider
+      </button>
+    </div>
+  </div>
+
+  <!-- No Results State -->
+  <div class="no-results" *ngIf="!hasResult && !(validating$ | async)">
+    <mat-icon class="placeholder-icon">description</mat-icon>
+    <p>Aucune validation effectuée</p>
+    <button 
+      mat-raised-button 
+      color="primary" 
+      (click)="validateDocument()"
+      [disabled]="!file && !document">
+      <mat-icon>verified</mat-icon>
+      Valider le document
+    </button>
+  </div>
+</div>

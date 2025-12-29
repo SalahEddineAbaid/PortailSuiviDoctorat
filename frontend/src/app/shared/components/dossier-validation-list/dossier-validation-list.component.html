@@ -1,0 +1,158 @@
+<div class="dossier-validation-container">
+  <!-- Header -->
+  <div class="validation-header">
+    <h3 class="validation-title">{{ title }}</h3>
+    <div class="validation-count" *ngIf="!loading">
+      {{ filteredDossiers.length }} dossier(s)
+    </div>
+  </div>
+
+  <!-- Filtres -->
+  <div class="validation-filters" *ngIf="showFilters">
+    <div class="filter-group">
+      <label for="type-filter" class="filter-label">Type</label>
+      <select 
+        id="type-filter"
+        [(ngModel)]="selectedType" 
+        (change)="onFilterChange()"
+        class="filter-select"
+      >
+        <option value="">Tous les types</option>
+        <option value="inscription">Inscriptions</option>
+        <option value="soutenance">Soutenances</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label for="priorite-filter" class="filter-label">Priorité</label>
+      <select 
+        id="priorite-filter"
+        [(ngModel)]="selectedPriorite" 
+        (change)="onFilterChange()"
+        class="filter-select"
+      >
+        <option value="">Toutes les priorités</option>
+        <option value="haute">Haute</option>
+        <option value="normale">Normale</option>
+        <option value="basse">Basse</option>
+      </select>
+    </div>
+
+    <div class="filter-group search-group">
+      <label for="search-filter" class="filter-label">Recherche</label>
+      <div class="search-input-container">
+        <i class="fas fa-search search-icon"></i>
+        <input 
+          id="search-filter"
+          type="text"
+          [(ngModel)]="searchTerm"
+          (input)="onFilterChange()"
+          placeholder="Nom, email, sujet..."
+          class="search-input"
+        >
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="validation-loading" *ngIf="loading">
+    <div class="loading-spinner">
+      <i class="fas fa-spinner fa-spin"></i>
+    </div>
+    <p>Chargement des dossiers...</p>
+  </div>
+
+  <!-- Liste des dossiers -->
+  <div class="validation-list" *ngIf="!loading">
+    <!-- Message vide -->
+    <div class="empty-state" *ngIf="filteredDossiers.length === 0">
+      <div class="empty-icon">
+        <i class="fas fa-inbox"></i>
+      </div>
+      <h4>Aucun dossier trouvé</h4>
+      <p *ngIf="dossiers.length === 0">Tous les dossiers ont été traités.</p>
+      <p *ngIf="dossiers.length > 0">Aucun dossier ne correspond aux critères de recherche.</p>
+    </div>
+
+    <!-- Cartes des dossiers -->
+    <div class="dossier-grid" *ngIf="filteredDossiers.length > 0">
+      <div 
+        *ngFor="let dossier of filteredDossiers; trackBy: trackByDossier"
+        class="dossier-card"
+      >
+        <!-- Header de la carte -->
+        <div class="dossier-header">
+          <div class="dossier-type">
+            <span class="type-badge" [ngClass]="getTypeColorClasses(dossier.type)">
+              <i [class]="getTypeIcon(dossier.type)"></i>
+              {{ getTypeLabel(dossier.type) }}
+            </span>
+            <span class="priorite-badge" [ngClass]="getPrioriteColorClasses(dossier.priorite)">
+              {{ getPrioriteLabel(dossier.priorite) }}
+            </span>
+          </div>
+          <div class="dossier-date">
+            {{ formatDate(dossier.dateCreation) }}
+          </div>
+        </div>
+
+        <!-- Contenu de la carte -->
+        <div class="dossier-content">
+          <h4 class="dossier-title">{{ getDossierTitle(dossier) }}</h4>
+          
+          <div class="dossier-info">
+            <div class="info-item">
+              <i class="fas fa-user"></i>
+              <span>{{ getDoctorantFullName(dossier.doctorant) }}</span>
+            </div>
+            <div class="info-item">
+              <i class="fas fa-envelope"></i>
+              <span>{{ dossier.doctorant.email }}</span>
+            </div>
+            <div class="info-item" *ngIf="dossier.directeur">
+              <i class="fas fa-user-tie"></i>
+              <span>Dir. {{ getDirecteurFullName(dossier.directeur) }}</span>
+            </div>
+            <div class="info-item">
+              <i class="fas fa-paperclip"></i>
+              <span>{{ dossier.documentsCount }} document(s)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="dossier-actions" *ngIf="showActions">
+          <button 
+            type="button"
+            (click)="onAction(dossier, 'consulter')"
+            class="action-btn action-btn-secondary"
+            title="Consulter le dossier"
+          >
+            <i class="fas fa-eye"></i>
+            Consulter
+          </button>
+          
+          <button 
+            type="button"
+            (click)="onAction(dossier, 'valider')"
+            class="action-btn action-btn-success"
+            title="Valider le dossier"
+          >
+            <i class="fas fa-check"></i>
+            Valider
+          </button>
+          
+          <button 
+            type="button"
+            (click)="onAction(dossier, 'rejeter')"
+            class="action-btn action-btn-danger"
+            title="Rejeter le dossier"
+          >
+            <i class="fas fa-times"></i>
+            Rejeter
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

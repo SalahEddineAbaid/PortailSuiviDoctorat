@@ -1,0 +1,67 @@
+<div 
+  class="notification-item"
+  [class.unread]="!notification.lue"
+  [class.compact]="compact"
+  [class.recent]="isRecent()"
+  (click)="onNotificationClick()"
+>
+  <!-- Icône de type -->
+  <div class="notification-icon" [class]="'type-' + getNotificationColor()">
+    <i class="material-icons">{{ getNotificationIcon() }}</i>
+  </div>
+
+  <!-- Contenu principal -->
+  <div class="notification-content">
+    <div class="notification-header">
+      <h4 class="notification-title">{{ notification.titre }}</h4>
+      <span class="notification-time">{{ getRelativeTime() }}</span>
+    </div>
+    
+    <p class="notification-message" [class.truncated]="compact">
+      {{ notification.message }}
+    </p>
+
+    <!-- Actions si disponibles -->
+    <div class="notification-actions" *ngIf="showActions && !compact">
+      <button 
+        class="btn btn-sm btn-outline-primary"
+        *ngIf="!notification.lue"
+        (click)="markAsRead(); $event.stopPropagation()"
+      >
+        <i class="material-icons">done</i>
+        Marquer comme lu
+      </button>
+      
+      <button 
+        class="btn btn-sm btn-outline-danger"
+        (click)="deleteNotification($event)"
+      >
+        <i class="material-icons">delete</i>
+        Supprimer
+      </button>
+    </div>
+  </div>
+
+  <!-- Indicateur non lu -->
+  <div class="unread-indicator" *ngIf="!notification.lue"></div>
+
+  <!-- Actions compactes -->
+  <div class="compact-actions" *ngIf="compact">
+    <button 
+      class="btn-icon"
+      *ngIf="!notification.lue"
+      (click)="markAsRead(); $event.stopPropagation()"
+      title="Marquer comme lu"
+    >
+      <i class="material-icons">done</i>
+    </button>
+    
+    <button 
+      class="btn-icon"
+      (click)="deleteNotification($event)"
+      title="Supprimer"
+    >
+      <i class="material-icons">close</i>
+    </button>
+  </div>
+</div>

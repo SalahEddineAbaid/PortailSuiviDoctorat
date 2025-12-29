@@ -1,0 +1,195 @@
+<div class="document-upload" [class.disabled]="disabled">
+  <div class="upload-header">
+    <div class="document-info">
+      <i class="material-icons">{{ getDocumentIcon() }}</i>
+      <div class="document-details">
+        <h4>{{ config.label }}</h4>
+        <p class="document-description" *ngIf="config.description">{{ config.description }}</p>
+        <div class="document-requirements">
+          <span class="requirement-badge" [class.required]="config.required">
+            {{ config.required ? 'Obligatoire' : 'Optionnel' }}
+          </span>
+          <span class="format-info">
+            Formats: {{ getFormatsLabel() }} | Max: {{ config.maxSizeMB }}MB
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Message -->
+  <div *ngIf="success" class="alert alert-success">
+    <i class="fas fa-check-circle"></i>
+    {{ success }}
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="error" class="alert alert-danger">
+    <i class="fas fa-exclamation-triangle"></i>
+    {{ error }}
+  </div>
+
+  <!-- Existing Document Display -->
+  <div *ngIf="hasExistingDocument && !selectedFile" class="existing-document">
+    <div class="document-card">
+      <div class="document-icon">
+        <i class="material-icons">{{ getDocumentIcon() }}</i>
+      </div>
+      <div class="document-info">
+        <h5>{{ currentDocument?.nom }}</h5>
+        <p class="document-meta">
+          Taille: {{ formatFileSize(currentDocument?.taille || 0) }} | 
+          Uploadé le: {{ currentDocument?.dateUpload | date:'dd/MM/yyyy HH:mm' }}
+        </p>
+        <div class="document-status" *ngIf="currentDocument?.valide !== undefined">
+          <span class="status-badge" [class.valid]="currentDocument?.valide" [class.invalid]="!currentDocument?.valide">
+            {{ currentDocument?.valide ? 'Validé' : 'En attente de validation' }}
+          </span>
+        </div>
+      </div>
+      <div class="document-actions" *ngIf="!disabled">
+        <button 
+          type="button" 
+          class="btn btn-sm btn-outline-primary" 
+          (click)="onPreview(currentDocument!.id)"
+          title="Prévisualiser"
+        >
+          <i class="fas fa-eye"></i>
+        </button>
+        <button 
+          type="button" 
+          class="btn btn-sm btn-outline-success" 
+          (click)="onDownload(currentDocument!.id, currentDocument!.nom)"
+          title="Télécharger"
+        >
+          <i class="fas fa-download"></i>
+        </button>
+        <button 
+          type="button" 
+          class="btn btn-sm btn-outline-danger" 
+          (click)="onDelete(currentDocument!.id)"
+          title="Supprimer"
+        >
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+    </div>
+    
+    <div class="replace-section" *ngIf="!disabled">
+      <button type="button" class="btn btn-outline-primary" (click)="fileInput.click()">
+        <i class="fas fa-sync-alt"></i>
+        Remplacer le document
+      </button>
+    </div>
+  </div>
+
+  <!-- Upload Area -->
+  <div *ngIf="showUploadArea" class="upload-area">
+    
+    <!-- Drag & Drop Zone -->
+    <div 
+      class="drop-zone"
+      [class.drag-over]="dragOver"
+      [class.has-file]="selectedFile"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave($event)"
+      (drop)="onDrop($event)"
+      (click)="fileInput.click()"
+    >
+      <div class="drop-zone-content">
+        <div *ngIf="!selectedFile" class="drop-zone-empty">
+          <i class="fas fa-cloud-upload-alt"></i>
+          <h4>Glissez-déposez votre fichier ici</h4>
+          <p>ou cliquez pour sélectionner un fichier</p>
+        </div>
+        
+        <div *ngIf="selectedFile" class="drop-zone-file">
+          <div class="file-preview">
+            <img *ngIf="previewUrl" [src]="previewUrl" alt="Aperçu" class="image-preview">
+            <i *ngIf="!previewUrl" class="fas fa-file-pdf file-icon"></i>
+          </div>
+          <div class="file-info">
+            <h5>{{ selectedFile.name }}</h5>
+            <p>{{ formatFileSize(selectedFile.size) }}</p>
+          </div>
+          <button 
+            type="button" 
+            class="btn btn-sm btn-outline-danger remove-file" 
+            (click)="resetUpload(); $event.stopPropagation()"
+            title="Supprimer"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hidden File Input -->
+    <input
+      #fileInput
+      type="file"
+      [id]="'file-input-' + config.type"
+      [accept]="config.allowedTypes?.join(',')"
+      (change)="onFileSelected($event)"
+      style="display: none"
+      [disabled]="disabled"
+    />
+
+    <!-- Upload Actions -->
+    <div class="upload-actions" *ngIf="selectedFile && !disabled">
+      <button 
+        type="button" 
+        class="btn btn-secondary" 
+        (click)="resetUpload()"
+        [disabled]="uploading"
+      >
+        Annuler
+      </button>
+      
+      <button 
+        *ngIf="!hasExistingDocument"
+        type="button" 
+        class="btn btn-primary" 
+        (click)="onUpload()"
+        [disabled]="!canUpload"
+      >
+        <i class="fas fa-upload"></i>
+        <span *ngIf="!uploading">Uploader</span>
+        <span *ngIf="uploading">Upload en cours...</span>
+      </button>
+
+      <button 
+        *ngIf="hasExistingDocument"
+        type="button" 
+        class="btn btn-warning" 
+        (click)="onReplace(currentDocument!.id)"
+        [disabled]="!canReplace"
+      >
+        <i class="fas fa-sync-alt"></i>
+        <span *ngIf="!uploading">Remplacer</span>
+        <span *ngIf="uploading">Remplacement en cours...</span>
+      </button>
+    </div>
+
+    <!-- Upload Progress -->
+    <div class="upload-progress" *ngIf="uploading">
+      <div class="progress">
+        <div class="progress-bar" [style.width.%]="uploadProgress"></div>
+      </div>
+      <p class="progress-text">Upload en cours... {{ uploadProgress }}%</p>
+    </div>
+  </div>
+
+  <!-- Help Text -->
+  <div class="upload-help" *ngIf="!hasExistingDocument && !selectedFile">
+    <div class="help-content">
+      <h5>Instructions d'upload</h5>
+      <ul>
+        <li>Formats acceptés: {{ getFormatsLabel() }}</li>
+        <li>Taille maximale: {{ config.maxSizeMB }}MB</li>
+        <li *ngIf="config.required">Ce document est obligatoire pour valider votre inscription</li>
+        <li>Vous pouvez glisser-déposer le fichier ou cliquer pour le sélectionner</li>
+      </ul>
+    </div>
+  </div>
+</div>

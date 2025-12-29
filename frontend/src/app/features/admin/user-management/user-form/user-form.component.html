@@ -1,0 +1,115 @@
+<div class="user-form-dialog">
+  <h2 mat-dialog-title>{{ title }}</h2>
+  
+  <mat-dialog-content>
+    <form [formGroup]="userForm" class="user-form">
+      <!-- Informations personnelles -->
+      <div class="form-section">
+        <h3>Informations personnelles</h3>
+        
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Prénom</mat-label>
+            <input matInput formControlName="FirstName" placeholder="Prénom">
+            <mat-error>{{ getFieldError('FirstName') }}</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Nom</mat-label>
+            <input matInput formControlName="LastName" placeholder="Nom">
+            <mat-error>{{ getFieldError('LastName') }}</mat-error>
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" formControlName="email" placeholder="email@example.com">
+          <mat-error>{{ getFieldError('email') }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Téléphone</mat-label>
+          <input matInput formControlName="phoneNumber" placeholder="0123456789">
+          <mat-error>{{ getFieldError('phoneNumber') }}</mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Adresse -->
+      <div class="form-section">
+        <h3>Adresse</h3>
+        
+        <mat-form-field appearance="outline">
+          <mat-label>Adresse</mat-label>
+          <input matInput formControlName="adresse" placeholder="123 rue de la Paix">
+          <mat-error>{{ getFieldError('adresse') }}</mat-error>
+        </mat-form-field>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Ville</mat-label>
+            <input matInput formControlName="ville" placeholder="Paris">
+            <mat-error>{{ getFieldError('ville') }}</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Pays</mat-label>
+            <input matInput formControlName="pays" placeholder="France">
+            <mat-error>{{ getFieldError('pays') }}</mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Mot de passe (uniquement en mode création) -->
+      <div class="form-section" *ngIf="!isEditMode">
+        <h3>Mot de passe</h3>
+        
+        <mat-form-field appearance="outline">
+          <mat-label>Mot de passe</mat-label>
+          <input matInput type="password" formControlName="password" placeholder="Mot de passe">
+          <mat-error>{{ getFieldError('password') }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Confirmer le mot de passe</mat-label>
+          <input matInput type="password" formControlName="confirmPassword" placeholder="Confirmer le mot de passe">
+          <mat-error>{{ getFieldError('confirmPassword') }}</mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Rôles et permissions -->
+      <div class="form-section">
+        <h3>Rôles et permissions</h3>
+        
+        <mat-form-field appearance="outline">
+          <mat-label>Rôles</mat-label>
+          <mat-select formControlName="roles" multiple>
+            <mat-option *ngFor="let role of roleNames" [value]="role">
+              {{ getRoleLabel(role) }}
+            </mat-option>
+          </mat-select>
+          <mat-error>{{ getFieldError('roles') }}</mat-error>
+        </mat-form-field>
+
+        <!-- Statut (uniquement en mode édition) -->
+        <div class="status-section" *ngIf="isEditMode">
+          <mat-slide-toggle formControlName="enabled" color="primary">
+            Compte actif
+          </mat-slide-toggle>
+          <p class="status-help">
+            Désactiver un compte empêche l'utilisateur de se connecter
+          </p>
+        </div>
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()">Annuler</button>
+    <button mat-raised-button 
+            color="primary" 
+            (click)="onSubmit()" 
+            [disabled]="userForm.invalid">
+      {{ submitButtonText }}
+    </button>
+  </mat-dialog-actions>
+</div>

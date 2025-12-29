@@ -1,0 +1,102 @@
+<div class="notification-bell" (document:click)="onDocumentClick($event)">
+  <!-- Bouton cloche -->
+  <button 
+    class="bell-button"
+    [class.has-notifications]="(unreadCount$ | async) > 0"
+    [class.new-notification]="hasNewNotifications"
+    [class.dropdown-open]="isDropdownOpen"
+    (click)="toggleDropdown()"
+    type="button"
+    aria-label="Notifications"
+    [attr.aria-expanded]="isDropdownOpen"
+  >
+    <!-- Icône cloche -->
+    <i class="material-icons bell-icon">notifications</i>
+    
+    <!-- Badge de compteur -->
+    <span 
+      class="notification-badge"
+      *ngIf="(unreadCount$ | async) as unreadCount"
+      [class.large-count]="unreadCount > 99"
+    >
+      {{ unreadCount > 99 ? '99+' : unreadCount }}
+    </span>
+
+    <!-- Indicateur de nouvelle notification -->
+    <div class="new-notification-pulse" *ngIf="hasNewNotifications"></div>
+  </button>
+
+  <!-- Dropdown des notifications -->
+  <div 
+    class="notification-dropdown"
+    [class.show]="isDropdownOpen"
+    role="menu"
+    aria-labelledby="notification-bell"
+  >
+    <!-- En-tête du dropdown -->
+    <div class="dropdown-header">
+      <h3>Notifications</h3>
+      <div class="header-actions">
+        <button 
+          class="btn-icon"
+          (click)="markAllAsRead()"
+          *ngIf="(unreadCount$ | async) > 0"
+          title="Marquer toutes comme lues"
+        >
+          <i class="material-icons">done_all</i>
+        </button>
+        <button 
+          class="btn-icon"
+          (click)="closeDropdown()"
+          title="Fermer"
+        >
+          <i class="material-icons">close</i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Contenu des notifications -->
+    <div class="dropdown-content">
+      <ng-container *ngIf="(notifications$ | async) as notifications">
+        <!-- Notifications récentes (max 5) -->
+        <div class="recent-notifications" *ngIf="notifications.length > 0">
+          <app-notification
+            *ngFor="let notification of notifications.slice(0, 5); trackBy: trackByNotificationId"
+            [notification]="notification"
+            [showActions]="false"
+            [compact]="true"
+            (notificationClicked)="onNotificationClick($event)"
+          ></app-notification>
+        </div>
+
+        <!-- Aucune notification -->
+        <div class="no-notifications" *ngIf="notifications.length === 0">
+          <i class="material-icons">notifications_none</i>
+          <p>Aucune notification</p>
+        </div>
+      </ng-container>
+    </div>
+
+    <!-- Pied du dropdown -->
+    <div class="dropdown-footer" *ngIf="(notifications$ | async)?.length > 0">
+      <button 
+        class="view-all-btn"
+        (click)="viewAllNotifications()"
+        routerLink="/notifications"
+      >
+        <i class="material-icons">list</i>
+        Voir toutes les notifications
+        <span *ngIf="(notifications$ | async)?.length > 5">
+          ({{ (notifications$ | async)?.length - 5 }} de plus)
+        </span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Overlay pour fermer le dropdown -->
+  <div 
+    class="dropdown-overlay"
+    *ngIf="isDropdownOpen"
+    (click)="closeDropdown()"
+  ></div>
+</div>

@@ -1,0 +1,25 @@
+<div class="status-widget" [ngClass]="[getColorClass(), getSizeClass()]">
+  <div class="widget-header">
+    <div class="widget-icon">
+      <i [class]="data.icon"></i>
+    </div>
+    <div class="widget-action" *ngIf="data.actionLabel && data.actionRoute">
+      <a [routerLink]="data.actionRoute" class="action-link">
+        {{ data.actionLabel }}
+        <i class="fas fa-arrow-right"></i>
+      </a>
+    </div>
+  </div>
+
+  <div class="widget-content">
+    <div class="widget-value">{{ data.value }}</div>
+    <div class="widget-title">{{ data.title }}</div>
+    <div class="widget-subtitle" *ngIf="data.subtitle">{{ data.subtitle }}</div>
+    
+    <div class="widget-trend" *ngIf="data.trend" [ngClass]="getTrendClass()">
+      <i [class]="getTrendIcon()"></i>
+      <span class="trend-value">{{ data.trend.value }}%</span>
+      <span class="trend-label">{{ data.trend.label }}</span>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,215 @@
+<div class="profile-container">
+  <div class="profile-header">
+    <h1>Mon Profil</h1>
+    <p class="subtitle">Gérez vos informations personnelles et votre mot de passe</p>
+  </div>
+
+  <div class="profile-content">
+    <!-- Section Informations Personnelles -->
+    <div class="profile-section">
+      <h2>Informations Personnelles</h2>
+      
+      <form [formGroup]="profileForm" (ngSubmit)="onUpdateProfile()" class="profile-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="FirstName">Prénom *</label>
+            <input
+              type="text"
+              id="FirstName"
+              formControlName="FirstName"
+              class="form-control"
+              [class.is-invalid]="isFieldInvalid(profileForm, 'FirstName')"
+              placeholder="Votre prénom"
+            />
+            <div class="invalid-feedback" *ngIf="isFieldInvalid(profileForm, 'FirstName')">
+              {{ getFieldError(profileForm, 'FirstName') }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="LastName">Nom *</label>
+            <input
+              type="text"
+              id="LastName"
+              formControlName="LastName"
+              class="form-control"
+              [class.is-invalid]="isFieldInvalid(profileForm, 'LastName')"
+              placeholder="Votre nom"
+            />
+            <div class="invalid-feedback" *ngIf="isFieldInvalid(profileForm, 'LastName')">
+              {{ getFieldError(profileForm, 'LastName') }}
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="phoneNumber">Téléphone *</label>
+          <input
+            type="tel"
+            id="phoneNumber"
+            formControlName="phoneNumber"
+            class="form-control"
+            [class.is-invalid]="isFieldInvalid(profileForm, 'phoneNumber')"
+            placeholder="Ex: 0123456789 ou +33123456789"
+          />
+          <div class="invalid-feedback" *ngIf="isFieldInvalid(profileForm, 'phoneNumber')">
+            {{ getFieldError(profileForm, 'phoneNumber') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="adresse">Adresse *</label>
+          <input
+            type="text"
+            id="adresse"
+            formControlName="adresse"
+            class="form-control"
+            [class.is-invalid]="isFieldInvalid(profileForm, 'adresse')"
+            placeholder="Votre adresse complète"
+          />
+          <div class="invalid-feedback" *ngIf="isFieldInvalid(profileForm, 'adresse')">
+            {{ getFieldError(profileForm, 'adresse') }}
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="ville">Ville *</label>
+            <input
+              type="text"
+              id="ville"
+              formControlName="ville"
+              class="form-control"
+              [class.is-invalid]="isFieldInvalid(profileForm, 'ville')"
+              placeholder="Votre ville"
+            />
+            <div class="invalid-feedback" *ngIf="isFieldInvalid(profileForm, 'ville')">
+              {{ getFieldError(profileForm, 'ville') }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="pays">Pays *</label>
+            <input
+              type="text"
+              id="pays"
+              formControlName="pays"
+              class="form-control"
+              [class.is-invalid]="isFieldInvalid(profileForm, 'pays')"
+              placeholder="Votre pays"
+            />
+            <div class="invalid-feedback" *ngIf="isFieldInvalid(profileForm, 'pays')">
+              {{ getFieldError(profileForm, 'pays') }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Messages de feedback -->
+        <div class="alert alert-success" *ngIf="profileSuccess">
+          <i class="fas fa-check-circle"></i>
+          Profil mis à jour avec succès !
+        </div>
+
+        <div class="alert alert-danger" *ngIf="profileError">
+          <i class="fas fa-exclamation-circle"></i>
+          {{ profileError }}
+        </div>
+
+        <div class="form-actions">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="isLoadingProfile || profileForm.invalid"
+          >
+            <i class="fas fa-spinner fa-spin" *ngIf="isLoadingProfile"></i>
+            <i class="fas fa-save" *ngIf="!isLoadingProfile"></i>
+            {{ isLoadingProfile ? 'Mise à jour...' : 'Mettre à jour' }}
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Section Changement de Mot de Passe -->
+    <div class="profile-section">
+      <h2>Changer le Mot de Passe</h2>
+      
+      <form [formGroup]="passwordForm" (ngSubmit)="onChangePassword()" class="password-form">
+        <div class="form-group">
+          <label for="currentPassword">Mot de passe actuel *</label>
+          <input
+            type="password"
+            id="currentPassword"
+            formControlName="currentPassword"
+            class="form-control"
+            [class.is-invalid]="isFieldInvalid(passwordForm, 'currentPassword')"
+            placeholder="Votre mot de passe actuel"
+          />
+          <div class="invalid-feedback" *ngIf="isFieldInvalid(passwordForm, 'currentPassword')">
+            {{ getFieldError(passwordForm, 'currentPassword') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="newPassword">Nouveau mot de passe *</label>
+          <input
+            type="password"
+            id="newPassword"
+            formControlName="newPassword"
+            class="form-control"
+            [class.is-invalid]="isFieldInvalid(passwordForm, 'newPassword')"
+            placeholder="Votre nouveau mot de passe (min. 8 caractères)"
+          />
+          <div class="invalid-feedback" *ngIf="isFieldInvalid(passwordForm, 'newPassword')">
+            {{ getFieldError(passwordForm, 'newPassword') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword">Confirmer le nouveau mot de passe *</label>
+          <input
+            type="password"
+            id="confirmPassword"
+            formControlName="confirmPassword"
+            class="form-control"
+            [class.is-invalid]="isFieldInvalid(passwordForm, 'confirmPassword')"
+            placeholder="Confirmez votre nouveau mot de passe"
+          />
+          <div class="invalid-feedback" *ngIf="isFieldInvalid(passwordForm, 'confirmPassword')">
+            {{ getFieldError(passwordForm, 'confirmPassword') }}
+          </div>
+        </div>
+
+        <!-- Messages de feedback -->
+        <div class="alert alert-success" *ngIf="passwordSuccess">
+          <i class="fas fa-check-circle"></i>
+          Mot de passe changé avec succès !
+        </div>
+
+        <div class="alert alert-danger" *ngIf="passwordError">
+          <i class="fas fa-exclamation-circle"></i>
+          {{ passwordError }}
+        </div>
+
+        <div class="form-actions">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="isLoadingPassword || passwordForm.invalid"
+          >
+            <i class="fas fa-spinner fa-spin" *ngIf="isLoadingPassword"></i>
+            <i class="fas fa-key" *ngIf="!isLoadingPassword"></i>
+            {{ isLoadingPassword ? 'Changement...' : 'Changer le mot de passe' }}
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Actions -->
+    <div class="profile-actions">
+      <button type="button" class="btn btn-secondary" (click)="onCancel()">
+        <i class="fas fa-arrow-left"></i>
+        Retour au tableau de bord
+      </button>
+    </div>
+  </div>
+</div>

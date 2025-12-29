@@ -1,0 +1,130 @@
+.user-form-dialog {
+  min-width: 500px;
+  max-width: 600px;
+
+  h2 {
+    margin: 0;
+    color: #333;
+    font-weight: 500;
+  }
+
+  mat-dialog-content {
+    padding: 1.5rem 0;
+    max-height: 70vh;
+    overflow-y: auto;
+
+    .user-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+
+      .form-section {
+        h3 {
+          margin: 0 0 1rem 0;
+          color: #666;
+          font-size: 1rem;
+          font-weight: 500;
+          border-bottom: 1px solid #e0e0e0;
+          padding-bottom: 0.5rem;
+        }
+
+        .form-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1rem;
+
+          @media (max-width: 600px) {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        mat-form-field {
+          width: 100%;
+        }
+
+        .status-section {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+
+          mat-slide-toggle {
+            margin-bottom: 0.5rem;
+          }
+
+          .status-help {
+            margin: 0;
+            font-size: 0.875rem;
+            color: #666;
+            font-style: italic;
+          }
+        }
+      }
+    }
+  }
+
+  mat-dialog-actions {
+    padding: 1rem 0 0 0;
+    gap: 1rem;
+
+    button {
+      min-width: 100px;
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 600px) {
+  .user-form-dialog {
+    min-width: 90vw;
+    max-width: 90vw;
+
+    mat-dialog-content {
+      padding: 1rem 0;
+
+      .user-form {
+        gap: 1rem;
+
+        .form-section {
+          h3 {
+            font-size: 0.9rem;
+          }
+        }
+      }
+    }
+
+    mat-dialog-actions {
+      flex-direction: column-reverse;
+      
+      button {
+        width: 100%;
+      }
+    }
+  }
+}
+
+// Material Design overrides
+::ng-deep {
+  .mat-mdc-form-field {
+    .mat-mdc-text-field-wrapper {
+      .mat-mdc-form-field-flex {
+        .mat-mdc-form-field-infix {
+          min-height: 56px;
+        }
+      }
+    }
+  }
+
+  .mat-mdc-select-panel {
+    max-height: 300px;
+  }
+
+  .mat-mdc-slide-toggle {
+    .mdc-switch {
+      &.mdc-switch--selected {
+        .mdc-switch__track {
+          background-color: #4caf50;
+        }
+      }
+    }
+  }
+}

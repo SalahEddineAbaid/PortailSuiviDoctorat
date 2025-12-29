@@ -1,0 +1,235 @@
+<div class="inscription-detail">
+  
+  <!-- Header -->
+  <div class="detail-header">
+    <button class="btn btn-outline-secondary back-btn" (click)="onBack()">
+      <i class="fas fa-arrow-left"></i>
+      Retour à la liste
+    </button>
+    <h1>Détails de l'inscription</h1>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Chargement des détails...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error" class="alert alert-danger">
+    <i class="fas fa-exclamation-triangle"></i>
+    {{ error }}
+    <button class="btn btn-sm btn-outline-primary" (click)="loadInscription()">
+      Réessayer
+    </button>
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="!loading && !error && (inscription$ | async) as inscription" class="detail-content">
+    
+    <!-- Status and Actions -->
+    <div class="status-section">
+      <div class="status-info">
+        <div class="status-badge" [class]="getStatusClass(inscription.statut)">
+          <i class="material-icons">{{ getStatusIcon(inscription.statut) }}</i>
+          <span>{{ getStatusLabel(inscription.statut) }}</span>
+        </div>
+        <div class="inscription-meta">
+          <span class="inscription-date">
+            Créée le {{ inscription.dateInscription | date:'dd/MM/yyyy à HH:mm' }}
+          </span>
+        </div>
+      </div>
+      
+      <div class="action-buttons">
+        <button 
+          *ngIf="canEdit(inscription)"
+          class="btn btn-warning" 
+          (click)="onEdit(inscription)"
+        >
+          <i class="fas fa-edit"></i>
+          Modifier
+        </button>
+        
+        <button 
+          *ngIf="canSubmit(inscription)"
+          class="btn btn-primary" 
+          (click)="onSubmit(inscription)"
+        >
+          <i class="fas fa-paper-plane"></i>
+          Soumettre
+        </button>
+      </div>
+    </div>
+
+    <!-- Progress Steps -->
+    <div class="progress-section">
+      <h2>Progression du dossier</h2>
+      <div class="progress-steps">
+        <div 
+          *ngFor="let step of getProgressSteps(inscription); let i = index" 
+          class="progress-step"
+          [class.completed]="step.completed"
+          [class.current]="step.current"
+        >
+          <div class="step-indicator">
+            <i class="fas" [class.fa-check]="step.completed" [class.fa-circle]="!step.completed"></i>
+          </div>
+          <div class="step-label">{{ step.label }}</div>
+          <div *ngIf="i < getProgressSteps(inscription).length - 1" class="step-connector"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Campaign Information -->
+    <div class="info-section">
+      <h2>Informations de la campagne</h2>
+      <div class="info-card">
+        <div class="info-grid">
+          <div class="info-item">
+            <strong>Campagne:</strong>
+            <span>{{ inscription.campagne.nom }}</span>
+          </div>
+          <div class="info-item">
+            <strong>Année universitaire:</strong>
+            <span>{{ inscription.campagne.anneeUniversitaire }}</span>
+          </div>
+          <div class="info-item">
+            <strong>Type:</strong>
+            <span>{{ inscription.campagne.typeInscription }}</span>
+          </div>
+          <div class="info-item">
+            <strong>Statut campagne:</strong>
+            <span class="badge" [class.badge-success]="inscription.campagne.active" [class.badge-secondary]="!inscription.campagne.active">
+              {{ inscription.campagne.active ? 'Active' : 'Fermée' }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Thesis Information -->
+    <div class="info-section">
+      <h2>Informations de la thèse</h2>
+      <div class="info-card">
+        <div class="thesis-info">
+          <div class="info-item full-width">
+            <strong>Sujet de thèse:</strong>
+            <p class="thesis-subject">{{ inscription.sujetThese }}</p>
+          </div>
+          
+          <div class="info-grid">
+            <div class="info-item">
+              <strong>Laboratoire:</strong>
+              <span>{{ inscription.laboratoire }}</span>
+            </div>
+            <div class="info-item">
+              <strong>Spécialité:</strong>
+              <span>{{ inscription.specialite }}</span>
+            </div>
+          </div>
+
+          <div class="info-item">
+            <strong>Directeur de thèse:</strong>
+            <div class="director-info">
+              <span class="director-name">{{ inscription.directeur.FirstName }} {{ inscription.directeur.LastName }}</span>
+              <span class="director-email">{{ inscription.directeur.email }}</span>
+              <span class="director-phone" *ngIf="inscription.directeur.phoneNumber">{{ inscription.directeur.phoneNumber }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Director's Opinion -->
+    <div *ngIf="inscription.avisDirecteur" class="info-section">
+      <h2>Avis du Directeur de thèse</h2>
+      <div class="info-card" [class.favorable]="inscription.avisDirecteur.valide" [class.defavorable]="!inscription.avisDirecteur.valide">
+        <div class="avis-header">
+          <div class="avis-status" [class.favorable]="inscription.avisDirecteur.valide" [class.defavorable]="!inscription.avisDirecteur.valide">
+            <i class="fas" [class.fa-check-circle]="inscription.avisDirecteur.valide" [class.fa-times-circle]="!inscription.avisDirecteur.valide"></i>
+            <span>{{ inscription.avisDirecteur.valide ? 'Avis Favorable' : 'Avis Défavorable' }}</span>
+          </div>
+          <span class="avis-date">{{ inscription.avisDirecteur.dateAvis | date:'dd/MM/yyyy à HH:mm' }}</span>
+        </div>
+        
+        <div class="avis-content">
+          <div class="avis-text">
+            <strong>Avis:</strong>
+            <p>{{ inscription.avisDirecteur.avis }}</p>
+          </div>
+          
+          <div *ngIf="inscription.avisDirecteur.commentaire" class="avis-comment">
+            <strong>Commentaire:</strong>
+            <p>{{ inscription.avisDirecteur.commentaire }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Administrative Validation -->
+    <div *ngIf="inscription.validationAdmin" class="info-section">
+      <h2>Validation Administrative</h2>
+      <div class="info-card" [class.validee]="inscription.validationAdmin.valide" [class.rejetee]="!inscription.validationAdmin.valide">
+        <div class="validation-header">
+          <div class="validation-status" [class.validee]="inscription.validationAdmin.valide" [class.rejetee]="!inscription.validationAdmin.valide">
+            <i class="fas" [class.fa-check-circle]="inscription.validationAdmin.valide" [class.fa-times-circle]="!inscription.validationAdmin.valide"></i>
+            <span>{{ inscription.validationAdmin.valide ? 'Inscription Validée' : 'Inscription Rejetée' }}</span>
+          </div>
+          <span class="validation-date">{{ inscription.validationAdmin.dateValidation | date:'dd/MM/yyyy à HH:mm' }}</span>
+        </div>
+        
+        <div class="validation-content">
+          <div class="validation-comment">
+            <strong>Commentaire:</strong>
+            <p>{{ inscription.validationAdmin.commentaire }}</p>
+          </div>
+          
+          <div class="validation-by">
+            <strong>Validé par:</strong>
+            <span>{{ inscription.validationAdmin.validateur.FirstName }} {{ inscription.validationAdmin.validateur.LastName }}</span>
+            <span class="validator-email">({{ inscription.validationAdmin.validateur.email }})</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Documents Section -->
+    <div class="info-section">
+      <h2>Documents</h2>
+      <app-documents-manager 
+        [inscriptionId]="inscription.id"
+        [disabled]="!canEdit(inscription)"
+        [showTitle]="false"
+      ></app-documents-manager>
+    </div>
+
+    <!-- Actions Footer -->
+    <div class="actions-footer">
+      <button class="btn btn-outline-secondary" (click)="onBack()">
+        <i class="fas fa-arrow-left"></i>
+        Retour à la liste
+      </button>
+      
+      <div class="footer-actions">
+        <button 
+          *ngIf="canEdit(inscription)"
+          class="btn btn-warning" 
+          (click)="onEdit(inscription)"
+        >
+          <i class="fas fa-edit"></i>
+          Modifier l'inscription
+        </button>
+        
+        <button 
+          *ngIf="canSubmit(inscription)"
+          class="btn btn-primary" 
+          (click)="onSubmit(inscription)"
+        >
+          <i class="fas fa-paper-plane"></i>
+          Soumettre pour validation
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
