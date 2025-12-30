@@ -37,7 +37,7 @@ export class InscriptionDetail implements OnInit {
     });
   }
 
-  private loadInscription(): void {
+  loadInscription(): void {
     this.loading = true;
     this.error = null;
 

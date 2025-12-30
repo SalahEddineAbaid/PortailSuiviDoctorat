@@ -1,5 +1,8 @@
 import { Component, Input, Output, EventEmitter, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatButtonModule } from '@angular/material/button';
 import { BehaviorSubject, Subject, Observable } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -45,7 +48,7 @@ export interface ValidationConfig {
 @Component({
   selector: 'app-document-validator',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MatIconModule, MatProgressSpinnerModule, MatButtonModule],
   templateUrl: './document-validator.component.html',
   styleUrls: ['./document-validator.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

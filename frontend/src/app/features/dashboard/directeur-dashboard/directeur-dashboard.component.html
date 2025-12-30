@@ -22,33 +22,39 @@
   <!-- Stats Overview -->
   <div class="stats-grid">
     <app-status-widget
-      title="Doctorants encadrés"
-      [value]="data.stats.totalDoctorants"
-      icon="fas fa-users"
-      color="primary">
+      [data]="{
+        title: 'Doctorants encadrés',
+        value: data.stats.totalDoctorants || 0,
+        icon: 'fas fa-users',
+        color: 'blue'
+      }">
     </app-status-widget>
 
     <app-status-widget
-      title="Inscriptions en attente"
-      [value]="data.stats.inscriptionsEnAttente"
-      icon="fas fa-clock"
-      color="warning"
-      [clickable]="true">
+      [data]="{
+        title: 'Inscriptions en attente',
+        value: data.stats.inscriptionsEnAttente || 0,
+        icon: 'fas fa-clock',
+        color: 'orange'
+      }">
     </app-status-widget>
 
     <app-status-widget
-      title="Demandes de soutenance"
-      [value]="data.stats.soutenancesEnAttente"
-      icon="fas fa-graduation-cap"
-      color="info"
-      [clickable]="true">
+      [data]="{
+        title: 'Demandes de soutenance',
+        value: data.stats.soutenancesEnAttente || 0,
+        icon: 'fas fa-graduation-cap',
+        color: 'blue'
+      }">
     </app-status-widget>
 
     <app-status-widget
-      title="Soutenances validées"
-      [value]="data.stats.soutenancesValidees"
-      icon="fas fa-check-circle"
-      color="success">
+      [data]="{
+        title: 'Soutenances validées',
+        value: data.stats.soutenancesValidees || 0,
+        icon: 'fas fa-check-circle',
+        color: 'green'
+      }">
     </app-status-widget>
   </div>
 
@@ -78,7 +84,7 @@
       <app-doctorant-list
         [doctorants]="data.doctorants"
         [showActions]="true"
-        (doctorantSelected)="onDoctorantSelected($event)">
+        (doctorantSelected)="onDoctorantSelected($any($event))">
       </app-doctorant-list>
     </div>
 

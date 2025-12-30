@@ -281,8 +281,7 @@
 }
 
 // High contrast mode
-.high-contrast,
-@media (prefers-contrast: high) {
+.high-contrast {
   .setting-label {
     border: 1px solid var(--border-color);
     
@@ -329,7 +328,15 @@
 }
 
 // Reduced motion
-.reduce-motion,
+.reduce-motion {
+  .setting-label,
+  .checkbox-custom,
+  .btn {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .setting-label,
   .checkbox-custom,

@@ -11,8 +11,22 @@ import { DashboardAlert } from '../../../core/models/dashboard.model';
   styleUrl: './alert.component.scss'
 })
 export class AlertComponent {
-  @Input() alert!: DashboardAlert;
+  @Input() alert?: DashboardAlert;
+  @Input() type: string = 'info';
+  @Input() message: string = '';
+  @Input() dismissible: boolean = true;
   @Output() dismiss = new EventEmitter<string>();
+  @Output() dismissed = new EventEmitter<void>();
+
+  get alertData(): DashboardAlert {
+    return this.alert || {
+      id: 'inline-alert',
+      type: this.type as any,
+      title: '',
+      message: this.message,
+      dismissible: this.dismissible
+    };
+  }
 
   getAlertIcon(type: string): string {
     switch (type) {
@@ -30,8 +44,9 @@ export class AlertComponent {
   }
 
   onDismiss(): void {
-    if (this.alert.dismissible) {
-      this.dismiss.emit(this.alert.id);
+    if (this.alertData.dismissible) {
+      this.dismiss.emit(this.alertData.id);
+      this.dismissed.emit();
     }
   }
 

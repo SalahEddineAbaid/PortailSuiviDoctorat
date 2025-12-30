@@ -120,7 +120,7 @@ export class UserFormComponent implements OnInit {
       adresse: user.adresse,
       ville: user.ville,
       pays: user.pays,
-      roles: user.roles.map(role => role.name),
+      roles: user.roles,  // ✅ Les rôles sont déjà des strings
       enabled: user.enabled
     });
   }

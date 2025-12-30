@@ -6,7 +6,7 @@ import { Observable, BehaviorSubject } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
 import { InscriptionService } from '../../../core/services/inscription.service';
-import { Campagne, CampagneRequest } from '../../../core/models/inscription.model';
+import { Campagne, CampagneRequest, TypeInscription } from '../../../core/models/inscription.model';
 import { AlertComponent } from '../../../shared/components/alert/alert.component';
 
 interface CampagneFormData {
@@ -412,7 +412,7 @@ export class CampagneManagementComponent implements OnInit {
         anneeUniversitaire: formData.anneeUniversitaire,
         dateOuverture: new Date(formData.dateOuverture),
         dateFermeture: new Date(formData.dateFermeture),
-        typeInscription: formData.typeInscription,
+        typeInscription: formData.typeInscription as TypeInscription,
         active: formData.active,
         description: formData.description
       };

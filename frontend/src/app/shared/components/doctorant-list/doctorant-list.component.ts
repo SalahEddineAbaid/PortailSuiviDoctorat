@@ -2,8 +2,19 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { UserResponse } from '../../../core/models/user.model';
+import { Role } from '../../../core/models/role.model';
 
-export interface DoctorantListItem extends UserResponse {
+export interface DoctorantListItem {
+  id: number;
+  FirstName: string;
+  LastName: string;
+  email: string;
+  phoneNumber: string;
+  adresse: string;
+  ville: string;
+  pays: string;
+  roles: Role[];
+  enabled: boolean;
   inscriptionStatus?: string;
   soutenanceStatus?: string;
   lastActivity?: Date;

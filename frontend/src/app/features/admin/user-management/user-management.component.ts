@@ -137,7 +137,7 @@ export class UserManagementComponent implements OnInit {
     // Filtre par rôle
     if (this.roleFilter) {
       filtered = filtered.filter(user =>
-        user.roles.some(role => role.name === this.roleFilter)
+        user.roles.includes(this.roleFilter)  // ✅ Les rôles sont des strings
       );
     }
 
@@ -295,6 +295,7 @@ export class UserManagementComponent implements OnInit {
   }
 
   getUserRoles(user: UserResponse): string {
-    return user.roles.map(role => this.getRoleLabel(role.name)).join(', ');
+    // ✅ Les rôles sont des strings directement
+    return user.roles.map(role => this.getRoleLabel(role as RoleName)).join(', ');
   }
 }

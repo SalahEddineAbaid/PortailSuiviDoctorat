@@ -1,11 +1,11 @@
 services:
   mariadb:
-    image: mariadb:12.0.2
+    image: mariadb:10.11
     container_name: userdb
     environment:
       MYSQL_ROOT_PASSWORD: amthroot
       MYSQL_DATABASE: userdb
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - ./data/mariadb:/var/lib/mysql

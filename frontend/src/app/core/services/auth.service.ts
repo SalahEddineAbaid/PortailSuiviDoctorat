@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, BehaviorSubject, tap, catchError, throwError } from 'rxjs';
-import { environment } from '../../environments/environment';  // ✅ Corrigé le chemin
+import { Observable, BehaviorSubject, tap, catchError, throwError, switchMap, of } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 // ✅ Interfaces correspondant EXACTEMENT au backend
 export interface LoginRequest {
@@ -13,8 +13,8 @@ export interface LoginRequest {
 export interface RegisterRequest {
   email: string;
   password: string;
-  FirstName: string;  // ✅ Majuscule comme dans le backend
-  LastName: string;   // ✅ Majuscule comme dans le backend
+  firstName: string;  // ✅ minuscule comme dans le backend
+  lastName: string;   // ✅ minuscule comme dans le backend
   phoneNumber: string;
   adresse: string;
   ville: string;
@@ -63,8 +63,8 @@ export interface UserInfo {
   adresse: string;
   ville: string;
   pays: string;
-  roles: Array<{ id: number; name: string }>;
-  enabled: boolean;
+  roles: string[];  // ✅ Backend renvoie un tableau de strings ['ROLE_DOCTORANT']
+  enabled?: boolean;
 }
 
 export interface UserResponse {
@@ -111,9 +111,9 @@ export class AuthService {
   }
 
   /**
-   * 🔐 Connexion
+   * 🔐 Connexion - retourne l'utilisateur une fois chargé
    */
-  login(credentials: LoginRequest): Observable<TokenResponse> {
+  login(credentials: LoginRequest): Observable<UserInfo> {
     console.log('📤 [AUTH SERVICE] Tentative de connexion pour:', credentials.email);
     
     return this.http.post<TokenResponse>(`${this.API_URL}/login`, credentials).pipe(
@@ -125,10 +125,18 @@ export class AuthService {
         // ✅ Stocker les tokens
         this.setTokens(response.accessToken, response.refreshToken);
         console.log('💾 [AUTH SERVICE] Tokens stockés dans localStorage');
-        
-        // ✅ Charger les infos utilisateur
+      }),
+      // ✅ Après stockage des tokens, charger l'utilisateur
+      switchMap(() => {
         console.log('👤 [AUTH SERVICE] Chargement des infos utilisateur...');
-        this.loadCurrentUser();
+        return this.http.get<UserInfo>(`${this.USER_API_URL}/profile`);
+      }),
+      tap(user => {
+        console.log('✅ [AUTH SERVICE] Utilisateur chargé:', user);
+        console.log('👤 Nom:', user.FirstName, user.LastName);
+        console.log('📧 Email:', user.email);
+        console.log('🎭 Rôles:', user.roles);
+        this.currentUserSubject.next(user);
       }),
       catchError(error => {
         console.error('❌ [AUTH SERVICE] Erreur connexion:', error);
@@ -196,7 +204,7 @@ export class AuthService {
     console.log('📤 [AUTH SERVICE] Requête GET /users/profile');
     console.log('🌐 URL:', `${this.USER_API_URL}/profile`);
 
-    this.http.get<UserInfo>(`${this.USER_API_URL}/profile`).pipe(  // ✅ CHANGÉ DE /me À /profile
+    this.http.get<UserInfo>(`${this.USER_API_URL}/profile`).pipe(
       catchError(error => {
         console.error('❌ [AUTH SERVICE] Erreur chargement utilisateur:', error);
         console.error('Status:', error.status);
@@ -236,15 +244,15 @@ export class AuthService {
     return isAuth;
   }
 
-  getCurrentUser(): UserInfo | null {
-    return this.currentUserSubject.value;
+  getCurrentUser(): Observable<UserResponse> {
+    return this.http.get<UserResponse>(`${this.USER_API_URL}/profile`);
   }
 
   /**
    * 🎯 Obtenir la route du dashboard selon le rôle
    */
   getDashboardRoute(): string {
-    const user = this.getCurrentUser();
+    const user = this.currentUserSubject.value;
     
     console.log('🎯 [AUTH SERVICE] Détermination de la route du dashboard...');
     console.log('👤 Utilisateur:', user);
@@ -254,7 +262,8 @@ export class AuthService {
       return '/login';
     }
 
-    const role = user.roles[0].name;
+    // ✅ Le backend renvoie les rôles comme strings directement
+    const role = user.roles[0];
     console.log('🎭 [AUTH SERVICE] Rôle détecté:', role);
 
     switch (role) {
@@ -277,8 +286,9 @@ export class AuthService {
    * ✅ Vérifier si l'utilisateur a un rôle spécifique
    */
   hasRole(roleName: string): boolean {
-    const user = this.getCurrentUser();
-    const hasRole = user?.roles?.some(role => role.name === roleName) || false;
+    const user = this.currentUserSubject.value;
+    // ✅ Les rôles sont des strings directement
+    const hasRole = user?.roles?.includes(roleName) || false;
     console.log(`🔍 [AUTH SERVICE] hasRole(${roleName}):`, hasRole);
     return hasRole;
   }
@@ -287,14 +297,14 @@ export class AuthService {
    * 🎯 Obtenir le rôle principal de l'utilisateur
    */
   getUserRole(): string | null {
-    const user = this.getCurrentUser();
+    const user = this.currentUserSubject.value;
     
     if (!user || !user.roles || user.roles.length === 0) {
       return null;
     }
 
-    // Retourner le nom du premier rôle
-    return user.roles[0].name;
+    // ✅ Les rôles sont des strings directement
+    return user.roles[0];
   }
 
   /**
@@ -316,6 +326,39 @@ export class AuthService {
    */
   isDoctorant(): boolean {
     return this.hasRole('ROLE_DOCTORANT');
+  }
+
+  /**
+   * 🔍 Check if token is expired
+   */
+  isTokenExpired(): boolean {
+    const token = this.getToken();
+    if (!token) return true;
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const now = Math.floor(Date.now() / 1000);
+      return payload.exp <= now;
+    } catch {
+      return true;
+    }
+  }
+
+  /**
+   * 🔍 Check if token expires soon (within 5 minutes)
+   */
+  isTokenExpiringSoon(): boolean {
+    const token = this.getToken();
+    if (!token) return true;
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const now = Math.floor(Date.now() / 1000);
+      const fiveMinutes = 5 * 60;
+      return payload.exp <= (now + fiveMinutes);
+    } catch {
+      return true;
+    }
   }
 
   /**

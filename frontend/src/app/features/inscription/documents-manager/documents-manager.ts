@@ -76,7 +76,7 @@ export class DocumentsManager implements OnInit {
     }
   }
 
-  private loadDocuments(): void {
+  loadDocuments(): void {
     if (!this.inscriptionId) return;
 
     this.loading = true;

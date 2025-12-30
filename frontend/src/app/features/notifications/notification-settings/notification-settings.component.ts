@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Subject } from 'rxjs';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Observable, Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
 
 import { NotificationService } from '../../../core/services/notification.service';
@@ -9,6 +10,8 @@ import { NotificationSettings } from '../../../core/models/notification.model';
 
 @Component({
   selector: 'app-notification-settings',
+  standalone: true,
+  imports: [CommonModule, AsyncPipe, ReactiveFormsModule],
   templateUrl: './notification-settings.component.html',
   styleUrls: ['./notification-settings.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

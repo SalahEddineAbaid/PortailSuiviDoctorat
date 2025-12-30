@@ -8,23 +8,22 @@ import { DashboardService } from '../../../core/services/dashboard.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { InscriptionService } from '../../../core/services/inscription.service';
 import { SoutenanceService } from '../../../core/services/soutenance.service';
-import { DoctorantListComponent } from '../../../shared/components/doctorant-list/doctorant-list.component';
+import { DoctorantListComponent, DoctorantListItem } from '../../../shared/components/doctorant-list/doctorant-list.component';
 import { StatusWidgetComponent } from '../../../shared/components/status-widget/status-widget.component';
 import { AlertComponent } from '../../../shared/components/alert/alert.component';
-import { 
+import {
   DashboardStats,
-  DashboardAlert 
+  DashboardAlert
 } from '../../../core/models/dashboard.model';
 
 interface DirecteurDashboardData {
   stats: DashboardStats;
-  doctorants: UserInfo[];
+  doctorants: DoctorantListItem[];
   soutenances: SoutenanceResponse[];
   alerts: DashboardAlert[];
   recentActivity: any[];
 }
-import { UserInfo } from '../../../core/services/auth.service';
-import { Inscription } from '../../../core/models/inscription.model';
+import { UserResponse } from '../../../core/services/auth.service';
 import { SoutenanceResponse } from '../../../core/models/soutenance.model';
 
 @Component({
@@ -43,17 +42,19 @@ import { SoutenanceResponse } from '../../../core/models/soutenance.model';
 })
 export class DirecteurDashboardComponent implements OnInit {
   dashboardData$!: Observable<DirecteurDashboardData>;
-  currentUser: UserInfo | null = null;
+  currentUser: UserResponse | null = null;
 
   constructor(
     private dashboardService: DashboardService,
     private authService: AuthService,
     private inscriptionService: InscriptionService,
     private soutenanceService: SoutenanceService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
-    this.currentUser = this.authService.getCurrentUser();
+    this.authService.getCurrentUser().subscribe(user => {
+      this.currentUser = user;
+    });
     this.loadDashboardData();
   }
 
@@ -75,7 +76,7 @@ export class DirecteurDashboardComponent implements OnInit {
     );
   }
 
-  private buildRecentActivity(doctorants: UserInfo[], soutenances: SoutenanceResponse[]): any[] {
+  private buildRecentActivity(doctorants: DoctorantListItem[], soutenances: SoutenanceResponse[]): any[] {
     const activities: any[] = [];
 
     // Add recent inscriptions
@@ -104,7 +105,7 @@ export class DirecteurDashboardComponent implements OnInit {
       .slice(0, 5);
   }
 
-  onDoctorantSelected(doctorant: UserInfo): void {
+  onDoctorantSelected(doctorant: DoctorantListItem): void {
     // Navigate to doctorant details or open consultation modal
     console.log('Doctorant selected:', doctorant);
   }

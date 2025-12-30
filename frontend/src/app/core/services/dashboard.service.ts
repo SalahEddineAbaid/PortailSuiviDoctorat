@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, combineLatest, map, of } from 'rxjs';
+import { Observable, combineLatest, map, of, switchMap, catchError } from 'rxjs';
 import { InscriptionService } from './inscription.service';
 import { SoutenanceService } from './soutenance.service';
 import { NotificationService } from './notification.service';
@@ -36,9 +36,9 @@ export class DashboardService {
    */
   getDoctorantDashboardData(): Observable<DoctorantDashboardData> {
     return combineLatest([
-      this.inscriptionService.getMyInscriptions(),
-      this.soutenanceService.getMySoutenances(),
-      this.notificationService.getMyNotifications()
+      this.inscriptionService.getMyInscriptions().pipe(catchError(() => of([]))),
+      this.soutenanceService.getMySoutenances().pipe(catchError(() => of([]))),
+      this.notificationService.getMyNotifications().pipe(catchError(() => of([])))  // ✅ Gérer les erreurs 404
     ]).pipe(
       map(([inscriptions, soutenances, notifications]) => {
         const inscriptionActuelle = inscriptions.find(i => 
@@ -68,9 +68,9 @@ export class DashboardService {
    */
   getDoctorantStatusWidgets(): Observable<StatusWidgetData[]> {
     return combineLatest([
-      this.inscriptionService.getMyInscriptions(),
-      this.soutenanceService.getMySoutenances(),
-      this.notificationService.getMyNotifications()
+      this.inscriptionService.getMyInscriptions().pipe(catchError(() => of([]))),
+      this.soutenanceService.getMySoutenances().pipe(catchError(() => of([]))),
+      this.notificationService.getMyNotifications().pipe(catchError(() => of([])))  // ✅ Gérer les erreurs 404
     ]).pipe(
       map(([inscriptions, soutenances, notifications]) => {
         const widgets: StatusWidgetData[] = [];
@@ -165,40 +165,43 @@ export class DashboardService {
    * 🔹 Récupérer les données du dashboard directeur
    */
   getDirecteurDashboardData(): Observable<DirecteurDashboardData> {
-    const currentUser = this.authService.getCurrentUser();
-    if (!currentUser) {
-      return of({
-        doctorants: [],
-        dossiersEnAttente: [],
-        soutenancesAPlanifier: [],
-        statistiques: this.getEmptyStats()
-      });
-    }
+    return this.authService.getCurrentUser().pipe(
+      switchMap(currentUser => {
+        if (!currentUser) {
+          return of({
+            doctorants: [],
+            dossiersEnAttente: [],
+            soutenancesAPlanifier: [],
+            statistiques: this.getEmptyStats()
+          });
+        }
 
-    return combineLatest([
-      this.inscriptionService.getInscriptionsEnAttenteDirecteur(currentUser.id),
-      this.soutenanceService.getSoutenancesEnAttenteDirecteur(currentUser.id)
-    ]).pipe(
-      map(([inscriptionsEnAttente, soutenancesEnAttente]) => {
-        // Extraire les doctorants uniques
-        const doctorantsMap = new Map();
-        inscriptionsEnAttente.forEach(inscription => {
-          if (inscription.doctorant) {
-            doctorantsMap.set(inscription.doctorant.id, inscription.doctorant);
-          }
-        });
-        soutenancesEnAttente.forEach(soutenance => {
-          if (soutenance.doctorant) {
-            doctorantsMap.set(soutenance.doctorant.id, soutenance.doctorant);
-          }
-        });
+        return combineLatest([
+          this.inscriptionService.getInscriptionsEnAttenteDirecteur(currentUser.id),
+          this.soutenanceService.getSoutenancesEnAttenteDirecteur(currentUser.id)
+        ]).pipe(
+          map(([inscriptionsEnAttente, soutenancesEnAttente]) => {
+            // Extraire les doctorants uniques
+            const doctorantsMap = new Map();
+            inscriptionsEnAttente.forEach(inscription => {
+              if (inscription.doctorant) {
+                doctorantsMap.set(inscription.doctorant.id, inscription.doctorant);
+              }
+            });
+            soutenancesEnAttente.forEach(soutenance => {
+              if (soutenance.doctorant) {
+                doctorantsMap.set(soutenance.doctorant.id, soutenance.doctorant);
+              }
+            });
 
-        return {
-          doctorants: Array.from(doctorantsMap.values()),
-          dossiersEnAttente: inscriptionsEnAttente,
-          soutenancesAPlanifier: soutenancesEnAttente,
-          statistiques: this.calculateDirecteurStats(inscriptionsEnAttente, soutenancesEnAttente)
-        };
+            return {
+              doctorants: Array.from(doctorantsMap.values()),
+              dossiersEnAttente: inscriptionsEnAttente,
+              soutenancesAPlanifier: soutenancesEnAttente,
+              statistiques: this.calculateDirecteurStats(inscriptionsEnAttente, soutenancesEnAttente)
+            };
+          })
+        );
       })
     );
   }
@@ -207,28 +210,31 @@ export class DashboardService {
    * 🔹 Récupérer les statistiques du directeur
    */
   getDirecteurStats(): Observable<DashboardStats> {
-    const currentUser = this.authService.getCurrentUser();
-    if (!currentUser) {
-      return of(this.getEmptyDirecteurStats());
-    }
+    return this.authService.getCurrentUser().pipe(
+      switchMap(currentUser => {
+        if (!currentUser) {
+          return of(this.getEmptyDirecteurStats());
+        }
 
-    return combineLatest([
-      this.inscriptionService.getDoctorantsByDirecteur(),
-      this.inscriptionService.getInscriptionsEnAttenteDirecteur(currentUser.id),
-      this.soutenanceService.getSoutenancesByDirecteur(),
-      this.soutenanceService.getSoutenancesEnAttenteDirecteur(currentUser.id)
-    ]).pipe(
-      map(([doctorants, inscriptionsEnAttente, soutenances, soutenancesEnAttente]) => ({
-        totalDoctorants: doctorants.length,
-        inscriptionsEnAttente: inscriptionsEnAttente.length,
-        soutenancesEnAttente: soutenancesEnAttente.length,
-        soutenancesValidees: soutenances.filter(s => s.statut === SoutenanceStatus.AUTORISEE).length,
-        totalInscriptions: 0, // Not needed for directeur
-        inscriptionsValidees: 0, // Not needed for directeur
-        inscriptionsRejetees: 0, // Not needed for directeur
-        totalSoutenances: soutenances.length,
-        soutenancesAutorisees: soutenances.filter(s => s.statut === SoutenanceStatus.AUTORISEE).length
-      }))
+        return combineLatest([
+          this.inscriptionService.getDoctorantsByDirecteur(),
+          this.inscriptionService.getInscriptionsEnAttenteDirecteur(currentUser.id),
+          this.soutenanceService.getSoutenancesByDirecteur(),
+          this.soutenanceService.getSoutenancesEnAttenteDirecteur(currentUser.id)
+        ]).pipe(
+          map(([doctorants, inscriptionsEnAttente, soutenances, soutenancesEnAttente]) => ({
+            totalDoctorants: doctorants.length,
+            inscriptionsEnAttente: inscriptionsEnAttente.length,
+            soutenancesEnAttente: soutenancesEnAttente.length,
+            soutenancesValidees: soutenances.filter(s => s.statut === SoutenanceStatus.AUTORISEE).length,
+            totalInscriptions: 0, // Not needed for directeur
+            inscriptionsValidees: 0, // Not needed for directeur
+            inscriptionsRejetees: 0, // Not needed for directeur
+            totalSoutenances: soutenances.length,
+            soutenancesAutorisees: soutenances.filter(s => s.statut === SoutenanceStatus.AUTORISEE).length
+          }))
+        );
+      })
     );
   }
 
@@ -236,45 +242,48 @@ export class DashboardService {
    * 🔹 Récupérer les alertes du directeur
    */
   getDirecteurAlerts(): Observable<DashboardAlert[]> {
-    const currentUser = this.authService.getCurrentUser();
-    if (!currentUser) {
-      return of([]);
-    }
-
-    return combineLatest([
-      this.inscriptionService.getInscriptionsEnAttenteDirecteur(currentUser.id),
-      this.soutenanceService.getSoutenancesEnAttenteDirecteur(currentUser.id)
-    ]).pipe(
-      map(([inscriptionsEnAttente, soutenancesEnAttente]) => {
-        const alerts: DashboardAlert[] = [];
-
-        // Alerte pour inscriptions en attente
-        if (inscriptionsEnAttente.length > 0) {
-          alerts.push({
-            id: 'inscriptions-attente',
-            type: 'warning',
-            title: 'Inscriptions en attente',
-            message: `Vous avez ${inscriptionsEnAttente.length} inscription(s) en attente de votre avis.`,
-            actionLabel: 'Voir les dossiers',
-            actionRoute: '/directeur/inscriptions',
-            dismissible: true
-          });
+    return this.authService.getCurrentUser().pipe(
+      switchMap(currentUser => {
+        if (!currentUser) {
+          return of([]);
         }
 
-        // Alerte pour soutenances en attente
-        if (soutenancesEnAttente.length > 0) {
-          alerts.push({
-            id: 'soutenances-attente',
-            type: 'info',
-            title: 'Demandes de soutenance',
-            message: `Vous avez ${soutenancesEnAttente.length} demande(s) de soutenance à examiner.`,
-            actionLabel: 'Voir les demandes',
-            actionRoute: '/directeur/soutenances',
-            dismissible: true
-          });
-        }
+        return combineLatest([
+          this.inscriptionService.getInscriptionsEnAttenteDirecteur(currentUser.id),
+          this.soutenanceService.getSoutenancesEnAttenteDirecteur(currentUser.id)
+        ]).pipe(
+          map(([inscriptionsEnAttente, soutenancesEnAttente]) => {
+            const alerts: DashboardAlert[] = [];
 
-        return alerts;
+            // Alerte pour inscriptions en attente
+            if (inscriptionsEnAttente.length > 0) {
+              alerts.push({
+                id: 'inscriptions-attente',
+                type: 'warning',
+                title: 'Inscriptions en attente',
+                message: `Vous avez ${inscriptionsEnAttente.length} inscription(s) en attente de votre avis.`,
+                actionLabel: 'Voir les dossiers',
+                actionRoute: '/directeur/inscriptions',
+                dismissible: true
+              });
+            }
+
+            // Alerte pour soutenances en attente
+            if (soutenancesEnAttente.length > 0) {
+              alerts.push({
+                id: 'soutenances-attente',
+                type: 'info',
+                title: 'Demandes de soutenance',
+                message: `Vous avez ${soutenancesEnAttente.length} demande(s) de soutenance à examiner.`,
+                actionLabel: 'Voir les demandes',
+                actionRoute: '/directeur/soutenances',
+                dismissible: true
+              });
+            }
+
+            return alerts;
+          })
+        );
       })
     );
   }

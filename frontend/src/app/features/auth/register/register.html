@@ -41,7 +41,7 @@
               type="text" 
               id="firstName" 
               name="firstName"
-              [(ngModel)]="formData.FirstName"
+              [(ngModel)]="formData.firstName"
               placeholder="Votre prénom"
               required>
           </div>
@@ -52,7 +52,7 @@
               type="text" 
               id="lastName" 
               name="lastName"
-              [(ngModel)]="formData.LastName"
+              [(ngModel)]="formData.lastName"
               placeholder="Votre nom"
               required>
           </div>
@@ -162,6 +162,9 @@
               </li>
               <li [class.valid]="hasSpecialChar()">
                 ✓ Au moins un caractère spécial (@$!%*?&.)
+              </li>
+              <li [class.valid]="hasOnlyAllowedChars()">
+                ✓ Pas d'espaces ni de caractères non autorisés
               </li>
             </ul>
           </div>

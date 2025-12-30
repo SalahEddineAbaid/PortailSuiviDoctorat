@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
@@ -27,6 +27,8 @@ export interface DocumentUploadConfig {
   styleUrls: ['./document-upload.scss']
 })
 export class DocumentUpload implements OnInit {
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+  
   @Input() config!: DocumentUploadConfig;
   @Input() inscriptionId?: number;
   @Input() existingDocument?: DocumentResponse;
@@ -248,15 +250,20 @@ export class DocumentUpload implements OnInit {
     });
   }
 
-  private resetUpload(): void {
+  resetUpload(): void {
     this.selectedFile = null;
     this.previewUrl = null;
     this.uploadProgress = 0;
     
     // Reset file input
-    const fileInput = document.getElementById(`file-input-${this.config.type}`) as HTMLInputElement;
-    if (fileInput) {
-      fileInput.value = '';
+    if (this.fileInput?.nativeElement) {
+      this.fileInput.nativeElement.value = '';
+    }
+  }
+
+  triggerFileInput(): void {
+    if (this.fileInput?.nativeElement) {
+      this.fileInput.nativeElement.click();
     }
   }
 

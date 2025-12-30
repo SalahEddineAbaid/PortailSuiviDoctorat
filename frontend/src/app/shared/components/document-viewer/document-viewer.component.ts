@@ -1,6 +1,10 @@
 import { Component, Input, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatButtonModule } from '@angular/material/button';
 import { Observable, BehaviorSubject, Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
 
@@ -18,7 +22,7 @@ export interface DocumentViewerConfig {
 @Component({
   selector: 'app-document-viewer',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MatIconModule, MatProgressSpinnerModule, MatTooltipModule, MatButtonModule],
   templateUrl: './document-viewer.component.html',
   styleUrls: ['./document-viewer.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -26,19 +30,19 @@ export interface DocumentViewerConfig {
 export class DocumentViewerComponent implements OnInit, OnDestroy {
   @Input() document!: DocumentResponse;
   @Input() config: DocumentViewerConfig = {};
-  
+
   private destroy$ = new Subject<void>();
   private loadingSubject = new BehaviorSubject<boolean>(false);
   private errorSubject = new BehaviorSubject<string | null>(null);
-  
+
   loading$ = this.loadingSubject.asObservable();
   error$ = this.errorSubject.asObservable();
-  
+
   documentUrl: SafeResourceUrl | null = null;
   isImage = false;
   isPdf = false;
   isFullscreen = false;
-  
+
   // Default configuration
   private defaultConfig: DocumentViewerConfig = {
     showToolbar: true,
@@ -51,7 +55,7 @@ export class DocumentViewerComponent implements OnInit, OnDestroy {
   constructor(
     private documentService: DocumentService,
     private sanitizer: DomSanitizer
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.validateInputs();
@@ -97,10 +101,10 @@ export class DocumentViewerComponent implements OnInit, OnDestroy {
 
   private handleDocumentBlob(blob: Blob): void {
     this.cleanupUrl();
-    
+
     const url = URL.createObjectURL(blob);
     this.documentUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
-    
+
     // Determine document type for display
     this.isImage = blob.type.startsWith('image/');
     this.isPdf = blob.type === 'application/pdf';
@@ -138,7 +142,7 @@ export class DocumentViewerComponent implements OnInit, OnDestroy {
 
   onFullscreen(): void {
     this.isFullscreen = !this.isFullscreen;
-    
+
     if (this.isFullscreen) {
       document.body.style.overflow = 'hidden';
     } else {

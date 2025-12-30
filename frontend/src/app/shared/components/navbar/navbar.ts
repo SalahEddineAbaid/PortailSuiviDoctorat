@@ -227,7 +227,8 @@ export class Navbar implements OnInit, OnDestroy {
     if (!this.currentUser?.roles?.length) {
       return '';
     }
-    return this.currentUser.roles[0].name;
+    // ✅ Les rôles sont des strings directement
+    return this.currentUser.roles[0];
   }
 
   getUserRoleLabel(): string {

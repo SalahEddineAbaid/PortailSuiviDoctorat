@@ -9,22 +9,20 @@ import { NotificationListComponent } from './notification-list/notification-list
 import { NotificationBellComponent } from './notification-bell/notification-bell.component';
 import { NotificationDropdownComponent } from './notification-dropdown/notification-dropdown.component';
 import { NotificationSettingsComponent } from './notification-settings/notification-settings.component';
-import { NotificationsRoutingModule } from './notifications.routes';
+import { notificationsRoutes } from './notifications.routes';
 
 @NgModule({
-  declarations: [
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterModule.forChild(notificationsRoutes),
+    SharedModule,
+    // Import standalone components
     NotificationComponent,
     NotificationListComponent,
     NotificationBellComponent,
     NotificationDropdownComponent,
     NotificationSettingsComponent
-  ],
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    RouterModule,
-    SharedModule,
-    NotificationsRoutingModule
   ],
   exports: [
     NotificationBellComponent,

@@ -1,5 +1,9 @@
 import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatButtonModule } from '@angular/material/button';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
 
@@ -15,7 +19,7 @@ export interface DownloadProgress {
 @Component({
   selector: 'app-document-download',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MatIconModule, MatProgressSpinnerModule, MatTooltipModule, MatButtonModule],
   templateUrl: './document-download.component.html',
   styleUrls: ['./document-download.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -504,8 +504,7 @@ html, body {
 }
 
 // High contrast mode
-.high-contrast,
-@media (prefers-contrast: high) {
+.high-contrast {
   :root {
     --primary-color: #0000ff;
     --secondary-color: #000000;
@@ -561,8 +560,7 @@ html, body {
 }
 
 // Reduced motion
-.reduce-motion,
-@media (prefers-reduced-motion: reduce) {
+.reduce-motion {
   *,
   *::before,
   *::after {

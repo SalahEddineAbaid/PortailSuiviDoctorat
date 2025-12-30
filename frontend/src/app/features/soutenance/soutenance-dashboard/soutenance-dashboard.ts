@@ -34,7 +34,7 @@ import { PrerequisCheckComponent } from '../../../shared/components/prerequis-ch
             <i class="icon-clock"></i>
           </div>
           <div class="stat-content">
-            <h3>{{ getCountByStatus('EN_COURS_VALIDATION') }}</h3>
+            <h3>{{ getCountByStatus(SoutenanceStatus.EN_COURS_VALIDATION) }}</h3>
             <p>En cours de validation</p>
           </div>
         </div>
@@ -44,7 +44,7 @@ import { PrerequisCheckComponent } from '../../../shared/components/prerequis-ch
             <i class="icon-check"></i>
           </div>
           <div class="stat-content">
-            <h3>{{ getCountByStatus('AUTORISEE') }}</h3>
+            <h3>{{ getCountByStatus(SoutenanceStatus.AUTORISEE) }}</h3>
             <p>Autorisées</p>
           </div>
         </div>
@@ -54,7 +54,7 @@ import { PrerequisCheckComponent } from '../../../shared/components/prerequis-ch
             <i class="icon-calendar"></i>
           </div>
           <div class="stat-content">
-            <h3>{{ getCountByStatus('SOUTENUE') }}</h3>
+            <h3>{{ getCountByStatus(SoutenanceStatus.SOUTENUE) }}</h3>
             <p>Soutenues</p>
           </div>
         </div>
@@ -136,6 +136,9 @@ import { PrerequisCheckComponent } from '../../../shared/components/prerequis-ch
   styleUrls: ['./soutenance-dashboard.scss']
 })
 export class SoutenanceDashboard implements OnInit {
+  // Make enum available in template
+  SoutenanceStatus = SoutenanceStatus;
+
   soutenances$: Observable<SoutenanceResponse[]>;
   soutenances: SoutenanceResponse[] = [];
   currentUserId: number = 0;
@@ -149,10 +152,11 @@ export class SoutenanceDashboard implements OnInit {
     this.soutenances$ = this.soutenanceService.getMySoutenances();
     
     // Get current user ID
-    const currentUser = this.authService.getCurrentUser();
-    if (currentUser) {
-      this.currentUserId = currentUser.id;
-    }
+    this.authService.getCurrentUser().subscribe(currentUser => {
+      if (currentUser) {
+        this.currentUserId = currentUser.id;
+      }
+    });
   }
 
   ngOnInit(): void {

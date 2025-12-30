@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
@@ -17,6 +17,7 @@ import { StatusWidgetComponent } from '../../../shared/components/status-widget/
 @Component({
   selector: 'app-doctorant-dashboard',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule, 
     RouterModule,
@@ -50,7 +51,8 @@ export class DoctorantDashboard implements OnInit, OnDestroy {
 
   constructor(
     private userService: UserService,
-    private dashboardService: DashboardService
+    private dashboardService: DashboardService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -72,6 +74,7 @@ export class DoctorantDashboard implements OnInit, OnDestroy {
       .subscribe({
         next: (user) => {
           this.user = user;
+          this.cdr.markForCheck();
         },
         error: (error) => {
           console.error('❌ Erreur chargement utilisateur:', error);
@@ -86,11 +89,13 @@ export class DoctorantDashboard implements OnInit, OnDestroy {
         next: (data) => {
           this.dashboardData = data;
           this.isLoading = false;
+          this.cdr.markForCheck();
         },
         error: (error) => {
           console.error('❌ Erreur chargement dashboard:', error);
           this.error = 'Erreur lors du chargement du dashboard';
           this.isLoading = false;
+          this.cdr.markForCheck();
         }
       });
 
@@ -100,6 +105,7 @@ export class DoctorantDashboard implements OnInit, OnDestroy {
       .subscribe({
         next: (widgets) => {
           this.statusWidgets = widgets;
+          this.cdr.markForCheck();
         },
         error: (error) => {
           console.error('❌ Erreur chargement widgets:', error);
@@ -112,6 +118,7 @@ export class DoctorantDashboard implements OnInit, OnDestroy {
       .subscribe({
         next: (indicators) => {
           this.progressIndicators = indicators;
+          this.cdr.markForCheck();
         },
         error: (error) => {
           console.error('❌ Erreur chargement indicateurs:', error);
@@ -122,6 +129,7 @@ export class DoctorantDashboard implements OnInit, OnDestroy {
   onAlertDismiss(alertId: string): void {
     if (this.dashboardData) {
       this.dashboardData.alertes = this.dashboardData.alertes.filter(alert => alert.id !== alertId);
+      this.cdr.markForCheck();
     }
   }
 

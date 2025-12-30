@@ -5,6 +5,7 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { routes } from './app.routes';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
+import { securityInterceptor } from './core/interceptors/security.interceptor';
 import { GlobalErrorHandler } from './core/handlers/global-error.handler';
 
 export const appConfig: ApplicationConfig = {
@@ -13,7 +14,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideAnimations(),  // ← Ajout des animations Angular Material
     provideHttpClient(
-      withInterceptors([authInterceptor, errorInterceptor])  // ← Ajout des interceptors
+      withInterceptors([authInterceptor, securityInterceptor, errorInterceptor])  // ← Ajout des interceptors avec sécurité
     ),
     { provide: ErrorHandler, useClass: GlobalErrorHandler }  // ← Ajout du GlobalErrorHandler
   ]

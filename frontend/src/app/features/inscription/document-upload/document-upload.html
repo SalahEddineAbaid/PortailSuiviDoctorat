@@ -76,7 +76,7 @@
     </div>
     
     <div class="replace-section" *ngIf="!disabled">
-      <button type="button" class="btn btn-outline-primary" (click)="fileInput.click()">
+      <button type="button" class="btn btn-outline-primary" (click)="triggerFileInput()">
         <i class="fas fa-sync-alt"></i>
         Remplacer le document
       </button>
@@ -94,7 +94,7 @@
       (dragover)="onDragOver($event)"
       (dragleave)="onDragLeave($event)"
       (drop)="onDrop($event)"
-      (click)="fileInput.click()"
+      (click)="triggerFileInput()"
     >
       <div class="drop-zone-content">
         <div *ngIf="!selectedFile" class="drop-zone-empty">

@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { NotificationListComponent } from './notification-list/notification-list.component';
 import { NotificationSettingsComponent } from './notification-settings/notification-settings.component';
 
-export const routes: Routes = [
+export const notificationsRoutes: Routes = [
   {
     path: '',
     redirectTo: 'list',
@@ -17,12 +17,3 @@ export const routes: Routes = [
     component: NotificationSettingsComponent
   }
 ];
-
-import { NgModule } from '@angular/core';
-import { RouterModule } from '@angular/router';
-
-@NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
-})
-export class NotificationsRoutingModule { }

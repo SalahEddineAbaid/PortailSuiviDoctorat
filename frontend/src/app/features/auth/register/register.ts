@@ -15,8 +15,8 @@ export class Register {
   formData: RegisterRequest = {
     email: '',
     password: '',
-    FirstName: '',
-    LastName: '',
+    firstName: '',
+    lastName: '',
     phoneNumber: '',
     adresse: '',
     ville: '',
@@ -74,6 +74,14 @@ export class Register {
   }
 
   /**
+   * 🔹 Vérifier si le mot de passe contient uniquement des caractères autorisés
+   * (pas d'espaces ni de caractères non autorisés)
+   */
+  hasOnlyAllowedChars(): boolean {
+    return /^[A-Za-z\d@$!%*?&.]+$/.test(this.formData.password);
+  }
+
+  /**
    * Valider le mot de passe selon les critères du backend
    */
   validatePassword(): void {
@@ -95,6 +103,9 @@ export class Register {
     if (!this.hasSpecialChar()) {
       this.passwordErrors.push('Au moins un caractère spécial (@$!%*?&.)');
     }
+    if (!this.hasOnlyAllowedChars()) {
+      this.passwordErrors.push('Le mot de passe ne doit contenir que des lettres, chiffres et caractères spéciaux (@$!%*?&.) - pas d\'espaces');
+    }
   }
 
   /**
@@ -105,8 +116,8 @@ export class Register {
     this.successMessage = '';
 
     // Validation basique
-    if (!this.formData.email || !this.formData.password || !this.formData.FirstName || 
-        !this.formData.LastName || !this.formData.phoneNumber || !this.formData.adresse || 
+    if (!this.formData.email || !this.formData.password || !this.formData.firstName || 
+        !this.formData.lastName || !this.formData.phoneNumber || !this.formData.adresse || 
         !this.formData.ville || !this.formData.pays) {
       this.errorMessage = 'Veuillez remplir tous les champs obligatoires';
       return;

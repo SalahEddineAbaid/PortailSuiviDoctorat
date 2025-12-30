@@ -4,7 +4,7 @@
 
   <div class="dashboard-content">
     <!-- Sidebar -->
-    <app-sidebar [menuItems]="menuItems" [title]="'Menu Doctorant'"></app-sidebar>
+    <app-sidebar [customMenuItems]="menuItems" [title]="'Menu Doctorant'"></app-sidebar>
 
     <!-- Main Content -->
     <main class="main-content">
@@ -130,7 +130,7 @@
           </div>
 
           <!-- Recent Notifications -->
-          <div class="notifications-section" *ngIf="dashboardData?.notifications && dashboardData.notifications.length > 0">
+          <div class="notifications-section" *ngIf="(dashboardData?.notifications?.length ?? 0) > 0">
             <div class="notifications-card">
               <div class="card-header">
                 <h3>Notifications récentes</h3>
@@ -138,7 +138,7 @@
               </div>
               <div class="notifications-list">
                 <div 
-                  *ngFor="let notification of dashboardData.notifications.slice(0, 3)" 
+                  *ngFor="let notification of dashboardData?.notifications?.slice(0, 3)" 
                   class="notification-item"
                   [ngClass]="{ 'unread': !notification.lue }"
                 >
@@ -156,11 +156,11 @@
           </div>
 
           <!-- Documents Status -->
-          <div class="documents-section" *ngIf="dashboardData?.documentsManquants && dashboardData.documentsManquants.length > 0">
+          <div class="documents-section" *ngIf="(dashboardData?.documentsManquants?.length ?? 0) > 0">
             <div class="documents-card">
               <h3>Documents manquants</h3>
               <div class="documents-list">
-                <div *ngFor="let document of dashboardData.documentsManquants" class="document-item">
+                <div *ngFor="let document of dashboardData?.documentsManquants" class="document-item">
                   <i class="fas fa-file-alt"></i>
                   <span>{{ document }}</span>
                 </div>

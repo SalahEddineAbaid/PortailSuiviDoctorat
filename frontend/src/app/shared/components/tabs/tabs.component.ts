@@ -57,10 +57,10 @@ export class TabComponent {
             [attr.id]="'tab-' + tab.id"
             role="tab"
             (click)="selectTab(tab.id)"
-            (keydown.arrowleft)="navigateTab(-1, $event)"
-            (keydown.arrowright)="navigateTab(1, $event)"
-            (keydown.home)="navigateToFirstTab($event)"
-            (keydown.end)="navigateToLastTab($event)"
+            (keydown.arrowleft)="navigateTab(-1, $any($event))"
+            (keydown.arrowright)="navigateTab(1, $any($event))"
+            (keydown.home)="navigateToFirstTab($any($event))"
+            (keydown.end)="navigateToLastTab($any($event))"
           >
             <span *ngIf="tab.icon" class="material-icons tab-icon" aria-hidden="true">{{ tab.icon }}</span>
             <span class="tab-label">{{ tab.label }}</span>
@@ -99,7 +99,7 @@ export class TabComponent {
           [attr.hidden]="tab.id !== activeTabId"
           role="tabpanel"
         >
-          <ng-content [select]="'[data-tab-id=\"' + tab.id + '\"]'"></ng-content>
+          <ng-content></ng-content>
         </div>
       </div>
     </div>

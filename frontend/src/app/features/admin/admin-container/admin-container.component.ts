@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { AuthService } from '../../../core/services/auth.service';
-import { User } from '../../../core/models/user.model';
+import { Subscription } from 'rxjs';
+import { AuthService, UserResponse } from '../../../core/services/auth.service';
 import { AdminMenuComponent } from '../admin-menu/admin-menu.component';
 
 @Component({
@@ -44,8 +44,9 @@ import { AdminMenuComponent } from '../admin-menu/admin-menu.component';
   `,
   styleUrls: ['./admin-container.component.scss']
 })
-export class AdminContainerComponent implements OnInit {
-  currentUser: User | null = null;
+export class AdminContainerComponent implements OnInit, OnDestroy {
+  currentUser: UserResponse | null = null;
+  private subscription = new Subscription();
 
   constructor(
     private authService: AuthService,
@@ -53,8 +54,16 @@ export class AdminContainerComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.currentUser = this.authService.getCurrentUser();
-    console.log('✅ AdminContainer chargé pour:', this.currentUser?.FirstName);
+    this.subscription.add(
+      this.authService.getCurrentUser().subscribe(user => {
+        this.currentUser = user;
+        console.log('✅ AdminContainer chargé pour:', this.currentUser?.FirstName);
+      })
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 
   goToDashboard(): void {

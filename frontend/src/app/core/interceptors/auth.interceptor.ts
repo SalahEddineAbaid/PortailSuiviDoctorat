@@ -2,17 +2,17 @@ import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
-import { AuthService } from '../services/auth.service';
+import { environment } from '../../environments/environment';
 
 /**
  * 🔐 Interceptor qui ajoute automatiquement le JWT à chaque requête HTTP
+ * ⚠️ N'injecte PAS AuthService pour éviter la dépendance circulaire
  */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const authService = inject(AuthService);
   const router = inject(Router);
   
-  // ✅ Utiliser getToken() au lieu de getAccessToken()
-  const token = authService.getToken();
+  // ✅ Accéder directement au localStorage pour éviter la dépendance circulaire
+  const token = localStorage.getItem(environment.tokenKey);
 
   // ✅ Si pas de token, ou si c'est une requête d'authentification, ne rien faire
   if (!token || 
@@ -36,7 +36,9 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     catchError((error: HttpErrorResponse) => {
       if (error.status === 401) {
         console.warn('⚠️ Token expiré ou invalide, déconnexion...');
-        authService.logout();
+        // ✅ Nettoyer les tokens directement
+        localStorage.removeItem(environment.tokenKey);
+        localStorage.removeItem(environment.refreshTokenKey);
         router.navigate(['/login'], {
           queryParams: { expired: 'true' }
         });

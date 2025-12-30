@@ -245,10 +245,11 @@ export class SoutenanceForm implements OnInit {
     this.initializeDocumentConfigs();
     
     // Get current user ID
-    const currentUser = this.authService.getCurrentUser();
-    if (currentUser) {
-      this.currentUserId = currentUser.id;
-    }
+    this.authService.getCurrentUser().subscribe(currentUser => {
+      if (currentUser) {
+        this.currentUserId = currentUser.id;
+      }
+    });
   }
 
   ngOnInit(): void {

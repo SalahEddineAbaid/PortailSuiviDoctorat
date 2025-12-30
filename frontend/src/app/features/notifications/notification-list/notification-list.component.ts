@@ -1,10 +1,12 @@
 import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { Observable, Subject, combineLatest } from 'rxjs';
 import { takeUntil, map, startWith } from 'rxjs/operators';
-import { FormControl } from '@angular/forms';
 
 import { NotificationService } from '../../../core/services/notification.service';
 import { NotificationResponse, NotificationType } from '../../../core/models/notification.model';
+import { NotificationComponent } from '../notification/notification.component';
 
 interface FilterOptions {
   type: NotificationType | 'ALL';
@@ -14,6 +16,8 @@ interface FilterOptions {
 
 @Component({
   selector: 'app-notification-list',
+  standalone: true,
+  imports: [CommonModule, AsyncPipe, ReactiveFormsModule, NotificationComponent],
   templateUrl: './notification-list.component.html',
   styleUrls: ['./notification-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

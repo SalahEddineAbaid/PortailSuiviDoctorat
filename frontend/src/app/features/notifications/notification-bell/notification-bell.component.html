@@ -2,7 +2,7 @@
   <!-- Bouton cloche -->
   <button 
     class="bell-button"
-    [class.has-notifications]="(unreadCount$ | async) > 0"
+    [class.has-notifications]="((unreadCount$ | async) ?? 0) > 0"
     [class.new-notification]="hasNewNotifications"
     [class.dropdown-open]="isDropdownOpen"
     (click)="toggleDropdown()"
@@ -40,7 +40,7 @@
         <button 
           class="btn-icon"
           (click)="markAllAsRead()"
-          *ngIf="(unreadCount$ | async) > 0"
+          *ngIf="((unreadCount$ | async) ?? 0) > 0"
           title="Marquer toutes comme lues"
         >
           <i class="material-icons">done_all</i>
@@ -78,7 +78,7 @@
     </div>
 
     <!-- Pied du dropdown -->
-    <div class="dropdown-footer" *ngIf="(notifications$ | async)?.length > 0">
+    <div class="dropdown-footer" *ngIf="((notifications$ | async)?.length ?? 0) > 0">
       <button 
         class="view-all-btn"
         (click)="viewAllNotifications()"
@@ -86,8 +86,8 @@
       >
         <i class="material-icons">list</i>
         Voir toutes les notifications
-        <span *ngIf="(notifications$ | async)?.length > 5">
-          ({{ (notifications$ | async)?.length - 5 }} de plus)
+        <span *ngIf="((notifications$ | async)?.length ?? 0) > 5">
+          ({{ ((notifications$ | async)?.length ?? 0) - 5 }} de plus)
         </span>
       </button>
     </div>

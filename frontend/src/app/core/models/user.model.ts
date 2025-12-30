@@ -1,5 +1,3 @@
-import { Role } from './role.model';
-
 /**
  * 🔹 Représente un utilisateur complet (aligné avec User.java du backend)
  */
@@ -13,7 +11,7 @@ export interface User {
   ville: string;
   pays: string;
   enabled: boolean;
-  roles: Role[];
+  roles: string[];  // ✅ Backend renvoie Set<String> pas Role[]
 }
 
 /**
@@ -28,6 +26,6 @@ export interface UserResponse {
   adresse: string;
   ville: string;
   pays: string;
-  roles: Role[];
-  enabled: boolean;
+  roles: string[];  // ✅ Backend renvoie Set<String> pas Role[]
+  enabled?: boolean;
 }

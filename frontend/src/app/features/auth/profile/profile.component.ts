@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { AuthService, UpdateProfileRequest, ChangePasswordRequest, UserInfo } from '../../../core/services/auth.service';
+import { AuthService, UpdateProfileRequest, ChangePasswordRequest, UserResponse } from '../../../core/services/auth.service';
 import { CustomValidators } from '../../../core/validators/custom-validators';
 import { Router } from '@angular/router';
 
@@ -15,8 +15,8 @@ import { Router } from '@angular/router';
 export class ProfileComponent implements OnInit {
   profileForm: FormGroup;
   passwordForm: FormGroup;
-  currentUser: UserInfo | null = null;
-  
+  currentUser: UserResponse | null = null;
+
   isLoadingProfile = false;
   isLoadingPassword = false;
   profileSuccess = false;
@@ -32,10 +32,7 @@ export class ProfileComponent implements OnInit {
     this.profileForm = this.fb.group({
       FirstName: ['', [Validators.required, Validators.minLength(2), CustomValidators.name]],
       LastName: ['', [Validators.required, Validators.minLength(2), CustomValidators.name]],
-      phoneNumber: ['', [Validators.required, CustomValidators.phoneNumber]],
-      adresse: ['', [Validators.required, Validators.minLength(5)]],
-      ville: ['', [Validators.required, Validators.minLength(2), CustomValidators.name]],
-      pays: ['', [Validators.required, Validators.minLength(2), CustomValidators.name]]
+      phoneNumber: ['', [Validators.required, CustomValidators.phoneNumber]]
     });
 
     this.passwordForm = this.fb.group({
@@ -50,28 +47,27 @@ export class ProfileComponent implements OnInit {
   }
 
   private loadUserProfile(): void {
-    this.currentUser = this.authService.getCurrentUser();
-    if (this.currentUser) {
-      this.profileForm.patchValue({
-        FirstName: this.currentUser.FirstName,
-        LastName: this.currentUser.LastName,
-        phoneNumber: this.currentUser.phoneNumber,
-        adresse: this.currentUser.adresse,
-        ville: this.currentUser.ville,
-        pays: this.currentUser.pays
-      });
-    }
+    this.authService.getCurrentUser().subscribe(user => {
+      this.currentUser = user;
+      if (this.currentUser) {
+        this.profileForm.patchValue({
+          FirstName: this.currentUser.FirstName,
+          LastName: this.currentUser.LastName,
+          phoneNumber: this.currentUser.phoneNumber
+        });
+      }
+    });
   }
 
   private passwordMatchValidator(form: FormGroup) {
     const newPassword = form.get('newPassword');
     const confirmPassword = form.get('confirmPassword');
-    
+
     if (newPassword && confirmPassword && newPassword.value !== confirmPassword.value) {
       confirmPassword.setErrors({ passwordMismatch: true });
       return { passwordMismatch: true };
     }
-    
+
     return null;
   }
 
@@ -88,7 +84,7 @@ export class ProfileComponent implements OnInit {
           console.log('✅ Profil mis à jour:', response);
           this.profileSuccess = true;
           this.isLoadingProfile = false;
-          
+
           // Masquer le message de succès après 3 secondes
           setTimeout(() => {
             this.profileSuccess = false;
@@ -122,7 +118,7 @@ export class ProfileComponent implements OnInit {
           this.passwordSuccess = true;
           this.isLoadingPassword = false;
           this.passwordForm.reset();
-          
+
           // Masquer le message de succès après 3 secondes
           setTimeout(() => {
             this.passwordSuccess = false;
@@ -143,7 +139,7 @@ export class ProfileComponent implements OnInit {
     if (error.error?.message) {
       return error.error.message;
     }
-    
+
     switch (error.status) {
       case 400:
         return 'Données invalides. Veuillez vérifier votre saisie.';

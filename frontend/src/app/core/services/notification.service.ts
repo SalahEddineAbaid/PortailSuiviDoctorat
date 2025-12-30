@@ -44,6 +44,9 @@ export class NotificationService implements OnDestroy {
   public websocketMessages$: Observable<any>;
   public websocketState$: Observable<WebSocketState>;
 
+  // Flag pour savoir si le service de notification backend est disponible
+  private notificationServiceAvailable = true;
+
   constructor(
     private http: HttpClient,
     private webSocketService: WebSocketService
@@ -54,17 +57,22 @@ export class NotificationService implements OnDestroy {
     );
     this.websocketState$ = this.webSocketService.state$;
     
-    this.loadNotifications();
-    this.setupWebSocketSubscriptions();
+    // ⚠️ Ne PAS charger automatiquement les notifications au démarrage
+    // Les notifications seront chargées quand l'utilisateur sera authentifié
+    // this.loadNotifications();
+    // this.setupWebSocketSubscriptions();
+    
+    console.log('🔔 [NOTIFICATION SERVICE] Service initialisé (chargement différé)');
   }
 
   // ===== HTTP ENDPOINTS =====
 
   /**
    * 🔹 Récupérer mes notifications
+   * Note: Peut retourner 404 si le service notification n'est pas déployé
    */
   getMyNotifications(): Observable<NotificationResponse[]> {
-    console.log('📤 [NOTIFICATION SERVICE] Récupération notifications');
+    // Ne pas logger ici - laisser le caller gérer les erreurs
     return this.http.get<NotificationResponse[]>(`${this.API_URL}/me`);
   }
 
@@ -191,6 +199,20 @@ export class NotificationService implements OnDestroy {
   // ===== STATE MANAGEMENT =====
 
   /**
+   * 🔹 Initialiser le service de notifications (à appeler après connexion)
+   */
+  public initialize(): void {
+    if (!this.notificationServiceAvailable) {
+      console.log('ℹ️ [NOTIFICATION SERVICE] Service non disponible, initialisation ignorée');
+      return;
+    }
+    
+    console.log('🔔 [NOTIFICATION SERVICE] Initialisation...');
+    this.loadNotifications();
+    this.setupWebSocketSubscriptions();
+  }
+
+  /**
    * 🔹 Charger les notifications depuis l'API
    */
   private loadNotifications(): void {
@@ -199,9 +221,20 @@ export class NotificationService implements OnDestroy {
         console.log('✅ [NOTIFICATION SERVICE] Notifications chargées:', notifications.length);
         this.notificationsSubject.next(notifications);
         this.updateUnreadCount(notifications);
+        this.notificationServiceAvailable = true;
       },
       error: (error) => {
-        console.error('❌ [NOTIFICATION SERVICE] Erreur chargement notifications:', error);
+        // Si 404, le service n'existe pas - silencieux
+        if (error.status === 404) {
+          // Service non disponible - pas de log d'erreur
+          this.notificationServiceAvailable = false;
+        } else if (error.status !== 401) {
+          // Ne pas logger les erreurs 401 (utilisateur non connecté)
+          console.warn('⚠️ [NOTIFICATION SERVICE] Service indisponible:', error.status);
+        }
+        // Initialiser avec un tableau vide en cas d'erreur
+        this.notificationsSubject.next([]);
+        this.unreadCountSubject.next(0);
       }
     });
   }

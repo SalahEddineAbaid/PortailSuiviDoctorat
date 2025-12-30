@@ -1,6 +1,9 @@
 import { Component, Input, Output, EventEmitter, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatButtonModule } from '@angular/material/button';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
 
@@ -46,7 +49,7 @@ export interface ProcesVerbalResponse {
 @Component({
   selector: 'app-proces-verbal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, MatIconModule, MatProgressSpinnerModule, MatButtonModule],
   templateUrl: './proces-verbal.component.html',
   styleUrls: ['./proces-verbal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -79,13 +82,13 @@ export class ProcesVerbalComponent implements OnInit {
   mentions = MentionSoutenance;
   
   // Labels for display
-  resultatLabels = {
+  resultatLabels: { [key: string]: string } = {
     [ResultatSoutenance.ADMIS]: 'Admis',
     [ResultatSoutenance.AJOURNE]: 'Ajourné',
     [ResultatSoutenance.REFUSE]: 'Refusé'
   };
   
-  mentionLabels = {
+  mentionLabels: { [key: string]: string } = {
     [MentionSoutenance.TRES_HONORABLE]: 'Très honorable',
     [MentionSoutenance.TRES_HONORABLE_FELICITATIONS]: 'Très honorable avec félicitations du jury',
     [MentionSoutenance.HONORABLE]: 'Honorable',

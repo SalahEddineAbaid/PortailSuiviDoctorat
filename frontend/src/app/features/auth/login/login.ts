@@ -48,8 +48,8 @@ export class Login {
     this.isLoading = true;
 
     this.authService.login(this.formData).subscribe({
-      next: (response) => {
-        console.log('✅ Connexion réussie !', response);
+      next: (user) => {
+        console.log('✅ Connexion réussie ! Utilisateur:', user);
         
         // ✅ Redirection automatique selon le rôle
         const dashboardRoute = this.authService.getDashboardRoute();

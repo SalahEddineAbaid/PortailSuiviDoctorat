@@ -1,6 +1,9 @@
 import { Component, Input, Output, EventEmitter, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatButtonModule } from '@angular/material/button';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
 
@@ -29,7 +32,7 @@ export interface AutorisationResponse {
 @Component({
   selector: 'app-autorisation-soutenance',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, MatIconModule, MatProgressSpinnerModule, MatButtonModule],
   templateUrl: './autorisation-soutenance.component.html',
   styleUrls: ['./autorisation-soutenance.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

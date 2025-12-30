@@ -37,9 +37,9 @@
             <span class="status-label">Notifications temps réel</span>
             <span 
               class="status-value"
-              [class]="'status-' + getWebSocketStateColor((webSocketState$ | async))"
+              [class]="'status-' + getWebSocketStateColor((webSocketState$ | async)!)"
             >
-              {{ getWebSocketStateText((webSocketState$ | async)) }}
+              {{ getWebSocketStateText((webSocketState$ | async)!) }}
             </span>
           </div>
           <div class="status-actions">

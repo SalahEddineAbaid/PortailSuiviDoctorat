@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { CacheService } from './cache.service';
 import {
   Inscription,
   InscriptionRequest,
@@ -20,7 +21,10 @@ export class InscriptionService {
   private readonly API_URL = `${environment.apiUrl}/inscriptions`;
   private readonly CAMPAGNE_API_URL = `${environment.apiUrl}/campagnes`;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private cacheService: CacheService
+  ) {}
 
   // ===== INSCRIPTION ENDPOINTS =====
 
@@ -29,6 +33,7 @@ export class InscriptionService {
    */
   createInscription(data: InscriptionRequest): Observable<InscriptionResponse> {
     console.log('📤 [INSCRIPTION SERVICE] Création inscription:', data);
+    this.invalidateCache();
     return this.http.post<InscriptionResponse>(this.API_URL, data);
   }
 
@@ -61,7 +66,12 @@ export class InscriptionService {
    */
   getMyInscriptions(): Observable<InscriptionResponse[]> {
     console.log('📤 [INSCRIPTION SERVICE] Mes inscriptions');
-    return this.http.get<InscriptionResponse[]>(`${this.API_URL}/me`);
+    const cacheKey = 'my-inscriptions';
+    return this.cacheService.cacheObservable(
+      cacheKey,
+      this.http.get<InscriptionResponse[]>(`${this.API_URL}/me`),
+      2 * 60 * 1000 // 2 minutes cache
+    );
   }
 
   /**
@@ -119,7 +129,12 @@ export class InscriptionService {
    */
   getAllCampagnes(): Observable<CampagneResponse[]> {
     console.log('📤 [INSCRIPTION SERVICE] Toutes les campagnes');
-    return this.http.get<CampagneResponse[]>(this.CAMPAGNE_API_URL);
+    const cacheKey = 'all-campagnes';
+    return this.cacheService.cacheObservable(
+      cacheKey,
+      this.http.get<CampagneResponse[]>(this.CAMPAGNE_API_URL),
+      10 * 60 * 1000 // 10 minutes cache
+    );
   }
 
   /**
@@ -142,7 +157,12 @@ export class InscriptionService {
    */
   getCampagneActive(): Observable<CampagneResponse | null> {
     console.log('📤 [INSCRIPTION SERVICE] Campagne active');
-    return this.http.get<CampagneResponse>(`${this.CAMPAGNE_API_URL}/active`);
+    const cacheKey = 'campagne-active';
+    return this.cacheService.cacheObservable(
+      cacheKey,
+      this.http.get<CampagneResponse>(`${this.CAMPAGNE_API_URL}/active`),
+      5 * 60 * 1000 // 5 minutes cache
+    );
   }
 
   /**
@@ -185,6 +205,15 @@ export class InscriptionService {
   }
 
   // ===== UTILITY METHODS =====
+
+  /**
+   * 🔹 Invalider le cache après modification
+   */
+  private invalidateCache(): void {
+    this.cacheService.remove('my-inscriptions');
+    this.cacheService.remove('all-campagnes');
+    this.cacheService.remove('campagne-active');
+  }
 
   /**
    * 🔹 Vérifier si une campagne est ouverte

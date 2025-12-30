@@ -1,12 +1,16 @@
 import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, Output, EventEmitter } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { NotificationService } from '../../../core/services/notification.service';
 import { NotificationResponse } from '../../../core/models/notification.model';
+import { NotificationComponent } from '../notification/notification.component';
 
 @Component({
   selector: 'app-notification-bell',
+  standalone: true,
+  imports: [CommonModule, AsyncPipe, NotificationComponent],
   templateUrl: './notification-bell.component.html',
   styleUrls: ['./notification-bell.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
