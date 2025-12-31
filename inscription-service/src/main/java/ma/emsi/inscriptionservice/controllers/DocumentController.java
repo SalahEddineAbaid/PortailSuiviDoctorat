@@ -3,6 +3,7 @@ package ma.emsi.inscriptionservice.controllers;
 import lombok.RequiredArgsConstructor;
 import ma.emsi.inscriptionservice.DTOs.DocumentResponse;
 import ma.emsi.inscriptionservice.enums.TypeDocument;
+import ma.emsi.inscriptionservice.exceptions.InvalidDocumentException;
 import ma.emsi.inscriptionservice.services.DocumentService;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -70,7 +71,19 @@ public class DocumentController {
     }
 
     /**
-     * Gestion des erreurs
+     * Gestion des erreurs de validation de document
+     */
+    @ExceptionHandler(InvalidDocumentException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidDocumentException(InvalidDocumentException e) {
+        return ResponseEntity.status(e.getHttpStatus())
+                .body(Map.of(
+                    "error", e.getMessage(),
+                    "errorCode", e.getErrorCode()
+                ));
+    }
+
+    /**
+     * Gestion des erreurs génériques
      */
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException e) {

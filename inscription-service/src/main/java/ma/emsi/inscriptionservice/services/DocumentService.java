@@ -21,7 +21,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,6 +30,7 @@ public class DocumentService {
 
     private final DocumentInscriptionRepository documentRepository;
     private final InscriptionRepository inscriptionRepository;
+    private final DocumentValidationService documentValidationService;
 
     @Value("${app.upload.dir:./uploads}")
     private String uploadDir;
@@ -44,14 +44,15 @@ public class DocumentService {
         Inscription inscription = inscriptionRepository.findById(inscriptionId)
                 .orElseThrow(() -> new RuntimeException("Inscription introuvable"));
 
-        // Vérifier le type de fichier
-        String contentType = file.getContentType();
-        if (!contentType.equals("application/pdf") && !contentType.startsWith("image/")) {
-            throw new RuntimeException("Type de fichier non autorisé");
-        }
+        // Valider le document avec le service de validation
+        documentValidationService.validateDocument(file, typeDocument);
 
-        // Générer un nom unique
-        String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+        // Générer un nom de fichier sécurisé
+        String fileName = documentValidationService.generateSecureFileName(
+            typeDocument, 
+            inscription.getDoctorantId(), 
+            file.getOriginalFilename()
+        );
 
         try {
             // Créer le dossier s'il n'existe pas
@@ -71,7 +72,7 @@ public class DocumentService {
                     .nomFichier(file.getOriginalFilename())
                     .cheminFichier(filePath.toString())
                     .tailleFichier(file.getSize())
-                    .mimeType(contentType)
+                    .mimeType(file.getContentType())
                     .valide(false)
                     .build();
 

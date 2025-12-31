@@ -22,4 +22,8 @@ public interface CampagneRepository extends JpaRepository<Campagne, Long> {
     Optional<Campagne> findByTypeAndAnneeUniversitaire(TypeCampagne type, Integer anneeUniversitaire);
 
     List<Campagne> findByAnneeUniversitaire(Integer anneeUniversitaire);
+    
+    List<Campagne> findByDateDebut(LocalDate dateDebut);
+    
+    List<Campagne> findByDateFin(LocalDate dateFin);
 }

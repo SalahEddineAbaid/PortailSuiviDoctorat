@@ -1,0 +1,4 @@
+# This directory contains images for PDF generation
+# Required files:
+# - logo-etablissement.png: Institution logo for attestation header
+# - signature-chef.png: Director signature for attestation footer

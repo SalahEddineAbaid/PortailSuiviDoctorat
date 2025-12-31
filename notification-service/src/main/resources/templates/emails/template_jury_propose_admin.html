@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jury proposé</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #F5F5F5;">
+    <table role="presentation" style="width: 100%; border-collapse: collapse;">
+        <tr>
+            <td style="padding: 20px 0;">
+                <table role="presentation" style="max-width: 600px; margin: 0 auto; background-color: #FFFFFF; border-collapse: collapse;">
+                    <!-- Header -->
+                    <tr>
+                        <td style="background-color: #003366; padding: 30px; text-align: center;">
+                            <h1 style="color: #FFFFFF; margin: 0; font-size: 24px;">Portail Doctorat</h1>
+                        </td>
+                    </tr>
+                    
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 40px 30px;">
+                            <h2 style="color: #003366; margin: 0 0 20px 0; font-size: 20px;">Composition de jury proposée</h2>
+                            
+                            <p style="color: #333333; line-height: 1.6; margin: 0 0 15px 0;">
+                                Bonjour,
+                            </p>
+                            
+                            <p style="color: #333333; line-height: 1.6; margin: 0 0 15px 0;">
+                                Une composition de jury a été proposée pour la soutenance de thèse et nécessite votre validation.
+                            </p>
+                            
+                            <div style="background-color: #F5F5F5; padding: 20px; margin: 20px 0; border-left: 4px solid #003366;">
+                                <p style="margin: 0 0 10px 0; color: #333333;"><strong>Informations sur la soutenance :</strong></p>
+                                <p style="margin: 5px 0; color: #333333;">Doctorant : {{nomDoctorant}}</p>
+                                <p style="margin: 5px 0; color: #333333;">Directeur : {{nomDirecteur}}</p>
+                                <p style="margin: 5px 0; color: #333333;">Titre de la thèse : {{titreThese}}</p>
+                                <p style="margin: 5px 0; color: #333333;">Date proposée : {{dateSoutenance}}</p>
+                            </div>
+                            
+                            <div style="background-color: #F5F5F5; padding: 20px; margin: 20px 0;">
+                                <p style="margin: 0 0 10px 0; color: #333333;"><strong>Composition du jury :</strong></p>
+                                <p style="margin: 5px 0; color: #333333;">{{compositionJury}}</p>
+                            </div>
+                            
+                            <p style="color: #333333; line-height: 1.6; margin: 20px 0 15px 0;">
+                                Veuillez examiner la composition proposée et donner votre validation.
+                            </p>
+                            
+                            <table role="presentation" style="margin: 30px 0;">
+                                <tr>
+                                    <td style="background-color: #003366; border-radius: 4px;">
+                                        <a href="{{lienPortail}}" style="display: inline-block; padding: 12px 30px; color: #FFFFFF; text-decoration: none; font-weight: bold;">
+                                            Examiner le jury
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <p style="color: #666666; line-height: 1.6; margin: 20px 0 0 0; font-size: 14px;">
+                                Cordialement,<br>
+                                L'équipe du Portail Doctorat
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color: #F5F5F5; padding: 20px 30px; text-align: center;">
+                            <p style="color: #666666; margin: 0; font-size: 12px;">
+                                Cet email a été envoyé automatiquement, merci de ne pas y répondre.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

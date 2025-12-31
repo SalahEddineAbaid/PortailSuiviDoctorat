@@ -45,4 +45,12 @@ public interface InscriptionRepository extends JpaRepository<Inscription, Long> 
     @Query("SELECT COUNT(i) FROM Inscription i WHERE i.doctorantId = :doctorantId " +
             "AND i.statut = 'VALIDE'")
     Long countInscriptionsValidees(Long doctorantId);
+
+    List<Inscription> findByCampagneId(Long campagneId);
+
+    @Query("SELECT i FROM Inscription i WHERE i.campagne.id = :campagneId AND i.statut = :statut")
+    List<Inscription> findByCampagneIdAndStatut(Long campagneId, StatutInscription statut);
+
+    @Query("SELECT COUNT(i) FROM Inscription i WHERE i.campagne.id = :campagneId AND i.statut = :statut")
+    Long countByCampagneIdAndStatut(Long campagneId, StatutInscription statut);
 }

@@ -4,6 +4,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import ma.emsi.inscriptionservice.DTOs.CampagneRequest;
 import ma.emsi.inscriptionservice.DTOs.CampagneResponse;
+import ma.emsi.inscriptionservice.DTOs.CloneCampagneRequest;
+import ma.emsi.inscriptionservice.DTOs.StatistiquesCampagne;
 import ma.emsi.inscriptionservice.services.CampagneService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -78,6 +80,32 @@ public class CampagneController {
             @Valid @RequestBody CampagneRequest request) {
         CampagneResponse response = campagneService.modifierCampagne(id, request);
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Récupérer les statistiques d'une campagne
+     */
+    @GetMapping("/{id}/statistiques")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<StatistiquesCampagne> getStatistiques(@PathVariable Long id) {
+        StatistiquesCampagne statistiques = campagneService.getStatistiques(id);
+        return ResponseEntity.ok(statistiques);
+    }
+
+    /**
+     * Cloner une campagne existante avec de nouvelles dates
+     */
+    @PostMapping("/{id}/cloner")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<CampagneResponse> clonerCampagne(
+            @PathVariable Long id,
+            @Valid @RequestBody CloneCampagneRequest request) {
+        CampagneResponse response = campagneService.clonerCampagne(
+                id, 
+                request.getDateDebut(), 
+                request.getDateFin()
+        );
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     /**

@@ -44,6 +44,7 @@ public class Inscription {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default
     private StatutInscription statut = StatutInscription.BROUILLON;
 
     @Column(nullable = false)
@@ -59,6 +60,7 @@ public class Inscription {
     @Column(length = 1000)
     private String commentaireAdmin;
 
+    @Builder.Default
     private Boolean derogation = false;
 
     @Column(length = 500)
@@ -71,10 +73,28 @@ public class Inscription {
     private InfosThese infosThese;
 
     @OneToMany(mappedBy = "inscription", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<DocumentInscription> documents = new ArrayList<>();
 
     @OneToMany(mappedBy = "inscription", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<ValidationInscription> validations = new ArrayList<>();
+
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean bloqueReInscription = false;
+
+    @OneToMany(mappedBy = "inscription", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<DerogationRequest> derogations = new ArrayList<>();
+
+    @OneToMany(mappedBy = "inscription", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<AlerteDuree> alertes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "inscription", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<DocumentGenere> documentsGeneres = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {

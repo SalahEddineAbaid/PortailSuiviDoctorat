@@ -5,6 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import ma.emsi.inscriptionservice.client.UserServiceClient;
 import ma.emsi.inscriptionservice.DTOs.NotificationDTO;
 import ma.emsi.inscriptionservice.DTOs.UserDTO;
+import ma.emsi.inscriptionservice.entities.InfosDoctorant;
+import ma.emsi.inscriptionservice.entities.Inscription;
+import ma.emsi.inscriptionservice.repositories.InscriptionRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -18,6 +21,8 @@ public class NotificationService {
 
     private final KafkaTemplate<String, NotificationDTO> kafkaTemplate;
     private final UserServiceClient userServiceClient;
+    private final AttestationPdfGenerator attestationPdfGenerator;
+    private final InscriptionRepository inscriptionRepository;
 
     @Value("${kafka.topic.notifications:notifications}")
     private String notificationTopic;
@@ -146,6 +151,182 @@ public class NotificationService {
 
     public void genererAttestationInscription(Long inscriptionId) {
         log.info("Génération attestation pour inscription {}", inscriptionId);
-        // TODO: Implémenter la génération PDF avec iText
+        
+        try {
+            // Récupérer l'inscription avec toutes les informations
+            Inscription inscription = inscriptionRepository.findById(inscriptionId)
+                    .orElseThrow(() -> new RuntimeException("Inscription introuvable"));
+            
+            InfosDoctorant infosDoctorant = inscription.getInfosDoctorant();
+            if (infosDoctorant == null) {
+                log.error("Informations doctorant manquantes pour l'inscription {}", inscriptionId);
+                throw new RuntimeException("Informations doctorant manquantes");
+            }
+            
+            // Récupérer les informations du directeur avec la méthode dédiée
+            // Requirements: 2.2 - Fetch director information for attestation
+            UserDTO directeur = userServiceClient.getDirectorInfo(inscription.getDirecteurTheseId());
+            
+            // Générer l'attestation PDF
+            String filePath = attestationPdfGenerator.generateAttestation(
+                    inscription, 
+                    infosDoctorant, 
+                    directeur
+            );
+            
+            log.info("Attestation générée avec succès pour l'inscription {}: {}", inscriptionId, filePath);
+            
+        } catch (Exception e) {
+            log.error("Erreur lors de la génération de l'attestation pour l'inscription {}: {}", 
+                    inscriptionId, e.getMessage(), e);
+            // Ne pas bloquer le processus de validation si la génération échoue
+            // L'attestation pourra être régénérée plus tard
+        }
+    }
+
+    /**
+     * Publish INSCRIPTION_SOUMISE event to Kafka
+     * Requirements: 7.1
+     * 
+     * @param inscriptionId The inscription ID
+     * @param doctorantId The student ID
+     * @param directeurId The director ID
+     */
+    public void publierEvenementInscriptionSoumise(Long inscriptionId, Long doctorantId, Long directeurId) {
+        log.info("Publication événement INSCRIPTION_SOUMISE pour inscription {}", inscriptionId);
+        
+        try {
+            NotificationDTO notification = NotificationDTO.builder()
+                    .sujet("Inscription soumise")
+                    .message(String.format(
+                            "L'inscription ID: %d a été soumise par le doctorant ID: %d pour validation par le directeur ID: %d",
+                            inscriptionId, doctorantId, directeurId
+                    ))
+                    .type(NotificationDTO.TypeNotification.NOUVELLE_DEMANDE_DIRECTEUR)
+                    .inscriptionId(inscriptionId)
+                    .dateEnvoi(LocalDateTime.now())
+                    .build();
+            
+            kafkaTemplate.send(notificationTopic, notification);
+            log.info("Événement INSCRIPTION_SOUMISE publié pour inscription {}", inscriptionId);
+        } catch (Exception e) {
+            log.error("Erreur lors de la publication de l'événement INSCRIPTION_SOUMISE: {}", e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Publish INSCRIPTION_VALIDEE_DIRECTEUR event to Kafka
+     * Requirements: 7.2
+     * 
+     * @param inscriptionId The inscription ID
+     * @param directeurId The director ID
+     */
+    public void publierEvenementInscriptionValideeDirecteur(Long inscriptionId, Long directeurId) {
+        log.info("Publication événement INSCRIPTION_VALIDEE_DIRECTEUR pour inscription {}", inscriptionId);
+        
+        try {
+            NotificationDTO notification = NotificationDTO.builder()
+                    .sujet("Inscription validée par le directeur")
+                    .message(String.format(
+                            "L'inscription ID: %d a été validée par le directeur ID: %d",
+                            inscriptionId, directeurId
+                    ))
+                    .type(NotificationDTO.TypeNotification.VALIDATION_DIRECTEUR)
+                    .inscriptionId(inscriptionId)
+                    .dateEnvoi(LocalDateTime.now())
+                    .build();
+            
+            kafkaTemplate.send(notificationTopic, notification);
+            log.info("Événement INSCRIPTION_VALIDEE_DIRECTEUR publié pour inscription {}", inscriptionId);
+        } catch (Exception e) {
+            log.error("Erreur lors de la publication de l'événement INSCRIPTION_VALIDEE_DIRECTEUR: {}", e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Publish INSCRIPTION_REJETEE_DIRECTEUR event to Kafka
+     * Requirements: 7.3
+     * 
+     * @param inscriptionId The inscription ID
+     * @param directeurId The director ID
+     * @param motifRejet The rejection reason
+     */
+    public void publierEvenementInscriptionRejeteeDirecteur(Long inscriptionId, Long directeurId, String motifRejet) {
+        log.info("Publication événement INSCRIPTION_REJETEE_DIRECTEUR pour inscription {}", inscriptionId);
+        
+        try {
+            NotificationDTO notification = NotificationDTO.builder()
+                    .sujet("Inscription rejetée par le directeur")
+                    .message(String.format(
+                            "L'inscription ID: %d a été rejetée par le directeur ID: %d. Motif: %s",
+                            inscriptionId, directeurId, motifRejet != null ? motifRejet : "Non spécifié"
+                    ))
+                    .type(NotificationDTO.TypeNotification.REJET_DIRECTEUR)
+                    .inscriptionId(inscriptionId)
+                    .dateEnvoi(LocalDateTime.now())
+                    .build();
+            
+            kafkaTemplate.send(notificationTopic, notification);
+            log.info("Événement INSCRIPTION_REJETEE_DIRECTEUR publié pour inscription {}", inscriptionId);
+        } catch (Exception e) {
+            log.error("Erreur lors de la publication de l'événement INSCRIPTION_REJETEE_DIRECTEUR: {}", e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Publish INSCRIPTION_VALIDEE_ADMIN event to Kafka
+     * Requirements: 7.4
+     * 
+     * @param inscriptionId The inscription ID
+     */
+    public void publierEvenementInscriptionValideeAdmin(Long inscriptionId) {
+        log.info("Publication événement INSCRIPTION_VALIDEE_ADMIN pour inscription {}", inscriptionId);
+        
+        try {
+            NotificationDTO notification = NotificationDTO.builder()
+                    .sujet("Inscription validée par l'administration")
+                    .message(String.format(
+                            "L'inscription ID: %d a été validée par l'administration",
+                            inscriptionId
+                    ))
+                    .type(NotificationDTO.TypeNotification.VALIDATION_ADMIN)
+                    .inscriptionId(inscriptionId)
+                    .dateEnvoi(LocalDateTime.now())
+                    .build();
+            
+            kafkaTemplate.send(notificationTopic, notification);
+            log.info("Événement INSCRIPTION_VALIDEE_ADMIN publié pour inscription {}", inscriptionId);
+        } catch (Exception e) {
+            log.error("Erreur lors de la publication de l'événement INSCRIPTION_VALIDEE_ADMIN: {}", e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Publish INSCRIPTION_REJETEE_ADMIN event to Kafka
+     * Requirements: 7.5
+     * 
+     * @param inscriptionId The inscription ID
+     * @param motifRejet The rejection reason
+     */
+    public void publierEvenementInscriptionRejeteeAdmin(Long inscriptionId, String motifRejet) {
+        log.info("Publication événement INSCRIPTION_REJETEE_ADMIN pour inscription {}", inscriptionId);
+        
+        try {
+            NotificationDTO notification = NotificationDTO.builder()
+                    .sujet("Inscription rejetée par l'administration")
+                    .message(String.format(
+                            "L'inscription ID: %d a été rejetée par l'administration. Motif: %s",
+                            inscriptionId, motifRejet != null ? motifRejet : "Non spécifié"
+                    ))
+                    .type(NotificationDTO.TypeNotification.REJET_ADMIN)
+                    .inscriptionId(inscriptionId)
+                    .dateEnvoi(LocalDateTime.now())
+                    .build();
+            
+            kafkaTemplate.send(notificationTopic, notification);
+            log.info("Événement INSCRIPTION_REJETEE_ADMIN publié pour inscription {}", inscriptionId);
+        } catch (Exception e) {
+            log.error("Erreur lors de la publication de l'événement INSCRIPTION_REJETEE_ADMIN: {}", e.getMessage(), e);
+        }
     }
 }
