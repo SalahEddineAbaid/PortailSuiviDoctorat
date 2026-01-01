@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  eureka-peer1:
+    build: .
+    container_name: eureka-peer1
+    hostname: peer1
+    ports:
+      - "8761:8761"
+    environment:
+      - SPRING_PROFILES_ACTIVE=peer1
+      - SPRING_APPLICATION_NAME=eureka-server
+      - SERVER_PORT=8761
+      - EUREKA_INSTANCE_HOSTNAME=peer1
+      - EUREKA_CLIENT_REGISTER_WITH_EUREKA=true
+      - EUREKA_CLIENT_FETCH_REGISTRY=true
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka:eureka123@eureka-peer2:8762/eureka/
+      - SPRING_SECURITY_USER_NAME=eureka
+      - SPRING_SECURITY_USER_PASSWORD=eureka123
+    networks:
+      - eureka-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://eureka:eureka123@localhost:8761/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+
+  eureka-peer2:
+    build: .
+    container_name: eureka-peer2
+    hostname: peer2
+    ports:
+      - "8762:8762"
+    environment:
+      - SPRING_PROFILES_ACTIVE=peer2
+      - SPRING_APPLICATION_NAME=eureka-server
+      - SERVER_PORT=8762
+      - EUREKA_INSTANCE_HOSTNAME=peer2
+      - EUREKA_CLIENT_REGISTER_WITH_EUREKA=true
+      - EUREKA_CLIENT_FETCH_REGISTRY=true
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka:eureka123@eureka-peer1:8761/eureka/
+      - SPRING_SECURITY_USER_NAME=eureka
+      - SPRING_SECURITY_USER_PASSWORD=eureka123
+    networks:
+      - eureka-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://eureka:eureka123@localhost:8762/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+    depends_on:
+      eureka-peer1:
+        condition: service_healthy
+
+networks:
+  eureka-network:
+    driver: bridge
+    name: eureka-cluster-network

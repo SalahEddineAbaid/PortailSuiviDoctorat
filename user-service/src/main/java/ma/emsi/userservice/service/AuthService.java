@@ -39,6 +39,9 @@ public class AuthService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuditService auditService;
+    private final LoginAttemptService loginAttemptService;
+    private final UserEventPublisher userEventPublisher;
     private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
 
     public User register(RegisterRequest request) {
@@ -79,7 +82,12 @@ public class AuthService {
         }
 
         logger.info("Utilisateur créé avec succès : {}", user.getId());
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        // Publish USER_REGISTERED event
+        userEventPublisher.publishUserRegistered(savedUser);
+
+        return savedUser;
     }
 
     public UserResponse toUserResponse(User u) {
@@ -100,7 +108,24 @@ public class AuthService {
                 roles);
     }
 
-    public TokenResponse login(LoginRequest request) {
+    public TokenResponse login(LoginRequest request, String ipAddress) {
+        // Récupération de l'utilisateur
+        User user = userRepository.findByEmail(request.email())
+                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+
+        // Check if account is locked
+        if (loginAttemptService.isAccountLocked(user)) {
+            auditService.logLogin(user.getId(), ipAddress, false);
+            throw new ma.emsi.userservice.exception.AccountLockedException(
+                    "Account is temporarily locked due to multiple failed login attempts");
+        }
+
+        // Check if account is disabled
+        if (user.getAccountStatus() == ma.emsi.userservice.enums.AccountStatus.DISABLED) {
+            auditService.logLogin(user.getId(), ipAddress, false);
+            throw new ma.emsi.userservice.exception.AccountDisabledException("Account is disabled");
+        }
+
         try {
             // Authentification de l'utilisateur
             Authentication authentication = authenticationManager.authenticate(
@@ -110,13 +135,15 @@ public class AuthService {
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
+            // Login succeeded - reset failed attempts
+            loginAttemptService.loginSucceeded(user);
+
+            // Log successful login audit
+            auditService.logLogin(user.getId(), ipAddress, true);
+
             // Génération des tokens
             String accessToken = jwtProvider.generateToken(authentication);
             String refreshToken = UUID.randomUUID().toString();
-
-            // Récupération de l'utilisateur
-            User user = userRepository.findByEmail(request.email())
-                    .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
 
             // ✅ SOLUTION : Supprimer les anciens refresh tokens de cet utilisateur
             refreshTokenRepository.deleteByUser(user);
@@ -131,6 +158,8 @@ public class AuthService {
 
             return new TokenResponse(accessToken, refreshToken);
         } catch (AuthenticationException ex) {
+            // Login failed - increment failed attempts
+            loginAttemptService.loginFailed(user, ipAddress);
             throw ex;
         }
     }

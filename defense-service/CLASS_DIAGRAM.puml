@@ -1,0 +1,192 @@
+@startuml Defense Service - Diagramme de Classes
+
+title Diagramme de Classes - Defense Service
+
+' ============================================
+' ENTITÉS PRINCIPALES
+' ============================================
+
+class DefenseRequest {
+    - id: Long
+    - doctorantId: Long
+    - submissionDate: LocalDateTime
+    - status: DefenseRequestStatus
+    - rejectionReason: String
+}
+
+class Prerequisites {
+    - id: Long
+    - doctorantId: Long
+    - journalArticles: int
+    - conferences: int
+    - trainingHours: int
+    - manuscriptUploaded: boolean
+    - antiPlagiarismUploaded: boolean
+    - publicationsReportUploaded: boolean
+    - trainingCertsUploaded: boolean
+    - authorizationLetterUploaded: boolean
+    - isValid: boolean
+}
+
+class Document {
+    - id: Long
+    - fileName: String
+    - fileType: String
+    - fileUrl: String
+    - type: DocumentType
+    - uploadDate: LocalDateTime
+}
+
+class Jury {
+    - id: Long
+    - directorId: Long
+    - status: JuryStatus
+    - proposalDate: LocalDateTime
+    - validationDate: LocalDateTime
+}
+
+class JuryMember {
+    - id: Long
+    - professorId: Long
+    - role: MemberRole
+    - status: MemberStatus
+}
+
+class Rapport {
+    - id: Long
+    - reportUrl: String
+    - favorable: boolean
+    - submissionDate: LocalDateTime
+}
+
+class Defense {
+    - id: Long
+    - defenseDate: LocalDateTime
+    - location: String
+    - room: String
+    - status: DefenseStatus
+    - procesVerbalUrl: String
+    - mention: Mention
+    - publicationRecommended: boolean
+    - juryComments: String
+    - deliberationDate: LocalDateTime
+}
+
+' ============================================
+' ENUMS
+' ============================================
+
+enum DefenseRequestStatus {
+    DRAFT
+    SUBMITTED
+    PREREQUISITES_VALIDATION
+    JURY_PROPOSED
+    JURY_VALIDATED
+    REPORTS_PENDING
+    AUTHORIZED
+    SCHEDULED
+    COMPLETED
+    REJECTED
+}
+
+enum DefenseStatus {
+    SCHEDULED
+    IN_PROGRESS
+    COMPLETED
+    CANCELLED
+    POSTPONED
+}
+
+enum DocumentType {
+    MANUSCRIPT
+    ANTI_PLAGIARISM_REPORT
+    PUBLICATIONS_REPORT
+    TRAINING_CERTIFICATES
+    AUTHORIZATION_LETTER
+    JURY_REPORT
+    PROCES_VERBAL
+}
+
+enum JuryStatus {
+    PROPOSED
+    VALIDATED_BY_ADMIN
+    REPORTS_PENDING
+    REPORTS_RECEIVED
+}
+
+enum MemberRole {
+    PRESIDENT
+    RAPPORTEUR
+    EXAMINATEUR
+    DIRECTEUR_THESE
+    CO_DIRECTEUR
+}
+
+enum MemberStatus {
+    INVITED
+    ACCEPTED
+    DECLINED
+}
+
+enum Mention {
+    TRES_HONORABLE_AVEC_FELICITATIONS
+    TRES_HONORABLE
+    HONORABLE
+    PASSABLE
+}
+
+' ============================================
+' RELATIONS
+' ============================================
+
+DefenseRequest "1" *-- "1" Prerequisites : contient
+DefenseRequest "1" *-- "0..*" Document : possède
+DefenseRequest "1" *-- "0..1" Jury : a
+DefenseRequest "1" *-- "0..1" Defense : a
+DefenseRequest "1" *-- "0..*" Rapport : reçoit
+
+Jury "1" *-- "3..*" JuryMember : composé de
+Rapport "*" --> "1" JuryMember : soumis par
+
+DefenseRequest --> DefenseRequestStatus : a un
+Defense --> DefenseStatus : a un
+Defense --> Mention : obtient
+Document --> DocumentType : de type
+Jury --> JuryStatus : a un
+JuryMember --> MemberRole : joue le rôle
+JuryMember --> MemberStatus : a le statut
+
+' ============================================
+' NOTES
+' ============================================
+
+note right of DefenseRequest
+  **Entité Centrale**
+  Orchestre tout le processus
+  de soutenance de thèse
+end note
+
+note bottom of Prerequisites
+  **Conditions requises**
+  - Publications scientifiques
+  - Formations complétées
+  - Documents obligatoires
+end note
+
+note right of Jury
+  **Composition du Jury**
+  Minimum 3 membres :
+  - 1 Président
+  - 2 Rapporteurs
+  - Examinateurs
+end note
+
+note bottom of Defense
+  **Événement de Soutenance**
+  Résultat final avec :
+  - Mention obtenue
+  - Commentaires du jury
+  - Procès-verbal
+end note
+
+@enduml

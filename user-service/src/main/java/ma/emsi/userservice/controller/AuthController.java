@@ -8,12 +8,13 @@ import ma.emsi.userservice.dto.response.UserResponse;
 import ma.emsi.userservice.entity.User;
 import ma.emsi.userservice.exception.UserAlreadyExistsException;
 import ma.emsi.userservice.service.AuthService;
+import ma.emsi.userservice.util.IpAddressExtractor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
 import ma.emsi.userservice.dto.request.TokenRefreshRequest;
-
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.Map;
 
@@ -23,9 +24,11 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthService authService;
+    private final IpAddressExtractor ipAddressExtractor;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, IpAddressExtractor ipAddressExtractor) {
         this.authService = authService;
+        this.ipAddressExtractor = ipAddressExtractor;
     }
 
     // ✅ Inscription
@@ -46,9 +49,10 @@ public class AuthController {
 
     // ✅ Connexion
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request, HttpServletRequest httpRequest) {
         try {
-            TokenResponse response = authService.login(request);
+            String ipAddress = ipAddressExtractor.extractIpAddress(httpRequest);
+            TokenResponse response = authService.login(request, ipAddress);
             return ResponseEntity.ok(response);
         } catch (AuthenticationException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)

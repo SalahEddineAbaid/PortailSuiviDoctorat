@@ -18,6 +18,9 @@ public class JuryService {
     @Autowired
     private UserServiceFacade userServiceFacade;
 
+    @Autowired
+    private DefenseEventPublisher defenseEventPublisher;
+
     public Jury create(Jury jury) {
         // ✅ IMPORTANT 1 : Validation du directeur (avec Resilience4j)
         boolean isValidDirector = userServiceFacade.validateUserRole(
@@ -31,7 +34,12 @@ public class JuryService {
         }
 
         jury.setProposalDate(LocalDateTime.now());
-        return juryRepository.save(jury);
+        Jury savedJury = juryRepository.save(jury);
+
+        // Publish JURY_PROPOSE event (Requirement 6.2)
+        defenseEventPublisher.publishJuryProposed(savedJury);
+
+        return savedJury;
     }
 
     public Jury getByDefenseRequest(Long defenseRequestId) {

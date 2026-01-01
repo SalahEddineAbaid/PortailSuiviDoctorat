@@ -1,0 +1,107 @@
+@startuml User Service - Diagramme de Classes
+
+title Diagramme de Classes - User Service
+
+' ============================================
+' ENTITÉS PRINCIPALES
+' ============================================
+
+class User {
+    - id: Long
+    - lastName: String
+    - firstName: String
+    - email: String
+    - password: String
+    - phoneNumber: String
+    - adresse: String
+    - ville: String
+    - pays: String
+    - enabled: boolean
+    - createdAt: LocalDateTime
+    - updatedAt: LocalDateTime
+}
+
+class Role {
+    - id: Long
+    - name: RoleName
+}
+
+class RefreshToken {
+    - id: Long
+    - token: String
+    - expiryDate: LocalDateTime
+}
+
+class PasswordResetToken {
+    - id: Long
+    - token: String
+    - expiryDate: LocalDateTime
+}
+
+' ============================================
+' ENUMS
+' ============================================
+
+enum RoleName {
+    ROLE_DOCTORANT
+    ROLE_DIRECTEUR
+    ROLE_PROFESSEUR
+    ROLE_ADMIN
+    ROLE_CED
+}
+
+' ============================================
+' RELATIONS
+' ============================================
+
+User "1" *-- "*" Role : possède
+User "1" -- "0..1" RefreshToken : a
+User "1" -- "0..*" PasswordResetToken : peut avoir
+
+Role --> RoleName : de type
+
+' ============================================
+' NOTES
+' ============================================
+
+note right of User
+  **Entité Centrale**
+  Représente tous les acteurs :
+  - Doctorants
+  - Professeurs
+  - Directeurs de thèse
+  - Administrateurs
+  - Chefs CED
+end note
+
+note bottom of Role
+  **Système de Rôles**
+  Un utilisateur peut avoir
+  plusieurs rôles simultanément
+  (ex: PROFESSEUR + DIRECTEUR)
+end note
+
+note right of RefreshToken
+  **Gestion des Sessions**
+  - Validité: 7 jours
+  - Un seul token actif par utilisateur
+  - Supprimé lors de la déconnexion
+end note
+
+note bottom of PasswordResetToken
+  **Réinitialisation Mot de Passe**
+  - Validité: 1 heure
+  - Usage unique
+  - Envoyé par email
+end note
+
+note bottom of RoleName
+  **Rôles Disponibles**
+  - ROLE_DOCTORANT: Étudiant en doctorat
+  - ROLE_DIRECTEUR: Directeur de thèse
+  - ROLE_PROFESSEUR: Professeur/Rapporteur
+  - ROLE_ADMIN: Administrateur système
+  - ROLE_CED: Chef d'établissement doctoral
+end note
+
+@enduml

@@ -6,6 +6,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "prerequisites", indexes = {
         @Index(name = "idx_doctorant_id", columnList = "doctorant_id"),
@@ -24,6 +28,9 @@ public class Prerequisites {
     @Column(name = "doctorant_id", nullable = false)
     private Long doctorantId; // ID du doctorant (reference au user-service)
 
+    @Column(name = "doctorate_start_date")
+    private LocalDate doctorateStartDate;
+
     private int journalArticles;
     private int conferences;
     private int trainingHours;
@@ -35,4 +42,7 @@ public class Prerequisites {
     private boolean authorizationLetterUploaded;
 
     private boolean isValid;
+
+    @OneToMany(mappedBy = "prerequisites", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Publication> publications = new ArrayList<>();
 }

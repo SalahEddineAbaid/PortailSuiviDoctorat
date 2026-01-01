@@ -24,6 +24,9 @@ public class DefenseRequestService {
     @Autowired
     private UserServiceFacade userServiceFacade;
 
+    @Autowired
+    private DefenseEventPublisher defenseEventPublisher;
+
     public DefenseRequest create(DefenseRequest request, Long prerequisitesId) {
         // ✅ VALIDATION : Vérifier que le doctorant existe et a le rôle DOCTORANT (avec
         // Resilience4j)
@@ -65,7 +68,12 @@ public class DefenseRequestService {
             request.setPrerequisites(prerequisites);
         }
 
-        return defenseRequestRepository.save(request);
+        DefenseRequest savedRequest = defenseRequestRepository.save(request);
+
+        // Publish DEMANDE_SOUTENANCE_SOUMISE event (Requirement 6.1)
+        defenseEventPublisher.publishDemandeSubmitted(savedRequest);
+
+        return savedRequest;
     }
 
     public DefenseRequest getById(Long id) {

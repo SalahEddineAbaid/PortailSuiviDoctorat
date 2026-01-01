@@ -23,6 +23,9 @@ public class RapportService {
     @Autowired
     private UserServiceFacade userServiceFacade;
 
+    @Autowired
+    private DefenseEventPublisher defenseEventPublisher;
+
     public Rapport submit(Rapport r) {
         // ✅ IMPORTANT 4 : Validation de l'evaluateur (membre du jury) (avec
         // Resilience4j)
@@ -47,7 +50,12 @@ public class RapportService {
         }
 
         r.setSubmissionDate(LocalDateTime.now());
-        return rapportRepository.save(r);
+        Rapport savedRapport = rapportRepository.save(r);
+
+        // Publish RAPPORT_SOUMIS event (Requirement 6.3)
+        defenseEventPublisher.publishRapportSubmitted(savedRapport);
+
+        return savedRapport;
     }
 
     public List<Rapport> getByDefenseRequest(Long defenseRequestId) {

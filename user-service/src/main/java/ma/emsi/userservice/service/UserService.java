@@ -4,17 +4,25 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import ma.emsi.userservice.dto.request.ChangePasswordRequest;
 import ma.emsi.userservice.dto.request.ForgotPasswordRequest;
+import ma.emsi.userservice.dto.request.ProfileCompleteRequest;
+import ma.emsi.userservice.dto.response.ProfileData;
+import ma.emsi.userservice.dto.response.UserDetailedResponse;
 import ma.emsi.userservice.entity.Role;
 import ma.emsi.userservice.entity.RoleName;
 import ma.emsi.userservice.entity.User;
+import ma.emsi.userservice.entity.UserProfile;
+import ma.emsi.userservice.exception.DuplicateCinException;
 import ma.emsi.userservice.repository.UserRepository;
 import ma.emsi.userservice.repository.RoleRepository;
+import ma.emsi.userservice.repository.UserProfileRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import ma.emsi.userservice.dto.request.ResetPasswordRequest;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +34,9 @@ public class UserService {
     private final RefreshTokenService refreshTokenService;
     private final PasswordEncoder passwordEncoder;
     private final ma.emsi.userservice.repository.PasswordResetTokenRepository passwordResetTokenRepository;
+    private final UserProfileRepository userProfileRepository;
+    private final AuditService auditService;
+    private final UserEventPublisher eventPublisher;
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
@@ -130,5 +141,160 @@ public class UserService {
 
         // Ensuite supprimer l'utilisateur
         userRepository.deleteById(id);
+    }
+
+    @Transactional
+    public UserDetailedResponse completeProfile(Long userId, ProfileCompleteRequest request) {
+        // Validate user exists
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+
+        // Check CIN uniqueness (excluding current user's profile if updating)
+        UserProfile existingProfile = userProfileRepository.findByUserId(userId).orElse(null);
+        if (existingProfile == null || !request.cin().equals(existingProfile.getCin())) {
+            if (userProfileRepository.existsByCin(request.cin())) {
+                throw new DuplicateCinException("Ce CIN est déjà utilisé par un autre utilisateur");
+            }
+        }
+
+        // Create or update UserProfile
+        UserProfile profile;
+        if (existingProfile != null) {
+            profile = existingProfile;
+        } else {
+            profile = new UserProfile();
+            profile.setUser(user);
+        }
+
+        profile.setDateNaissance(request.dateNaissance());
+        profile.setLieuNaissance(request.lieuNaissance());
+        profile.setNationalite(request.nationalite());
+        profile.setCin(request.cin());
+        profile.setPhotoUrl(request.photoUrl());
+
+        userProfileRepository.save(profile);
+
+        // Set profileComplete flag
+        user.setProfileComplete(true);
+        user.setProfile(profile);
+        userRepository.save(user);
+
+        // Log profile modified audit
+        auditService.logProfileModified(userId, null);
+
+        // Publish event
+        eventPublisher.publishProfileCompleted(userId);
+
+        // Return detailed response
+        return buildUserDetailedResponse(user);
+    }
+
+    @Transactional(readOnly = true)
+    public UserDetailedResponse getDetailedProfile(Long userId) {
+        // Fetch user with profile
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+
+        // Return detailed response
+        return buildUserDetailedResponse(user);
+    }
+
+    private UserDetailedResponse buildUserDetailedResponse(User user) {
+        ProfileData profileData = null;
+        if (user.getProfile() != null) {
+            UserProfile profile = user.getProfile();
+            profileData = new ProfileData(
+                    profile.getDateNaissance(),
+                    profile.getLieuNaissance(),
+                    profile.getNationalite(),
+                    profile.getCin(),
+                    profile.getPhotoUrl());
+        }
+
+        return new UserDetailedResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getPhoneNumber(),
+                user.getAdresse(),
+                user.getVille(),
+                user.getPays(),
+                user.getRoles().stream()
+                        .map(role -> role.getName().name())
+                        .collect(Collectors.toSet()),
+                user.isProfileComplete(),
+                profileData,
+                user.getAccountStatus());
+    }
+
+    @Transactional
+    public void disableAccount(Long userId, String reason, Long adminId) {
+        // Validate admin cannot disable self
+        if (userId.equals(adminId)) {
+            throw new ma.emsi.userservice.exception.SelfDisableException(
+                    "Un administrateur ne peut pas désactiver son propre compte");
+        }
+
+        // Fetch user
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+
+        // Set account status to DISABLED
+        user.setAccountStatus(ma.emsi.userservice.enums.AccountStatus.DISABLED);
+        userRepository.save(user);
+
+        // Invalidate all refresh tokens
+        refreshTokenService.deleteByUser(user);
+
+        // Log account disabled audit
+        auditService.logAccountDisabled(userId, reason, adminId);
+
+        // Publish USER_DISABLED event
+        eventPublisher.publishUserDisabled(userId, user.getEmail(), reason);
+    }
+
+    @Transactional
+    public void enableAccount(Long userId, Long adminId) {
+        // Fetch user
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+
+        // Set account status to ACTIVE
+        user.setAccountStatus(ma.emsi.userservice.enums.AccountStatus.ACTIVE);
+
+        // Reset failed login attempts
+        user.setFailedLoginAttempts(0);
+        user.setLockoutExpiration(null);
+
+        userRepository.save(user);
+
+        // Log account enabled audit
+        auditService.logAccountEnabled(userId, adminId);
+
+        // Publish USER_ENABLED event
+        eventPublisher.publishUserEnabled(userId, user.getEmail());
+    }
+
+    @Transactional(readOnly = true)
+    public org.springframework.data.domain.Page<ma.emsi.userservice.dto.response.UserResponse> getDisabledAccounts(
+            org.springframework.data.domain.Pageable pageable) {
+        // Query disabled accounts with pagination
+        org.springframework.data.domain.Page<User> disabledUsers = userRepository.findByAccountStatus(
+                ma.emsi.userservice.enums.AccountStatus.DISABLED, pageable);
+
+        // Map to response DTOs
+        return disabledUsers.map(user -> new ma.emsi.userservice.dto.response.UserResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getPhoneNumber(),
+                user.getAdresse(),
+                user.getVille(),
+                user.getPays(),
+                user.getRoles().stream()
+                        .map(role -> role.getName().name())
+                        .collect(Collectors.toSet())));
     }
 }

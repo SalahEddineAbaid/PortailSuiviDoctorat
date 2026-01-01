@@ -98,4 +98,39 @@ public class UserServiceFacade {
         // Par sécurité, on refuse l'accès si le service est indisponible
         return false;
     }
+
+    /**
+     * Récupère le profil de l'utilisateur connecté avec Circuit Breaker et Retry
+     * 
+     * @return UserDTO ou fallback si le service est indisponible
+     */
+    @CircuitBreaker(name = "userService", fallbackMethod = "getCurrentUserFallback")
+    @Retry(name = "userService")
+    public UserDTO getCurrentUser() {
+        logger.info("🔍 Appel au user-service pour l'utilisateur connecté");
+        UserDTO user = userServiceClient.getCurrentUser();
+        logger.info("✅ Utilisateur connecté récupéré: {} {}", user.getFirstName(), user.getLastName());
+        return user;
+    }
+
+    /**
+     * Méthode de fallback pour getCurrentUser en cas d'échec du user-service
+     * Retourne un utilisateur par défaut avec des informations minimales
+     */
+    private UserDTO getCurrentUserFallback(Exception e) {
+        logger.error("❌ Fallback activé pour l'utilisateur connecté. Erreur: {}", e.getMessage());
+
+        UserDTO fallbackUser = new UserDTO();
+        fallbackUser.setId(0L);
+        fallbackUser.setFirstName("Utilisateur");
+        fallbackUser.setLastName("Connecté");
+        fallbackUser.setEmail("current@system.local");
+        fallbackUser.setPhoneNumber("N/A");
+        fallbackUser.setAdresse("N/A");
+        fallbackUser.setVille("N/A");
+        fallbackUser.setPays("N/A");
+        fallbackUser.setRoles(new HashSet<>());
+
+        return fallbackUser;
+    }
 }
