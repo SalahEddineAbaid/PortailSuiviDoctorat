@@ -13,11 +13,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Custom health indicator for Eureka Server
- * Provides detailed health information about registered instances and peer
- * replication
+ * Custom Health Indicator for Eureka Server
  */
-@Component
+@Component("customEurekaHealthIndicator")
 public class EurekaHealthIndicator implements HealthIndicator {
 
     @Override

@@ -1,46 +1,40 @@
 import { inject } from '@angular/core';
-import { Router, CanActivateFn } from '@angular/router';
+import { Router, CanActivateFn, ActivatedRouteSnapshot } from '@angular/router';
 import { AuthService } from '../services/auth.service';
-import { RoleName } from '../models/role.model';
-
 
 /**
- * Guard qui vérifie si l'utilisateur a le rôle requis
- * Si mauvais rôle → redirection vers son dashboard
+ * 🎭 Guard qui vérifie si l'utilisateur a le rôle requis
+ * 
+ * Utilisation dans les routes :
+ * ```typescript
+ * {
+ *   path: 'admin',
+ *   component: AdminComponent,
+ *   canActivate: [authGuard, roleGuard],
+ *   data: { role: 'ROLE_ADMIN' }
+ * }
+ * ```
  */
-export const roleGuard: CanActivateFn = (route, state) => {
+export const roleGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
   // Récupérer le rôle requis depuis les données de la route
-  const requiredRole = route.data['role'] as RoleName;
+  const requiredRole = route.data['role'] as string;
 
   if (!requiredRole) {
-    console.error('❌ RoleGuard : Aucun rôle défini dans route.data');
+    console.error('❌ RoleGuard : Aucun rôle spécifié dans les données de la route');
+    return true; // Laisser passer si pas de rôle spécifié
+  }
+
+  // Vérifier si l'utilisateur a le rôle requis
+  if (authService.hasRole(requiredRole)) {
+    console.log(`✅ RoleGuard : Utilisateur a le rôle ${requiredRole}`);
     return true;
   }
 
-  // Récupérer le rôle de l'utilisateur
-  const userRole = authService.getUserRole();
-
-  if (!userRole) {
-    console.warn('⚠️ RoleGuard : Aucun rôle trouvé pour l\'utilisateur');
-    router.navigate(['/login']);
-    return false;
-  }
-
-  // ✅ Convertir RoleName en string pour comparer
-  const requiredRoleString = `ROLE_${requiredRole}`;
-
-  // Vérifier si l'utilisateur a le bon rôle
-  if (userRole === requiredRoleString) {
-    console.log(`✅ RoleGuard : Rôle ${requiredRoleString} autorisé`);
-    return true;
-  }
-
-  // Si mauvais rôle, rediriger vers son propre dashboard
-  console.warn(`⚠️ RoleGuard : Rôle ${userRole} non autorisé pour ${requiredRoleString}`);
-  const correctRoute = authService.getDashboardRoute();
-  router.navigate([correctRoute]);
+  // Si l'utilisateur n'a pas le rôle, rediriger vers une page d'erreur
+  console.warn(`⚠️ RoleGuard : Utilisateur n'a pas le rôle ${requiredRole}`);
+  router.navigate(['/unauthorized']);
   return false;
 };

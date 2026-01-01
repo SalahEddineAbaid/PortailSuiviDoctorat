@@ -4,51 +4,279 @@ server:
 spring:
   application:
     name: gateway-service
+  
+  # Redis Configuration for Rate Limiting
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+  
+  # Cloud Gateway Configuration
   cloud:
     gateway:
-      routes:
-        # User Service Routes
-        - id: user-service-users
-          uri: lb://USER-SERVICE
-          predicates:
-            - Path=/api/users/**
-        - id: user-service-auth
-          uri: lb://USER-SERVICE
-          predicates:
-            - Path=/api/auth/**
-        
-        # Inscription Service Routes
-        - id: inscription-service-campagnes
-          uri: lb://INSCRIPTION-SERVICE
-          predicates:
-            - Path=/api/campagnes/**
-        - id: inscription-service-inscriptions
-          uri: lb://INSCRIPTION-SERVICE
-          predicates:
-            - Path=/api/inscriptions/**
-        - id: inscription-service-documents
-          uri: lb://INSCRIPTION-SERVICE
-          predicates:
-            - Path=/api/documents/**
-      
-      # Configuration globale
-      default-filters:
-        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+      # Global CORS Configuration
       globalcors:
-        corsConfigurations:
+        cors-configurations:
           '[/**]':
-            allowedOrigins: "http://localhost:4200"
-            allowedMethods:
+            allowed-origins:
+              - "http://localhost:3000"
+              - "http://localhost:4200"
+              - "http://localhost:8080"
+            allowed-methods:
               - GET
               - POST
               - PUT
               - DELETE
               - OPTIONS
-            allowedHeaders: "*"
-            allowCredentials: true
+              - PATCH
+            allowed-headers:
+              - "*"
+            exposed-headers:
+              - X-RateLimit-Limit
+              - X-RateLimit-Remaining
+              - X-RateLimit-Reset
+              - X-Request-Id
+            allow-credentials: true
+            max-age: 3600
+      
+      # Route Definitions
+      routes:
+        # User Service - Authentication (Public)
+        - id: user-service-auth
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: userServiceAuth
+                fallbackUri: forward:/fallback/user-service
+            - name: Retry
+              args:
+                retries: 3
+                statuses: BAD_GATEWAY,GATEWAY_TIMEOUT
+                methods: GET,POST
+                backoff:
+                  firstBackoff: 50ms
+                  maxBackoff: 500ms
+                  factor: 2
+          metadata:
+            public: true
+            rateLimit: 20
+        
+        # User Service - Users (Protected)
+        - id: user-service-users
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/api/users/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: userServiceUsers
+                fallbackUri: forward:/fallback/user-service
+            - name: Retry
+              args:
+                retries: 2
+                statuses: BAD_GATEWAY
+          metadata:
+            requiresAuth: true
+            rateLimit: 100
+        
+        # Defense Service (Protected)
+        - id: defense-service
+          uri: lb://DEFENSE-SERVICE
+          predicates:
+            - Path=/api/defenses/**, /api/defense-service/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: defenseService
+                fallbackUri: forward:/fallback/defense-service
+            - RewritePath=/api/defenses/(?<segment>.*), /api/defense-service/defenses/${segment}
+          metadata:
+            requiresAuth: true
+            rateLimit: 100
+        
+        # Inscription Service (Protected)
+        - id: inscription-service
+          uri: lb://INSCRIPTION-SERVICE
+          predicates:
+            - Path=/api/inscriptions/**, /api/campagnes/**, /api/documents/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: inscriptionService
+                fallbackUri: forward:/fallback/inscription-service
+          metadata:
+            requiresAuth: true
+            rateLimit: 100
+        
+        # Notification Service (Protected)
+        - id: notification-service
+          uri: lb://NOTIFICATION-SERVICE
+          predicates:
+            - Path=/api/notifications/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: notificationService
+                fallbackUri: forward:/fallback/notification-service
+          metadata:
+            requiresAuth: true
+            rateLimit: 200
+        
+        # Batch Service (Protected - Admin Only)
+        - id: batch-service
+          uri: lb://BATCH-SERVICE
+          predicates:
+            - Path=/api/batch/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: batchService
+                fallbackUri: forward:/fallback/batch-service
+          metadata:
+            requiresAuth: true
+            requiresRole: ADMIN
+            rateLimit: 50
+      
+      # Default Filters (Applied to all routes)
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+      
+      # HTTP Client Configuration
+      httpclient:
+        connect-timeout: 5000
+        response-timeout: 10s
+        pool:
+          type: ELASTIC
+          max-connections: 100
+          max-idle-time: 10s
     
+    # Eureka Configuration
     eureka:
-        client:
-            defaultZone: http://localhost:8761/eureka/
-        instance:
-            prefer-ip-address: true
+      client:
+        defaultZone: http://eureka:eureka123@localhost:8761/eureka/,http://eureka:eureka123@localhost:8762/eureka/
+      instance:
+        prefer-ip-address: true
+        instance-id: ${spring.application.name}:${random.value}
+
+# JWT Configuration
+jwt:
+  secret: ${JWT_SECRET:s3cR3tK3y!#2025@JWT_Sign4tur3!!VeryLongSecretKeyForHS512Algorithm2025!!}
+  expiration: 3600000  # 1 hour in milliseconds
+  issuer: user-service
+
+# Rate Limiting Configuration
+rate-limit:
+  enabled: true
+  default-limit: 100          # requests per minute for authenticated users
+  unauthenticated-limit: 50   # requests per minute for unauthenticated
+  admin-limit: 500            # requests per minute for admin users
+  window-size: 60             # sliding window in seconds
+
+# Resilience4j Configuration
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        register-health-indicator: true
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+        wait-duration-in-open-state: 10s
+        failure-rate-threshold: 50
+        slow-call-rate-threshold: 100
+        slow-call-duration-threshold: 5s
+        event-consumer-buffer-size: 10
+    instances:
+      userServiceAuth:
+        base-config: default
+      userServiceUsers:
+        base-config: default
+      defenseService:
+        base-config: default
+      inscriptionService:
+        base-config: default
+      notificationService:
+        base-config: default
+      batchService:
+        base-config: default
+  
+  timelimiter:
+    configs:
+      default:
+        timeout-duration: 10s
+    instances:
+      userServiceAuth:
+        base-config: default
+      userServiceUsers:
+        base-config: default
+      defenseService:
+        base-config: default
+      inscriptionService:
+        base-config: default
+      notificationService:
+        base-config: default
+      batchService:
+        base-config: default
+
+# Management & Monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,gateway,circuitbreakers,circuitbreakerevents
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
+    gateway:
+      enabled: true
+  health:
+    circuitbreakers:
+      enabled: true
+    redis:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: ${spring.application.name}
+  
+  info:
+    env:
+      enabled: true
+
+# Application Info
+info:
+  app:
+    name: API Gateway
+    description: Enterprise API Gateway with JWT, Rate Limiting, and Circuit Breakers
+    version: 2.0.0
+    features:
+      - JWT Authentication
+      - Rate Limiting (Redis)
+      - Circuit Breakers (Resilience4j)
+      - CORS Support
+      - Request/Response Logging
+      - Prometheus Metrics
+
+# Logging Configuration
+logging:
+  level:
+    root: INFO
+    com.devbuild.apigateway: DEBUG
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.web.server: DEBUG
+    io.github.resilience4j: DEBUG
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"

@@ -1,30 +1,11 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { Observable, combineLatest } from 'rxjs';
-import { map } from 'rxjs/operators';
-
-import { DashboardService } from '../../../core/services/dashboard.service';
-import { AuthService } from '../../../core/services/auth.service';
-import { InscriptionService } from '../../../core/services/inscription.service';
-import { SoutenanceService } from '../../../core/services/soutenance.service';
-import { DoctorantListComponent, DoctorantListItem } from '../../../shared/components/doctorant-list/doctorant-list.component';
-import { StatusWidgetComponent } from '../../../shared/components/status-widget/status-widget.component';
-import { AlertComponent } from '../../../shared/components/alert/alert.component';
-import {
-  DashboardStats,
-  DashboardAlert
-} from '../../../core/models/dashboard.model';
-
-interface DirecteurDashboardData {
-  stats: DashboardStats;
-  doctorants: DoctorantListItem[];
-  soutenances: SoutenanceResponse[];
-  alerts: DashboardAlert[];
-  recentActivity: any[];
-}
-import { UserResponse } from '../../../core/services/auth.service';
-import { SoutenanceResponse } from '../../../core/models/soutenance.model';
+import { RouterModule, ActivatedRoute } from '@angular/router';
+import { Subject, takeUntil } from 'rxjs';
+import { DashboardService } from '../services/dashboard.service';
+import { DirecteurDashboard as DirecteurDashboardModel } from '../models/dashboard.model';
+import { Navbar } from '../../../shared/components/navbar/navbar';
+import { Sidebar, MenuItem } from '../../../shared/components/sidebar/sidebar';
 
 @Component({
   selector: 'app-directeur-dashboard',
@@ -32,85 +13,124 @@ import { SoutenanceResponse } from '../../../core/models/soutenance.model';
   imports: [
     CommonModule,
     RouterModule,
-    DoctorantListComponent,
-    StatusWidgetComponent,
-    AlertComponent
+    Navbar,
+    Sidebar
   ],
   templateUrl: './directeur-dashboard.component.html',
   styleUrls: ['./directeur-dashboard.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DirecteurDashboardComponent implements OnInit {
-  dashboardData$!: Observable<DirecteurDashboardData>;
-  currentUser: UserResponse | null = null;
+export class DirecteurDashboardComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+  
+  dashboard: DirecteurDashboardModel | null = null;
+  isLoading = false;
+  error: string | null = null;
+
+  menuItems: MenuItem[] = [
+    { icon: 'fas fa-home', label: 'Accueil', route: '/dashboard/directeur' },
+    { icon: 'fas fa-users', label: 'Mes doctorants', route: '/directeur/doctorants' },
+    { icon: 'fas fa-tasks', label: 'Validations', route: '/directeur/validations' },
+    { icon: 'fas fa-bell', label: 'Notifications', route: '/notifications' },
+    { icon: 'fas fa-user', label: 'Mon profil', route: '/profile' }
+  ];
 
   constructor(
+    private route: ActivatedRoute,
     private dashboardService: DashboardService,
-    private authService: AuthService,
-    private inscriptionService: InscriptionService,
-    private soutenanceService: SoutenanceService
-  ) { }
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
-    this.authService.getCurrentUser().subscribe(user => {
-      this.currentUser = user;
+    // ✅ Récupérer les données préchargées par le resolver
+    this.route.data.pipe(takeUntil(this.destroy$)).subscribe(data => {
+      console.log('📊 [DIRECTEUR DASHBOARD] Données reçues du resolver:', data);
+      this.dashboard = data['dashboard'];
+      
+      if (!this.dashboard) {
+        this.error = 'Impossible de charger les données du dashboard';
+      }
+      
+      this.cdr.markForCheck();
     });
-    this.loadDashboardData();
   }
 
-  private loadDashboardData(): void {
-    // Combine multiple API calls to build the dashboard data
-    this.dashboardData$ = combineLatest([
-      this.dashboardService.getDirecteurStats(),
-      this.inscriptionService.getDoctorantsByDirecteur(),
-      this.soutenanceService.getSoutenancesByDirecteur(),
-      this.dashboardService.getDirecteurAlerts()
-    ]).pipe(
-      map(([stats, doctorants, soutenances, alerts]) => ({
-        stats,
-        doctorants,
-        soutenances,
-        alerts,
-        recentActivity: this.buildRecentActivity(doctorants, soutenances)
-      }))
-    );
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
-  private buildRecentActivity(doctorants: DoctorantListItem[], soutenances: SoutenanceResponse[]): any[] {
-    const activities: any[] = [];
+  /**
+   * 🔄 Rafraîchir manuellement le dashboard
+   */
+  refreshDashboard(): void {
+    if (!this.dashboard?.user?.id) return;
 
-    // Add recent inscriptions
-    doctorants.forEach(doctorant => {
-      activities.push({
-        type: 'inscription',
-        doctorant: doctorant,
-        date: new Date(), // This would come from the actual inscription date
-        message: `Nouvelle inscription de ${doctorant.FirstName} ${doctorant.LastName}`
+    this.isLoading = true;
+    this.error = null;
+
+    this.dashboardService.getDirecteurDashboard(this.dashboard.user.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          this.dashboard = data;
+          this.isLoading = false;
+          this.cdr.markForCheck();
+        },
+        error: (error) => {
+          console.error('❌ Erreur rafraîchissement dashboard:', error);
+          this.error = 'Erreur lors du rafraîchissement';
+          this.isLoading = false;
+          this.cdr.markForCheck();
+        }
       });
-    });
-
-    // Add recent soutenance requests
-    soutenances.forEach(soutenance => {
-      activities.push({
-        type: 'soutenance',
-        doctorant: soutenance.doctorant,
-        date: new Date(), // This would come from the actual submission date
-        message: `Demande de soutenance de ${soutenance.doctorant.FirstName} ${soutenance.doctorant.LastName}`
-      });
-    });
-
-    // Sort by date (most recent first) and take only the last 5
-    return activities
-      .sort((a, b) => b.date.getTime() - a.date.getTime())
-      .slice(0, 5);
   }
 
-  onDoctorantSelected(doctorant: DoctorantListItem): void {
-    // Navigate to doctorant details or open consultation modal
-    console.log('Doctorant selected:', doctorant);
+  /**
+   * 🎯 Getters pour le template
+   */
+  getWelcomeMessage(): string {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Bonjour';
+    if (hour < 18) return 'Bon après-midi';
+    return 'Bonsoir';
   }
 
-  onRefreshData(): void {
-    this.loadDashboardData();
+  getUserName(): string {
+    return this.dashboard?.user?.FirstName || 'Directeur';
+  }
+
+  hasDoctorants(): boolean {
+    return (this.dashboard?.doctorants?.length || 0) > 0;
+  }
+
+  hasDemandesEnAttente(): boolean {
+    return (this.dashboard?.demandesEnAttente?.length || 0) > 0;
+  }
+
+  hasNotifications(): boolean {
+    return (this.dashboard?.notifications?.length || 0) > 0;
+  }
+
+  getNotificationCount(): number {
+    return this.dashboard?.notifications?.filter(n => !n.lu).length || 0;
+  }
+
+  /**
+   * 🎯 Actions sur les demandes
+   */
+  onApproveRequest(demandeId: number): void {
+    console.log('✅ Approuver demande:', demandeId);
+    // TODO: Implémenter l'approbation
+  }
+
+  onRejectRequest(demandeId: number): void {
+    console.log('❌ Rejeter demande:', demandeId);
+    // TODO: Implémenter le rejet
+  }
+
+  onViewRequest(demandeId: number): void {
+    console.log('👁️ Voir demande:', demandeId);
+    // TODO: Navigation vers détail
   }
 }

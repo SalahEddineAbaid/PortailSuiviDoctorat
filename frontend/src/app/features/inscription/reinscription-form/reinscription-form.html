@@ -1,290 +1,406 @@
-<div class="reinscription-form-container">
-  <div class="form-header">
-    <h1>Réinscription en doctorat</h1>
-    <p class="form-description">
-      Mettez à jour vos informations pour votre réinscription. Les données de votre inscription précédente ont été pré-remplies.
-    </p>
-  </div>
-
+<div class="reinscription-container">
   <!-- Loading State -->
-  <div *ngIf="loading || loadingPreviousData" class="loading-container">
-    <div class="spinner"></div>
-    <p>{{ loadingPreviousData ? 'Chargement des données précédentes...' : 'Enregistrement en cours...' }}</p>
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner></mat-spinner>
+    <p>Chargement des données...</p>
   </div>
 
-  <!-- Success Message -->
-  <div *ngIf="success" class="alert alert-success">
-    <i class="fas fa-check-circle"></i>
-    {{ success }}
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-container">
+    <mat-icon color="warn">error</mat-icon>
+    <p>{{ error }}</p>
+    <button mat-raised-button color="primary" (click)="router.navigate(['/inscription/dashboard'])">
+      Retour au dashboard
+    </button>
   </div>
 
-  <!-- Error Message -->
-  <div *ngIf="error" class="alert alert-danger">
-    <i class="fas fa-exclamation-triangle"></i>
-    {{ error }}
-  </div>
-
-  <!-- Campagne Info -->
-  <div *ngIf="campagneActive$ | async as campagne" class="campagne-info">
-    <div class="info-card">
-      <h3>Campagne de réinscription active</h3>
-      <div class="campagne-details">
-        <p><strong>{{ campagne.nom }}</strong></p>
-        <p>Année universitaire: {{ campagne.anneeUniversitaire }}</p>
-        <p>Type: {{ campagne.typeInscription }}</p>
-        <p>Fermeture: {{ campagne.dateFermeture | date:'dd/MM/yyyy' }}</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Previous Inscription Info -->
-  <div *ngIf="previousInscription$ | async as previousInscription" class="previous-inscription-info">
-    <div class="info-card">
-      <div class="card-header">
-        <h3>Données de votre inscription précédente</h3>
-        <button type="button" class="btn btn-sm btn-outline-primary" (click)="onResetToOriginal()">
-          <i class="fas fa-undo"></i>
-          Restaurer les données originales
-        </button>
-      </div>
-      <div class="previous-data">
-        <div class="data-item">
-          <strong>Directeur:</strong> {{ previousInscription.directeur.FirstName }} {{ previousInscription.directeur.LastName }}
-        </div>
-        <div class="data-item">
-          <strong>Laboratoire:</strong> {{ previousInscription.laboratoire }}
-        </div>
-        <div class="data-item">
-          <strong>Spécialité:</strong> {{ previousInscription.specialite }}
-        </div>
-        <div class="data-item">
-          <strong>Date d'inscription:</strong> {{ previousInscription.dateInscription | date:'dd/MM/yyyy' }}
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Form -->
-  <form [formGroup]="reinscriptionForm" (ngSubmit)="onSubmit()" class="reinscription-form" *ngIf="!loading && !loadingPreviousData">
-    
-    <!-- Directeur de thèse -->
-    <div class="form-section">
-      <h2>Directeur de thèse</h2>
+  <!-- Form Content -->
+  <div *ngIf="!loading && !error && previousInscription" class="form-content">
+    <!-- Header -->
+    <div class="form-header">
+      <h1>Formulaire de Réinscription</h1>
+      <p class="subtitle">Année universitaire {{ campagneActive?.anneeUniversitaire }}</p>
       
-      <div class="form-group">
-        <label for="directeurSearch">Rechercher un directeur *</label>
-        <input
-          type="text"
-          id="directeurSearch"
-          formControlName="directeurSearch"
-          class="form-control"
-          placeholder="Tapez le nom ou l'email du directeur..."
-          [class.is-invalid]="isFieldInvalid('directeurId')"
-        />
-        <div class="invalid-feedback" *ngIf="isFieldInvalid('directeurId')">
-          {{ getFieldError('directeurId') }}
-        </div>
-      </div>
-
-      <!-- Directeurs filtrés -->
-      <div class="directeurs-list" *ngIf="filteredDirecteurs$ | async as directeurs">
-        <div 
-          *ngFor="let directeur of directeurs" 
-          class="directeur-item"
-          [class.selected]="reinscriptionForm.get('directeurId')?.value === directeur.id"
-          (click)="onDirecteurSelect(directeur)"
-        >
-          <div class="directeur-info">
-            <h4>{{ directeur.FirstName }} {{ directeur.LastName }}</h4>
-            <p>{{ directeur.email }}</p>
+      <!-- Derogation Warning -->
+      <mat-card *ngIf="requiresDerogation" class="warning-card">
+        <mat-card-content>
+          <div class="warning-content">
+            <mat-icon color="warn">warning</mat-icon>
+            <div>
+              <h3>Dérogation requise</h3>
+              <p>Votre doctorat dure depuis {{ dureeDoctoratAnnees }} ans. Une demande de dérogation est nécessaire pour continuer.</p>
+            </div>
           </div>
-          <div class="directeur-actions">
-            <i class="fas fa-check" *ngIf="reinscriptionForm.get('directeurId')?.value === directeur.id"></i>
-          </div>
-        </div>
-      </div>
+        </mat-card-content>
+      </mat-card>
     </div>
 
-    <!-- Informations de la thèse -->
-    <div class="form-section">
-      <h2>Informations de la thèse</h2>
-      
-      <div class="form-group">
-        <label for="sujetThese">Sujet de thèse *</label>
-        <textarea
-          id="sujetThese"
-          formControlName="sujetThese"
-          class="form-control"
-          rows="4"
-          placeholder="Décrivez le sujet de votre thèse..."
-          [class.is-invalid]="isFieldInvalid('sujetThese')"
-        ></textarea>
-        <div class="form-text">
-          Minimum 10 caractères, maximum 500 caractères
-        </div>
-        <div class="invalid-feedback" *ngIf="isFieldInvalid('sujetThese')">
-          {{ getFieldError('sujetThese') }}
-        </div>
-      </div>
+    <!-- Stepper -->
+    <mat-stepper #stepper linear>
+      <!-- Step 1: Vérification -->
+      <mat-step [stepControl]="verificationForm">
+        <ng-template matStepLabel>Vérification des données</ng-template>
+        
+        <div class="step-content">
+          <h2>Vérifiez vos informations</h2>
+          <p class="step-description">
+            Voici les informations de votre dernière inscription. Vous pourrez les modifier à l'étape suivante.
+          </p>
 
-      <div class="form-row">
-        <div class="form-group">
-          <label for="laboratoire">Laboratoire *</label>
-          <select
-            id="laboratoire"
-            formControlName="laboratoire"
-            class="form-control"
-            [class.is-invalid]="isFieldInvalid('laboratoire')"
-          >
-            <option value="">Sélectionnez un laboratoire</option>
-            <option *ngFor="let lab of laboratoires" [value]="lab">{{ lab }}</option>
-          </select>
-          <div class="invalid-feedback" *ngIf="isFieldInvalid('laboratoire')">
-            {{ getFieldError('laboratoire') }}
+          <mat-card class="info-card">
+            <mat-card-header>
+              <mat-card-title>Informations personnelles</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="info-grid">
+                <div class="info-item">
+                  <span class="label">CIN:</span>
+                  <span class="value">{{ previousInscription.infosDoctorant.cin }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="label">CNE:</span>
+                  <span class="value">{{ previousInscription.infosDoctorant.cne || 'N/A' }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="label">Téléphone:</span>
+                  <span class="value">{{ previousInscription.infosDoctorant.telephone }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="label">Adresse:</span>
+                  <span class="value">{{ previousInscription.infosDoctorant.adresse }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="label">Ville:</span>
+                  <span class="value">{{ previousInscription.infosDoctorant.ville }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="label">Nationalité:</span>
+                  <span class="value">{{ previousInscription.infosDoctorant.nationalite }}</span>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="info-card">
+            <mat-card-header>
+              <mat-card-title>Informations de thèse</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="info-grid">
+                <div class="info-item full-width">
+                  <span class="label">Titre:</span>
+                  <span class="value">{{ previousInscription.infosThese.titreThese }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="label">Discipline:</span>
+                  <span class="value">{{ previousInscription.infosThese.discipline }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="label">Laboratoire:</span>
+                  <span class="value">{{ previousInscription.infosThese.laboratoire }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="label">Établissement:</span>
+                  <span class="value">{{ previousInscription.infosThese.etablissementAccueil }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="label">Date début:</span>
+                  <span class="value">{{ (previousInscription.infosThese.dateDebutEffective || previousInscription.infosThese.dateDebutPrevue) | date:'dd/MM/yyyy' }}</span>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <form [formGroup]="verificationForm">
+            <mat-checkbox formControlName="confirmed">
+              Je confirme avoir vérifié mes informations
+            </mat-checkbox>
+          </form>
+
+          <div class="step-actions">
+            <button mat-button (click)="onCancel()">Annuler</button>
+            <button mat-raised-button color="primary" matStepperNext [disabled]="!verificationForm.valid">
+              Suivant
+            </button>
           </div>
         </div>
+      </mat-step>
 
-        <div class="form-group" *ngIf="reinscriptionForm.get('laboratoire')?.value === 'Autre'">
-          <label for="laboratoireAutre">Précisez le laboratoire *</label>
-          <input
-            type="text"
-            id="laboratoireAutre"
-            formControlName="laboratoireAutre"
-            class="form-control"
-            placeholder="Nom du laboratoire"
-            [class.is-invalid]="isFieldInvalid('laboratoireAutre')"
-          />
-          <div class="invalid-feedback" *ngIf="isFieldInvalid('laboratoireAutre')">
-            {{ getFieldError('laboratoireAutre') }}
+      <!-- Step 2: Modifications -->
+      <mat-step [stepControl]="modificationsForm">
+        <ng-template matStepLabel>Modifications</ng-template>
+        
+        <div class="step-content">
+          <h2>Mettez à jour vos informations</h2>
+          <p class="step-description">
+            Modifiez les informations qui ont changé depuis votre dernière inscription.
+          </p>
+
+          <form [formGroup]="modificationsForm">
+            <mat-card class="form-section">
+              <mat-card-header>
+                <mat-card-title>Coordonnées</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="form-row">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Téléphone</mat-label>
+                    <input matInput formControlName="telephone" placeholder="0612345678">
+                    <mat-icon matPrefix>phone</mat-icon>
+                    <mat-error>Format invalide (10 chiffres)</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Ville</mat-label>
+                    <input matInput formControlName="ville">
+                    <mat-icon matPrefix>location_city</mat-icon>
+                    <mat-error>Ce champ est obligatoire</mat-error>
+                  </mat-form-field>
+                </div>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Adresse</mat-label>
+                  <textarea matInput formControlName="adresse" rows="2"></textarea>
+                  <mat-icon matPrefix>home</mat-icon>
+                  <mat-error>Ce champ est obligatoire</mat-error>
+                </mat-form-field>
+              </mat-card-content>
+            </mat-card>
+
+            <mat-card class="form-section">
+              <mat-card-header>
+                <mat-card-title>Informations de thèse</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Titre de la thèse</mat-label>
+                  <textarea matInput formControlName="titreThese" rows="3"></textarea>
+                  <mat-error>Minimum 10 caractères</mat-error>
+                </mat-form-field>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Laboratoire</mat-label>
+                    <input matInput formControlName="laboratoire">
+                    <mat-error>Ce champ est obligatoire</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Établissement d'accueil</mat-label>
+                    <input matInput formControlName="etablissementAccueil">
+                    <mat-error>Ce champ est obligatoire</mat-error>
+                  </mat-form-field>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </form>
+
+          <div class="step-actions">
+            <button mat-button matStepperPrevious>Précédent</button>
+            <button mat-raised-button color="primary" matStepperNext [disabled]="!modificationsForm.valid">
+              Suivant
+            </button>
           </div>
         </div>
-      </div>
+      </mat-step>
 
-      <div class="form-row">
-        <div class="form-group">
-          <label for="specialite">Spécialité *</label>
-          <select
-            id="specialite"
-            formControlName="specialite"
-            class="form-control"
-            [class.is-invalid]="isFieldInvalid('specialite')"
-          >
-            <option value="">Sélectionnez une spécialité</option>
-            <option *ngFor="let spec of specialites" [value]="spec">{{ spec }}</option>
-          </select>
-          <div class="invalid-feedback" *ngIf="isFieldInvalid('specialite')">
-            {{ getFieldError('specialite') }}
+      <!-- Step 3: Documents -->
+      <mat-step [stepControl]="documentsForm">
+        <ng-template matStepLabel>Documents</ng-template>
+        
+        <div class="step-content">
+          <h2>Téléchargez vos documents</h2>
+          <p class="step-description">
+            Veuillez fournir les documents requis pour votre réinscription.
+          </p>
+
+          <!-- Progress -->
+          <mat-card class="progress-card">
+            <mat-card-content>
+              <div class="progress-info">
+                <span>Progression: {{ uploadProgressPercentage }}%</span>
+                <span>{{ uploadedDocuments.size }} / {{ requiredDocuments.length }} documents</span>
+              </div>
+              <mat-progress-bar mode="determinate" [value]="uploadProgressPercentage"></mat-progress-bar>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Document Upload -->
+          <div class="documents-list">
+            <mat-card *ngFor="let docConfig of requiredDocuments" class="document-card">
+              <mat-card-content>
+                <div class="document-header">
+                  <div class="document-info">
+                    <h3>{{ docConfig.label }}</h3>
+                    <p class="document-description">{{ docConfig.description }}</p>
+                    <mat-chip-set>
+                      <mat-chip *ngIf="docConfig.obligatoire" class="required-chip">Obligatoire</mat-chip>
+                      <mat-chip class="format-chip">{{ docConfig.formats.join(', ') }}</mat-chip>
+                      <mat-chip class="size-chip">Max {{ docConfig.tailleMax / 1024 / 1024 }}MB</mat-chip>
+                    </mat-chip-set>
+                  </div>
+                  
+                  <div class="document-actions">
+                    <input type="file" 
+                           #fileInput
+                           [accept]="docConfig.formats.join(',')"
+                           (change)="onFileSelected($event, docConfig.type)"
+                           style="display: none">
+                    
+                    <button *ngIf="!uploadedDocuments.has(docConfig.type)" 
+                            mat-raised-button 
+                            color="primary"
+                            (click)="fileInput.click()">
+                      <mat-icon>upload</mat-icon>
+                      Télécharger
+                    </button>
+
+                    <div *ngIf="uploadedDocuments.has(docConfig.type)" class="uploaded-info">
+                      <mat-icon color="primary">check_circle</mat-icon>
+                      <span>{{ uploadedDocuments.get(docConfig.type)?.nomFichier }}</span>
+                      <button mat-icon-button color="warn" (click)="removeDocument(docConfig.type)">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Upload Progress -->
+                <mat-progress-bar *ngIf="uploadProgress.has(docConfig.type)" 
+                                  mode="determinate" 
+                                  [value]="uploadProgress.get(docConfig.type)">
+                </mat-progress-bar>
+              </mat-card-content>
+            </mat-card>
+          </div>
+
+          <div class="step-actions">
+            <button mat-button matStepperPrevious>Précédent</button>
+            <button mat-raised-button color="primary" matStepperNext [disabled]="!allRequiredDocumentsUploaded">
+              Suivant
+            </button>
           </div>
         </div>
+      </mat-step>
 
-        <div class="form-group" *ngIf="reinscriptionForm.get('specialite')?.value === 'Autre'">
-          <label for="specialiteAutre">Précisez la spécialité *</label>
-          <input
-            type="text"
-            id="specialiteAutre"
-            formControlName="specialiteAutre"
-            class="form-control"
-            placeholder="Nom de la spécialité"
-            [class.is-invalid]="isFieldInvalid('specialiteAutre')"
-          />
-          <div class="invalid-feedback" *ngIf="isFieldInvalid('specialiteAutre')">
-            {{ getFieldError('specialiteAutre') }}
+      <!-- Step 4: Dérogation (if required) -->
+      <mat-step [stepControl]="derogationForm" *ngIf="requiresDerogation">
+        <ng-template matStepLabel>Dérogation</ng-template>
+        
+        <div class="step-content">
+          <h2>Demande de dérogation</h2>
+          <p class="step-description">
+            Votre doctorat dure depuis plus de 3 ans. Veuillez justifier votre demande de dérogation.
+          </p>
+
+          <form [formGroup]="derogationForm">
+            <mat-card class="form-section">
+              <mat-card-content>
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Motif de la dérogation</mat-label>
+                  <mat-select formControlName="motif">
+                    <mat-option value="RECHERCHE_COMPLEXE">Complexité de la recherche</mat-option>
+                    <mat-option value="PROBLEMES_SANTE">Problèmes de santé</mat-option>
+                    <mat-option value="RAISONS_FAMILIALES">Raisons familiales</mat-option>
+                    <mat-option value="FINANCEMENT">Problèmes de financement</mat-option>
+                    <mat-option value="AUTRE">Autre</mat-option>
+                  </mat-select>
+                  <mat-error>Veuillez sélectionner un motif</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Justification détaillée</mat-label>
+                  <textarea matInput 
+                            formControlName="justification" 
+                            rows="6"
+                            placeholder="Expliquez en détail les raisons de votre demande de dérogation..."></textarea>
+                  <mat-hint>Minimum 50 caractères</mat-hint>
+                  <mat-error>Justification trop courte (minimum 50 caractères)</mat-error>
+                </mat-form-field>
+              </mat-card-content>
+            </mat-card>
+          </form>
+
+          <div class="step-actions">
+            <button mat-button matStepperPrevious>Précédent</button>
+            <button mat-raised-button color="primary" matStepperNext [disabled]="!derogationForm.valid">
+              Suivant
+            </button>
           </div>
         </div>
-      </div>
-    </div>
+      </mat-step>
 
-    <!-- Changements apportés -->
-    <div class="form-section">
-      <h2>Modifications par rapport à l'inscription précédente</h2>
-      
-      <div class="form-group">
-        <label for="changementsApportes">Changements apportés (optionnel)</label>
-        <textarea
-          id="changementsApportes"
-          formControlName="changementsApportes"
-          class="form-control"
-          rows="3"
-          placeholder="Décrivez les changements apportés depuis votre dernière inscription (directeur, sujet, laboratoire, etc.)..."
-          [class.is-invalid]="isFieldInvalid('changementsApportes')"
-        ></textarea>
-        <div class="form-text">
-          Maximum 1000 caractères. Laissez vide si aucun changement.
-        </div>
-        <div class="invalid-feedback" *ngIf="isFieldInvalid('changementsApportes')">
-          {{ getFieldError('changementsApportes') }}
-        </div>
-      </div>
+      <!-- Step 5: Récapitulatif -->
+      <mat-step>
+        <ng-template matStepLabel>Récapitulatif</ng-template>
+        
+        <div class="step-content">
+          <h2>Récapitulatif de votre réinscription</h2>
+          <p class="step-description">
+            Vérifiez toutes les informations avant de soumettre votre réinscription.
+          </p>
 
-      <div class="form-group" *ngIf="hasChangesFromPrevious()">
-        <label for="justificationChangements">Justification des changements *</label>
-        <textarea
-          id="justificationChangements"
-          formControlName="justificationChangements"
-          class="form-control"
-          rows="3"
-          placeholder="Justifiez les raisons de ces changements..."
-          [class.is-invalid]="isFieldInvalid('justificationChangements')"
-        ></textarea>
-        <div class="form-text">
-          Minimum 20 caractères, maximum 1000 caractères. Obligatoire si des changements sont mentionnés.
-        </div>
-        <div class="invalid-feedback" *ngIf="isFieldInvalid('justificationChangements')">
-          {{ getFieldError('justificationChangements') }}
-        </div>
-      </div>
-    </div>
+          <mat-card class="summary-card">
+            <mat-card-header>
+              <mat-card-title>Informations modifiées</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="summary-grid">
+                <div class="summary-item">
+                  <span class="label">Téléphone:</span>
+                  <span class="value">{{ modificationsForm.value.telephone }}</span>
+                </div>
+                <div class="summary-item">
+                  <span class="label">Ville:</span>
+                  <span class="value">{{ modificationsForm.value.ville }}</span>
+                </div>
+                <div class="summary-item full-width">
+                  <span class="label">Adresse:</span>
+                  <span class="value">{{ modificationsForm.value.adresse }}</span>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
 
-    <!-- Bilan et perspectives -->
-    <div class="form-section">
-      <h2>Bilan et perspectives</h2>
-      
-      <div class="form-group">
-        <label for="avancementTravaux">Avancement des travaux de recherche *</label>
-        <textarea
-          id="avancementTravaux"
-          formControlName="avancementTravaux"
-          class="form-control"
-          rows="5"
-          placeholder="Décrivez l'avancement de vos travaux de recherche depuis votre dernière inscription..."
-          [class.is-invalid]="isFieldInvalid('avancementTravaux')"
-        ></textarea>
-        <div class="form-text">
-          Minimum 50 caractères, maximum 2000 caractères. Décrivez vos réalisations, publications, etc.
-        </div>
-        <div class="invalid-feedback" *ngIf="isFieldInvalid('avancementTravaux')">
-          {{ getFieldError('avancementTravaux') }}
-        </div>
-      </div>
+          <mat-card class="summary-card">
+            <mat-card-header>
+              <mat-card-title>Documents téléchargés</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <mat-list>
+                <mat-list-item *ngFor="let doc of uploadedDocuments | keyvalue">
+                  <mat-icon matListItemIcon color="primary">check_circle</mat-icon>
+                  <div matListItemTitle>{{ doc.value.nomFichier }}</div>
+                </mat-list-item>
+              </mat-list>
+            </mat-card-content>
+          </mat-card>
 
-      <div class="form-group">
-        <label for="objectifsAnneeProchaine">Objectifs pour l'année prochaine *</label>
-        <textarea
-          id="objectifsAnneeProchaine"
-          formControlName="objectifsAnneeProchaine"
-          class="form-control"
-          rows="5"
-          placeholder="Décrivez vos objectifs et planning pour l'année universitaire à venir..."
-          [class.is-invalid]="isFieldInvalid('objectifsAnneeProchaine')"
-        ></textarea>
-        <div class="form-text">
-          Minimum 50 caractères, maximum 2000 caractères. Détaillez vos objectifs de recherche.
-        </div>
-        <div class="invalid-feedback" *ngIf="isFieldInvalid('objectifsAnneeProchaine')">
-          {{ getFieldError('objectifsAnneeProchaine') }}
-        </div>
-      </div>
-    </div>
+          <mat-card *ngIf="requiresDerogation" class="summary-card warning">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>warning</mat-icon>
+                Dérogation demandée
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <p><strong>Motif:</strong> {{ derogationForm.value.motif }}</p>
+              <p><strong>Justification:</strong> {{ derogationForm.value.justification }}</p>
+            </mat-card-content>
+          </mat-card>
 
-    <!-- Form Actions -->
-    <div class="form-actions">
-      <button type="button" class="btn btn-secondary" (click)="onCancel()" [disabled]="loading">
-        Annuler
-      </button>
-      <button type="submit" class="btn btn-primary" [disabled]="loading || reinscriptionForm.invalid">
-        <i class="fas fa-save"></i>
-        Créer la réinscription
-      </button>
-    </div>
-  </form>
+          <div class="step-actions">
+            <button mat-button matStepperPrevious>Précédent</button>
+            <button mat-raised-button 
+                    color="primary" 
+                    (click)="onSubmit()"
+                    [disabled]="submitting">
+              <mat-spinner *ngIf="submitting" diameter="20"></mat-spinner>
+              <span *ngIf="!submitting">Soumettre la réinscription</span>
+            </button>
+          </div>
+        </div>
+      </mat-step>
+    </mat-stepper>
+  </div>
 </div>

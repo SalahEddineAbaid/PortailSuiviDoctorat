@@ -50,72 +50,72 @@ public class AttestationPdfGenerator {
     private final ResourceLoader resourceLoader;
     private final UserServiceClient userServiceClient;
 
-    @Value("${pdf.logo.path}")
+    @Value("${pdf.logo.path:}")
     private String logoPath;
 
-    @Value("${pdf.signature.path}")
+    @Value("${pdf.signature.path:}")
     private String signaturePath;
 
-    @Value("${pdf.qrcode.base-url}")
+    @Value("${pdf.qrcode.base-url:}")
     private String qrCodeBaseUrl;
 
-    @Value("${pdf.attestation.output-dir}")
+    @Value("${pdf.attestation.output-dir:./uploads/attestations}")
     private String outputDir;
 
     /**
      * Generates an attestation PDF for a validated inscription
      * 
-     * @param inscription The inscription entity
+     * @param inscription    The inscription entity
      * @param infosDoctorant Student information
-     * @param directeur Director information from user service
+     * @param directeur      Director information from user service
      * @return Path to the generated PDF file
      * @throws IOException if file operations fail
      */
-    public String generateAttestation(Inscription inscription, InfosDoctorant infosDoctorant, UserDTO directeur) 
+    public String generateAttestation(Inscription inscription, InfosDoctorant infosDoctorant, UserDTO directeur)
             throws IOException {
-        
+
         log.info("Generating attestation for inscription ID: {}", inscription.getId());
-        
+
         // Create output directory if it doesn't exist
         Path outputPath = Paths.get(outputDir);
         if (!Files.exists(outputPath)) {
             Files.createDirectories(outputPath);
         }
-        
+
         // Generate filename with timestamp
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
         String filename = String.format("attestation_%d_%s.pdf", inscription.getId(), timestamp);
         String filePath = outputDir + File.separator + filename;
-        
+
         // Create PDF
         try (FileOutputStream fos = new FileOutputStream(filePath)) {
             PdfWriter writer = new PdfWriter(fos);
             PdfDocument pdfDoc = new PdfDocument(writer);
             Document document = new Document(pdfDoc, PageSize.A4);
             document.setMargins(50, 50, 50, 50);
-            
+
             // Add header with logo and QR code
             addHeader(document, inscription);
-            
+
             // Add title
             addTitle(document);
-            
+
             // Add student information
             addStudentInformation(document, inscription, infosDoctorant);
-            
+
             // Add thesis details
             addThesisDetails(document, inscription);
-            
+
             // Add director information
             addDirectorInformation(document, directeur);
-            
+
             // Add signature and stamp section
             addSignatureSection(document, inscription);
-            
+
             document.close();
-            
+
             log.info("Attestation generated successfully at: {}", filePath);
-            
+
             // Create DocumentGenere record
             File file = new File(filePath);
             DocumentGenere documentGenere = DocumentGenere.builder()
@@ -124,12 +124,12 @@ public class AttestationPdfGenerator {
                     .cheminFichier(filePath)
                     .tailleFichier(file.length())
                     .build();
-            
+
             documentGenereRepository.save(documentGenere);
             log.info("DocumentGenere record created for attestation");
-            
+
             return filePath;
-            
+
         } catch (Exception e) {
             log.error("Error generating attestation for inscription {}: {}", inscription.getId(), e.getMessage(), e);
             throw new IOException("Failed to generate attestation PDF", e);
@@ -140,9 +140,9 @@ public class AttestationPdfGenerator {
      * Adds header with institution logo and QR code
      */
     private void addHeader(Document document, Inscription inscription) throws IOException {
-        Table headerTable = new Table(UnitValue.createPercentArray(new float[]{1, 1}));
+        Table headerTable = new Table(UnitValue.createPercentArray(new float[] { 1, 1 }));
         headerTable.setWidth(UnitValue.createPercentValue(100));
-        
+
         // Add logo on the left
         try {
             Resource logoResource = resourceLoader.getResource(logoPath);
@@ -159,7 +159,7 @@ public class AttestationPdfGenerator {
             log.warn("Could not load logo: {}", e.getMessage());
             headerTable.addCell(new Paragraph("LOGO"));
         }
-        
+
         // Add QR code on the right
         try {
             byte[] qrCodeBytes = generateQRCode(inscription.getId());
@@ -171,7 +171,7 @@ public class AttestationPdfGenerator {
             log.error("Error generating QR code: {}", e.getMessage());
             headerTable.addCell(new Paragraph("QR CODE"));
         }
-        
+
         document.add(headerTable);
         document.add(new Paragraph("\n"));
     }
@@ -183,7 +183,7 @@ public class AttestationPdfGenerator {
         String url = qrCodeBaseUrl + inscriptionId;
         QRCodeWriter qrCodeWriter = new QRCodeWriter();
         BitMatrix bitMatrix = qrCodeWriter.encode(url, BarcodeFormat.QR_CODE, 200, 200);
-        
+
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         MatrixToImageWriter.writeToStream(bitMatrix, "PNG", outputStream);
         return outputStream.toByteArray();
@@ -198,15 +198,15 @@ public class AttestationPdfGenerator {
                 .setBold()
                 .setTextAlignment(TextAlignment.CENTER)
                 .setFontColor(new DeviceRgb(0, 51, 102));
-        
+
         document.add(title);
         document.add(new Paragraph("\n"));
-        
+
         Paragraph subtitle = new Paragraph("Année Universitaire " + getCurrentAcademicYear())
                 .setFontSize(14)
                 .setTextAlignment(TextAlignment.CENTER)
                 .setItalic();
-        
+
         document.add(subtitle);
         document.add(new Paragraph("\n\n"));
     }
@@ -219,21 +219,21 @@ public class AttestationPdfGenerator {
                 .setFontSize(12);
         document.add(intro);
         document.add(new Paragraph("\n"));
-        
+
         // Student details table
-        Table studentTable = new Table(UnitValue.createPercentArray(new float[]{1, 2}));
+        Table studentTable = new Table(UnitValue.createPercentArray(new float[] { 1, 2 }));
         studentTable.setWidth(UnitValue.createPercentValue(100));
-        
+
         addTableRow(studentTable, "Nom et Prénom :", getStudentFullName(inscription));
         addTableRow(studentTable, "CIN :", infosDoctorant.getCin());
-        
+
         if (infosDoctorant.getCne() != null && !infosDoctorant.getCne().isEmpty()) {
             addTableRow(studentTable, "CNE :", infosDoctorant.getCne());
         }
-        
+
         addTableRow(studentTable, "Année d'étude :", String.valueOf(inscription.getAnneeInscription()));
         addTableRow(studentTable, "Type d'inscription :", inscription.getType().toString());
-        
+
         document.add(studentTable);
         document.add(new Paragraph("\n"));
     }
@@ -247,18 +247,18 @@ public class AttestationPdfGenerator {
                 .setBold();
         document.add(thesisHeader);
         document.add(new Paragraph("\n"));
-        
-        Table thesisTable = new Table(UnitValue.createPercentArray(new float[]{1, 2}));
+
+        Table thesisTable = new Table(UnitValue.createPercentArray(new float[] { 1, 2 }));
         thesisTable.setWidth(UnitValue.createPercentValue(100));
-        
+
         addTableRow(thesisTable, "Sujet de thèse :", inscription.getSujetThese());
-        
+
         if (inscription.getInfosThese() != null) {
             addTableRow(thesisTable, "Discipline :", inscription.getInfosThese().getDiscipline());
             addTableRow(thesisTable, "Laboratoire :", inscription.getInfosThese().getLaboratoire());
             addTableRow(thesisTable, "Établissement :", inscription.getInfosThese().getEtablissementAccueil());
         }
-        
+
         document.add(thesisTable);
         document.add(new Paragraph("\n"));
     }
@@ -272,7 +272,7 @@ public class AttestationPdfGenerator {
                 .setBold();
         document.add(directorHeader);
         document.add(new Paragraph("\n"));
-        
+
         String directorName = directeur.getFirstName() + " " + directeur.getLastName();
         Paragraph directorInfo = new Paragraph(directorName)
                 .setFontSize(12);
@@ -286,27 +286,27 @@ public class AttestationPdfGenerator {
     private void addSignatureSection(Document document, Inscription inscription) {
         // Validation date
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        String validationDate = inscription.getDateValidation() != null 
+        String validationDate = inscription.getDateValidation() != null
                 ? inscription.getDateValidation().format(formatter)
                 : LocalDateTime.now().format(formatter);
-        
+
         Paragraph dateParagraph = new Paragraph("Fait à Casablanca, le " + validationDate)
                 .setFontSize(11)
                 .setTextAlignment(TextAlignment.RIGHT);
         document.add(dateParagraph);
         document.add(new Paragraph("\n"));
-        
+
         // Signature section
-        Table signatureTable = new Table(UnitValue.createPercentArray(new float[]{1, 1}));
+        Table signatureTable = new Table(UnitValue.createPercentArray(new float[] { 1, 1 }));
         signatureTable.setWidth(UnitValue.createPercentValue(100));
-        
+
         // Left side - stamp placeholder
         Paragraph stampPlaceholder = new Paragraph("Cachet de l'établissement")
                 .setFontSize(10)
                 .setItalic()
                 .setTextAlignment(TextAlignment.CENTER);
         signatureTable.addCell(stampPlaceholder);
-        
+
         // Right side - signature
         try {
             Resource signatureResource = resourceLoader.getResource(signaturePath);
@@ -329,9 +329,9 @@ public class AttestationPdfGenerator {
                     .setTextAlignment(TextAlignment.CENTER);
             signatureTable.addCell(signaturePlaceholder);
         }
-        
+
         document.add(signatureTable);
-        
+
         // Footer note
         document.add(new Paragraph("\n\n"));
         Paragraph footer = new Paragraph("Cette attestation est valable pour l'année universitaire en cours.")
@@ -356,7 +356,7 @@ public class AttestationPdfGenerator {
     private String getCurrentAcademicYear() {
         int currentYear = LocalDateTime.now().getYear();
         int currentMonth = LocalDateTime.now().getMonthValue();
-        
+
         // Academic year starts in September
         if (currentMonth >= 9) {
             return currentYear + "-" + (currentYear + 1);
@@ -373,7 +373,7 @@ public class AttestationPdfGenerator {
             UserDTO student = userServiceClient.getStudentInfo(inscription.getDoctorantId());
             return student.getFirstName() + " " + student.getLastName();
         } catch (Exception e) {
-            log.warn("Could not fetch student information for ID {}: {}", 
+            log.warn("Could not fetch student information for ID {}: {}",
                     inscription.getDoctorantId(), e.getMessage());
             return "Étudiant " + inscription.getDoctorantId();
         }

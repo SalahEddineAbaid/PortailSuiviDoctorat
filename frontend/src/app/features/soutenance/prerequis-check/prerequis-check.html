@@ -1,0 +1,165 @@
+<div class="prerequis-check-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>fact_check</mat-icon>
+        Vérification des Prérequis
+      </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Status Banner -->
+      <div class="status-banner" [ngClass]="statusClass">
+        <mat-icon [style.font-size.px]="48">{{ statusIcon }}</mat-icon>
+        <div class="status-content">
+          <h3>{{ statusTitle }}</h3>
+          <p>{{ statusMessage }}</p>
+        </div>
+      </div>
+
+      <!-- Publications & Conferences -->
+      <div class="prerequis-section">
+        <h3>
+          <mat-icon>article</mat-icon>
+          Publications et Conférences
+        </h3>
+        
+        <div class="prerequis-grid">
+          <div class="prerequis-item" [ngClass]="isPublicationsValid() ? 'valid' : 'invalid'">
+            <div class="item-header">
+              <span class="item-title">
+                <mat-icon>menu_book</mat-icon>
+                Articles de Revue
+              </span>
+              <mat-icon class="status-icon" [ngClass]="isPublicationsValid() ? 'valid' : 'invalid'">
+                {{ isPublicationsValid() ? 'check_circle' : 'cancel' }}
+              </mat-icon>
+            </div>
+            <div class="item-content">
+              <div class="value">{{ prerequisites?.journalArticles || 0 }} / {{ REQUIRED_JOURNAL_ARTICLES }}</div>
+              <div class="requirement">Articles Q1/Q2 requis</div>
+              <mat-progress-bar class="progress-bar" mode="determinate" 
+                                [value]="getPublicationsProgress()"
+                                [color]="isPublicationsValid() ? 'primary' : 'warn'">
+              </mat-progress-bar>
+            </div>
+          </div>
+
+          <div class="prerequis-item" [ngClass]="isConferencesValid() ? 'valid' : 'invalid'">
+            <div class="item-header">
+              <span class="item-title">
+                <mat-icon>groups</mat-icon>
+                Conférences
+              </span>
+              <mat-icon class="status-icon" [ngClass]="isConferencesValid() ? 'valid' : 'invalid'">
+                {{ isConferencesValid() ? 'check_circle' : 'cancel' }}
+              </mat-icon>
+            </div>
+            <div class="item-content">
+              <div class="value">{{ prerequisites?.conferences || 0 }} / {{ REQUIRED_CONFERENCES }}</div>
+              <div class="requirement">Conférences internationales requises</div>
+              <mat-progress-bar class="progress-bar" mode="determinate" 
+                                [value]="getConferencesProgress()"
+                                [color]="isConferencesValid() ? 'primary' : 'warn'">
+              </mat-progress-bar>
+            </div>
+          </div>
+
+          <div class="prerequis-item" [ngClass]="isTrainingValid() ? 'valid' : 'invalid'">
+            <div class="item-header">
+              <span class="item-title">
+                <mat-icon>school</mat-icon>
+                Formations
+              </span>
+              <mat-icon class="status-icon" [ngClass]="isTrainingValid() ? 'valid' : 'invalid'">
+                {{ isTrainingValid() ? 'check_circle' : 'cancel' }}
+              </mat-icon>
+            </div>
+            <div class="item-content">
+              <div class="value">{{ prerequisites?.trainingHours || 0 }} / {{ REQUIRED_TRAINING_HOURS }}</div>
+              <div class="requirement">Heures de formation requises</div>
+              <mat-progress-bar class="progress-bar" mode="determinate" 
+                                [value]="getTrainingProgress()"
+                                [color]="isTrainingValid() ? 'primary' : 'warn'">
+              </mat-progress-bar>
+            </div>
+          </div>
+        </div>
+
+        <button mat-raised-button color="primary" (click)="goToPublications()" 
+                style="margin-top: 1rem;">
+          <mat-icon>add</mat-icon>
+          Gérer les Publications
+        </button>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- Documents -->
+      <div class="prerequis-section">
+        <h3>
+          <mat-icon>folder</mat-icon>
+          Documents Requis
+        </h3>
+        
+        <div class="documents-list">
+          <div *ngFor="let doc of getDocuments()" 
+               class="document-item" 
+               [ngClass]="doc.uploaded ? 'uploaded' : 'missing'">
+            <mat-icon [ngClass]="doc.uploaded ? 'uploaded' : 'missing'">
+              {{ doc.uploaded ? 'check_circle' : 'cancel' }}
+            </mat-icon>
+            <div class="document-info">
+              <div class="document-name">{{ doc.name }}</div>
+              <div class="document-status">
+                {{ doc.uploaded ? 'Uploadé' : 'Manquant' }}
+              </div>
+            </div>
+            <button *ngIf="!doc.uploaded" mat-raised-button color="primary" 
+                    (click)="goToDocuments()">
+              <mat-icon>upload</mat-icon>
+              Uploader
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- Publications List -->
+      <div class="prerequis-section" *ngIf="prerequisites?.publications && prerequisites.publications.length > 0">
+        <h3>
+          <mat-icon>list</mat-icon>
+          Liste des Publications
+        </h3>
+        
+        <div class="publications-list">
+          <div *ngFor="let pub of prerequisites.publications" class="publication-item">
+            <div class="publication-header">
+              <mat-icon>{{ pub.type === 'JOURNAL' ? 'menu_book' : 'groups' }}</mat-icon>
+              <mat-chip class="publication-type">{{ pub.type }}</mat-chip>
+            </div>
+            <div class="publication-title">{{ pub.title }}</div>
+            <div class="publication-details">
+              {{ pub.authors }} - {{ pub.venue }} ({{ pub.year }})
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="actions">
+        <button mat-button (click)="refresh()">
+          <mat-icon>refresh</mat-icon>
+          Actualiser
+        </button>
+        <button mat-raised-button color="primary" 
+                [disabled]="!prerequisites?.isValid"
+                routerLink="/soutenance/new">
+          <mat-icon>send</mat-icon>
+          Demander la Soutenance
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

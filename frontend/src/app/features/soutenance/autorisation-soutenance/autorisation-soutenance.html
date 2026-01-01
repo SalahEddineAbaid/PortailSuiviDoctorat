@@ -1,0 +1,159 @@
+<div class="autorisation-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>approval</mat-icon>
+        Autorisation de Soutenance
+      </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="autorisationForm" (ngSubmit)="onSubmit()">
+        
+        <!-- Vérifications Préalables -->
+        <div class="form-section">
+          <h3>Vérifications Préalables</h3>
+          
+          <div class="checks-grid">
+            <div class="check-item" [class.valid]="autorisationForm.value.prerequisValides">
+              <mat-checkbox formControlName="prerequisValides" disabled>
+                Prérequis Validés
+              </mat-checkbox>
+              <mat-icon [class.valid]="autorisationForm.value.prerequisValides">
+                {{ autorisationForm.value.prerequisValides ? 'check_circle' : 'cancel' }}
+              </mat-icon>
+            </div>
+
+            <div class="check-item" [class.valid]="autorisationForm.value.juryComplet">
+              <mat-checkbox formControlName="juryComplet" disabled>
+                Jury Complet (min. 3 membres)
+              </mat-checkbox>
+              <mat-icon [class.valid]="autorisationForm.value.juryComplet">
+                {{ autorisationForm.value.juryComplet ? 'check_circle' : 'cancel' }}
+              </mat-icon>
+            </div>
+
+            <div class="check-item" [class.valid]="autorisationForm.value.rapportsFavorables">
+              <mat-checkbox formControlName="rapportsFavorables" disabled>
+                Rapports Favorables
+              </mat-checkbox>
+              <mat-icon [class.valid]="autorisationForm.value.rapportsFavorables">
+                {{ autorisationForm.value.rapportsFavorables ? 'check_circle' : 'cancel' }}
+              </mat-icon>
+            </div>
+
+            <div class="check-item" [class.valid]="autorisationForm.value.documentsComplets">
+              <mat-checkbox formControlName="documentsComplets" disabled>
+                Documents Complets
+              </mat-checkbox>
+              <mat-icon [class.valid]="autorisationForm.value.documentsComplets">
+                {{ autorisationForm.value.documentsComplets ? 'check_circle' : 'cancel' }}
+              </mat-icon>
+            </div>
+          </div>
+
+          <div class="authorization-status" *ngIf="!canAuthorize">
+            <mat-icon>warning</mat-icon>
+            <p>Toutes les vérifications doivent être validées avant d'autoriser la soutenance.</p>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Décision -->
+        <div class="form-section">
+          <h3>Décision</h3>
+          
+          <mat-radio-group formControlName="statut" class="radio-group">
+            <mat-radio-button value="AUTORISE" [disabled]="!canAuthorize">
+              <mat-icon class="approve-icon">check_circle</mat-icon>
+              Autoriser la Soutenance
+            </mat-radio-button>
+            <mat-radio-button value="REFUSE">
+              <mat-icon class="reject-icon">cancel</mat-icon>
+              Refuser la Soutenance
+            </mat-radio-button>
+            <mat-radio-button value="EN_ATTENTE">
+              <mat-icon class="pending-icon">hourglass_empty</mat-icon>
+              Mettre en Attente
+            </mat-radio-button>
+          </mat-radio-group>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Planification (si autorisé) -->
+        <div class="form-section" *ngIf="autorisationForm.value.statut === 'AUTORISE'">
+          <h3>Planification de la Soutenance</h3>
+          
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Date de Soutenance</mat-label>
+            <input matInput [matDatepicker]="picker" formControlName="dateSoutenance">
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+            <mat-error *ngIf="isFieldInvalid('dateSoutenance')">
+              La date est obligatoire
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Lieu</mat-label>
+            <input matInput formControlName="lieuSoutenance" 
+                   placeholder="Ex: EMSI Casablanca">
+            <mat-icon matPrefix>location_on</mat-icon>
+            <mat-error *ngIf="isFieldInvalid('lieuSoutenance')">
+              Le lieu est obligatoire
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Salle</mat-label>
+            <input matInput formControlName="salleSoutenance" 
+                   placeholder="Ex: Amphithéâtre A">
+            <mat-icon matPrefix>meeting_room</mat-icon>
+            <mat-error *ngIf="isFieldInvalid('salleSoutenance')">
+              La salle est obligatoire
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Motif de Refus (si refusé) -->
+        <div class="form-section" *ngIf="autorisationForm.value.statut === 'REFUSE'">
+          <h3>Motif du Refus</h3>
+          
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Motif</mat-label>
+            <textarea matInput formControlName="motifRefus" rows="4"
+                      placeholder="Expliquez les raisons du refus..."></textarea>
+            <mat-error *ngIf="isFieldInvalid('motifRefus')">
+              Le motif est obligatoire
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Commentaires -->
+        <div class="form-section">
+          <h3>Commentaires Administratifs</h3>
+          
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Commentaires</mat-label>
+            <textarea matInput formControlName="commentaireAdmin" rows="4"
+                      placeholder="Commentaires additionnels (optionnel)..."></textarea>
+          </mat-form-field>
+        </div>
+
+        <!-- Actions -->
+        <div class="form-actions">
+          <button mat-button type="button" routerLink="/admin/soutenances">
+            Annuler
+          </button>
+          <button mat-raised-button color="primary" type="submit" 
+                  [disabled]="!autorisationForm.valid || submitting">
+            <mat-spinner *ngIf="submitting" diameter="20"></mat-spinner>
+            <span *ngIf="!submitting">Enregistrer la Décision</span>
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

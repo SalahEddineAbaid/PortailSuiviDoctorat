@@ -1,48 +1,73 @@
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
+import { AuthService } from '../services/auth.service';
+import { catchError, switchMap, throwError } from 'rxjs';
 import { Router } from '@angular/router';
-import { catchError, throwError } from 'rxjs';
-import { environment } from '../../environments/environment';
 
 /**
- * 🔐 Interceptor qui ajoute automatiquement le JWT à chaque requête HTTP
- * ⚠️ N'injecte PAS AuthService pour éviter la dépendance circulaire
+ * 🔐 Intercepteur d'authentification JWT
+ * 
+ * Fonctionnalités :
+ * - Ajoute automatiquement le token JWT aux requêtes
+ * - Gère le rafraîchissement automatique du token en cas d'expiration
+ * - Redirige vers login en cas d'échec d'authentification
  */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  const authService = inject(AuthService);
   const router = inject(Router);
-  
-  // ✅ Accéder directement au localStorage pour éviter la dépendance circulaire
-  const token = localStorage.getItem(environment.tokenKey);
 
-  // ✅ Si pas de token, ou si c'est une requête d'authentification, ne rien faire
-  if (!token || 
-      req.url.includes('/auth/login') || 
-      req.url.includes('/auth/register') ||
-      req.url.includes('/auth/refresh')) {
+  // ✅ Ne pas ajouter le token pour les requêtes d'authentification
+  const isAuthRequest = req.url.includes('/auth/login') || 
+                        req.url.includes('/auth/register') ||
+                        req.url.includes('/auth/refresh');
+
+  if (isAuthRequest) {
     return next(req);
   }
 
-  // ✅ Cloner la requête et ajouter le header Authorization
-  const clonedRequest = req.clone({
-    setHeaders: {
-      Authorization: `Bearer ${token}`
-    }
-  });
+  // ✅ Récupérer le token
+  const token = authService.getToken();
 
-  console.log('🔐 Token ajouté à la requête:', req.url);
-
-  // ✅ Gérer les erreurs 401 (token expiré)
-  return next(clonedRequest).pipe(
-    catchError((error: HttpErrorResponse) => {
-      if (error.status === 401) {
-        console.warn('⚠️ Token expiré ou invalide, déconnexion...');
-        // ✅ Nettoyer les tokens directement
-        localStorage.removeItem(environment.tokenKey);
-        localStorage.removeItem(environment.refreshTokenKey);
-        router.navigate(['/login'], {
-          queryParams: { expired: 'true' }
-        });
+  // ✅ Cloner la requête et ajouter le token si disponible
+  let authReq = req;
+  if (token) {
+    authReq = req.clone({
+      setHeaders: {
+        Authorization: `Bearer ${token}`
       }
+    });
+  }
+
+  // ✅ Envoyer la requête et gérer les erreurs 401
+  return next(authReq).pipe(
+    catchError((error: HttpErrorResponse) => {
+      // Si erreur 401 et qu'on a un refresh token, tenter le rafraîchissement
+      if (error.status === 401 && authService.getRefreshToken()) {
+        console.log('🔄 Token expiré, tentative de rafraîchissement...');
+        
+        return authService.refreshToken().pipe(
+          switchMap(() => {
+            // ✅ Réessayer la requête avec le nouveau token
+            const newToken = authService.getToken();
+            const retryReq = req.clone({
+              setHeaders: {
+                Authorization: `Bearer ${newToken}`
+              }
+            });
+            
+            console.log('✅ Token rafraîchi, nouvelle tentative de requête');
+            return next(retryReq);
+          }),
+          catchError((refreshError: any) => {
+            // ✅ Échec du rafraîchissement, déconnecter l'utilisateur
+            console.error('❌ Échec du rafraîchissement du token');
+            authService.logout();
+            return throwError(() => refreshError);
+          })
+        );
+      }
+
+      // Pour toutes les autres erreurs, les laisser passer
       return throwError(() => error);
     })
   );

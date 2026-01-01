@@ -1,132 +1,271 @@
-<div class="inscription-dashboard">
-  <div class="dashboard-header">
-    <h1>Mes Inscriptions</h1>
-    <button class="btn btn-primary" routerLink="/inscription/nouvelle">
-      <i class="fas fa-plus"></i>
-      Nouvelle Inscription
-    </button>
-  </div>
-
+<div class="dashboard-container">
   <!-- Loading State -->
   <div *ngIf="loading" class="loading-container">
-    <div class="spinner"></div>
-    <p>Chargement des données...</p>
+    <mat-spinner></mat-spinner>
+    <p>Chargement du dashboard...</p>
   </div>
 
   <!-- Error State -->
-  <div *ngIf="error" class="error-container">
-    <div class="alert alert-danger">
-      <i class="fas fa-exclamation-triangle"></i>
-      {{ error }}
-      <button class="btn btn-sm btn-outline-primary" (click)="onRefresh()">
-        Réessayer
-      </button>
-    </div>
+  <div *ngIf="error && !loading" class="error-container">
+    <mat-icon color="warn">error</mat-icon>
+    <p>{{ error }}</p>
+    <button mat-raised-button color="primary" (click)="loadDashboard()">
+      Réessayer
+    </button>
   </div>
 
-  <!-- Content -->
-  <div *ngIf="!loading && !error" class="dashboard-content">
-    
-    <!-- Campagne Active Info -->
-    <div class="campagne-info" *ngIf="campagneActive$ | async as campagne">
-      <div class="card">
-        <div class="card-header">
-          <h3>Campagne Active</h3>
-        </div>
-        <div class="card-body">
-          <h4>{{ campagne.nom }}</h4>
-          <p><strong>Année universitaire:</strong> {{ campagne.anneeUniversitaire }}</p>
-          <p><strong>Type:</strong> {{ campagne.typeInscription }}</p>
-          <p><strong>Date d'ouverture:</strong> {{ campagne.dateOuverture | date:'dd/MM/yyyy' }}</p>
-          <p><strong>Date de fermeture:</strong> {{ campagne.dateFermeture | date:'dd/MM/yyyy' }}</p>
-          <span class="badge badge-success" *ngIf="campagne.active">Ouverte</span>
-          <span class="badge badge-secondary" *ngIf="!campagne.active">Fermée</span>
-        </div>
+  <!-- Dashboard Content -->
+  <div *ngIf="!loading && !error && dashboard" class="dashboard-content">
+    <!-- Header -->
+    <div class="dashboard-header">
+      <div class="header-info">
+        <h1>Tableau de bord</h1>
+        <p class="subtitle">Bienvenue {{ dashboard.doctorant.prenom }} {{ dashboard.doctorant.nom }}</p>
+      </div>
+      <div class="header-actions">
+        <button mat-raised-button color="primary" 
+                (click)="onNewInscription()"
+                [disabled]="!canCreateInscription()">
+          <mat-icon>add</mat-icon>
+          Nouvelle inscription
+        </button>
+        <button mat-raised-button color="accent"
+                (click)="onReinscription()"
+                [disabled]="!canReinscribe()">
+          <mat-icon>refresh</mat-icon>
+          Réinscription
+        </button>
       </div>
     </div>
 
-    <!-- Mes Inscriptions -->
-    <div class="inscriptions-section">
-      <h2>Historique de mes inscriptions</h2>
-      
-      <div *ngIf="inscriptions$ | async as inscriptions; else noInscriptions">
-        <div *ngIf="inscriptions.length > 0; else emptyInscriptions" class="inscriptions-grid">
-          <div *ngFor="let inscription of inscriptions" class="inscription-card">
-            <div class="card">
-              <div class="card-header">
-                <div class="inscription-header">
-                  <h4>{{ inscription.campagne.nom }}</h4>
-                  <span class="badge" [ngClass]="getStatusClass(inscription.statut)">
-                    {{ getStatusLabel(inscription.statut) }}
-                  </span>
-                </div>
-              </div>
-              <div class="card-body">
-                <p><strong>Sujet de thèse:</strong> {{ inscription.sujetThese }}</p>
-                <p><strong>Laboratoire:</strong> {{ inscription.laboratoire }}</p>
-                <p><strong>Spécialité:</strong> {{ inscription.specialite }}</p>
-                <p><strong>Directeur:</strong> {{ inscription.directeur.FirstName }} {{ inscription.directeur.LastName }}</p>
-                <p><strong>Date d'inscription:</strong> {{ inscription.dateInscription | date:'dd/MM/yyyy' }}</p>
-                
-                <!-- Avis Directeur -->
-                <div *ngIf="inscription.avisDirecteur" class="avis-section">
-                  <h5>Avis du Directeur</h5>
-                  <p class="avis-text">{{ inscription.avisDirecteur.avis }}</p>
-                  <span class="badge" [ngClass]="inscription.avisDirecteur.valide ? 'badge-success' : 'badge-danger'">
-                    {{ inscription.avisDirecteur.valide ? 'Favorable' : 'Défavorable' }}
-                  </span>
-                </div>
+    <!-- Statistics Cards -->
+    <div class="statistics-grid">
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-icon" style="background-color: #e3f2fd;">
+            <mat-icon color="primary">description</mat-icon>
+          </div>
+          <div class="stat-info">
+            <h3>{{ totalInscriptions }}</h3>
+            <p>Total inscriptions</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
 
-                <!-- Validation Admin -->
-                <div *ngIf="inscription.validationAdmin" class="validation-section">
-                  <h5>Validation Administrative</h5>
-                  <p class="validation-text">{{ inscription.validationAdmin.commentaire }}</p>
-                  <span class="badge" [ngClass]="inscription.validationAdmin.valide ? 'badge-success' : 'badge-danger'">
-                    {{ inscription.validationAdmin.valide ? 'Validée' : 'Rejetée' }}
-                  </span>
-                </div>
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-icon" style="background-color: #e8f5e9;">
+            <mat-icon style="color: #4caf50;">check_circle</mat-icon>
+          </div>
+          <div class="stat-info">
+            <h3>{{ inscriptionsValidees }}</h3>
+            <p>Validées</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-icon" style="background-color: #fff3e0;">
+            <mat-icon style="color: #ff9800;">pending</mat-icon>
+          </div>
+          <div class="stat-info">
+            <h3>{{ inscriptionsEnAttente }}</h3>
+            <p>En attente</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-icon" style="background-color: #ffebee;">
+            <mat-icon style="color: #f44336;">cancel</mat-icon>
+          </div>
+          <div class="stat-info">
+            <h3>{{ inscriptionsRejetees }}</h3>
+            <p>Rejetées</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="content-grid">
+      <!-- Left Column -->
+      <div class="left-column">
+        <!-- Current Inscription -->
+        <mat-card *ngIf="dashboard.inscriptionCourante" class="current-inscription-card">
+          <mat-card-header>
+            <mat-card-title>Inscription courante</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="inscription-info">
+              <div class="info-row">
+                <span class="label">Année:</span>
+                <span class="value">{{ dashboard.inscriptionCourante.anneeInscription }}</span>
               </div>
-              <div class="card-footer">
-                <button class="btn btn-outline-primary" [routerLink]="['/inscription', inscription.id]">
-                  Voir détails
-                </button>
-                <button 
-                  *ngIf="inscription.statut === 'BROUILLON'" 
-                  class="btn btn-primary" 
-                  [routerLink]="['/inscription', inscription.id, 'edit']">
-                  Modifier
-                </button>
+              <div class="info-row">
+                <span class="label">Campagne:</span>
+                <span class="value">{{ dashboard.inscriptionCourante.campagneLibelle }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Statut:</span>
+                <mat-chip [style.background-color]="getStatutColor(dashboard.inscriptionCourante.statut)">
+                  {{ getStatutLabel(dashboard.inscriptionCourante.statut) }}
+                </mat-chip>
+              </div>
+              <div class="info-row">
+                <span class="label">Date création:</span>
+                <span class="value">{{ dashboard.inscriptionCourante.dateCreation | date:'dd/MM/yyyy' }}</span>
               </div>
             </div>
-          </div>
-        </div>
+          </mat-card-content>
+          <mat-card-actions>
+            <button mat-button color="primary" 
+                    (click)="onViewInscription(dashboard.inscriptionCourante.id)">
+              <mat-icon>visibility</mat-icon>
+              Voir détails
+            </button>
+          </mat-card-actions>
+        </mat-card>
+
+        <!-- Doctorate Progress -->
+        <mat-card class="progress-card">
+          <mat-card-header>
+            <mat-card-title>Progression du doctorat</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="progress-info">
+              <div class="progress-stats">
+                <div class="stat">
+                  <mat-icon>schedule</mat-icon>
+                  <span>{{ dureeDoctoratAnnees }} ans {{ dureeDoctoratMoisRestants }} mois</span>
+                </div>
+                <div class="stat">
+                  <mat-icon>trending_up</mat-icon>
+                  <span>{{ progressionPercentage }}%</span>
+                </div>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" [style.width.%]="progressionPercentage"></div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Documents Manquants -->
+        <mat-card *ngIf="dashboard.documentsManquants.length > 0" class="documents-card">
+          <mat-card-header>
+            <mat-card-title>
+              Documents manquants
+              <mat-chip class="count-chip">{{ dashboard.documentsManquants.length }}</mat-chip>
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <mat-list>
+              <mat-list-item *ngFor="let doc of dashboard.documentsManquants">
+                <mat-icon matListItemIcon color="warn">warning</mat-icon>
+                <div matListItemTitle>{{ doc.libelle }}</div>
+                <div matListItemLine *ngIf="doc.obligatoire">
+                  <mat-chip class="required-chip">Obligatoire</mat-chip>
+                </div>
+              </mat-list-item>
+            </mat-list>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Historique -->
+        <mat-card class="history-card">
+          <mat-card-header>
+            <mat-card-title>Historique des inscriptions</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <mat-list *ngIf="dashboard.historiqueInscriptions.length > 0">
+              <mat-list-item *ngFor="let inscription of dashboard.historiqueInscriptions">
+                <mat-icon matListItemIcon>history</mat-icon>
+                <div matListItemTitle>Année {{ inscription.anneeInscription }}</div>
+                <div matListItemLine>
+                  <mat-chip [style.background-color]="getStatutColor(inscription.statut)">
+                    {{ getStatutLabel(inscription.statut) }}
+                  </mat-chip>
+                  <span class="date">{{ inscription.dateCreation | date:'dd/MM/yyyy' }}</span>
+                </div>
+              </mat-list-item>
+            </mat-list>
+            <p *ngIf="dashboard.historiqueInscriptions.length === 0" class="empty-message">
+              Aucun historique disponible
+            </p>
+          </mat-card-content>
+          <mat-card-actions>
+            <button mat-button color="primary" (click)="onViewAllInscriptions()">
+              Voir toutes les inscriptions
+            </button>
+          </mat-card-actions>
+        </mat-card>
       </div>
 
-      <ng-template #emptyInscriptions>
-        <div class="empty-state">
-          <div class="empty-icon">
-            <i class="fas fa-file-alt"></i>
-          </div>
-          <h3>Aucune inscription trouvée</h3>
-          <p>Vous n'avez pas encore d'inscription enregistrée.</p>
-          <button class="btn btn-primary" routerLink="/inscription/nouvelle">
-            Créer ma première inscription
-          </button>
-        </div>
-      </ng-template>
+      <!-- Right Column -->
+      <div class="right-column">
+        <!-- Milestones -->
+        <mat-card class="milestones-card">
+          <mat-card-header>
+            <mat-card-title>Jalons importants</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <mat-list *ngIf="dashboard.milestones.length > 0">
+              <mat-list-item *ngFor="let milestone of dashboard.milestones">
+                <mat-icon matListItemIcon [color]="getMilestoneColor(milestone.statut)">
+                  {{ getMilestoneIcon(milestone.statut) }}
+                </mat-icon>
+                <div matListItemTitle>{{ milestone.libelle }}</div>
+                <div matListItemLine>
+                  <span class="date">{{ milestone.dateEcheance | date:'dd/MM/yyyy' }}</span>
+                  <span *ngIf="milestone.description" class="description">{{ milestone.description }}</span>
+                </div>
+              </mat-list-item>
+            </mat-list>
+            <p *ngIf="dashboard.milestones.length === 0" class="empty-message">
+              Aucun jalon défini
+            </p>
+          </mat-card-content>
+        </mat-card>
 
-      <ng-template #noInscriptions>
-        <div class="empty-state">
-          <div class="empty-icon">
-            <i class="fas fa-file-alt"></i>
-          </div>
-          <h3>Aucune inscription</h3>
-          <p>Commencez par créer votre première inscription.</p>
-          <button class="btn btn-primary" routerLink="/inscription/nouvelle">
-            Nouvelle inscription
-          </button>
-        </div>
-      </ng-template>
+        <!-- Alertes -->
+        <mat-card *ngIf="dashboard.alertes.length > 0" class="alerts-card">
+          <mat-card-header>
+            <mat-card-title>
+              Alertes
+              <mat-chip class="count-chip warn">{{ dashboard.alertes.length }}</mat-chip>
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <mat-list>
+              <mat-list-item *ngFor="let alerte of dashboard.alertes" class="alert-item">
+                <mat-icon matListItemIcon [color]="getAlerteColor(alerte.niveau)">
+                  {{ getAlerteIcon(alerte.niveau) }}
+                </mat-icon>
+                <div matListItemTitle>{{ alerte.message }}</div>
+                <div matListItemLine>
+                  <span class="date">{{ alerte.dateCreation | date:'dd/MM/yyyy HH:mm' }}</span>
+                </div>
+              </mat-list-item>
+            </mat-list>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Prochaine Date Limite -->
+        <mat-card *ngIf="dashboard.prochaineDateLimite" class="deadline-card">
+          <mat-card-content>
+            <div class="deadline-content">
+              <mat-icon color="warn">event</mat-icon>
+              <div class="deadline-info">
+                <h3>Prochaine échéance</h3>
+                <p class="deadline-date">{{ dashboard.prochaineDateLimite | date:'dd MMMM yyyy' }}</p>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
     </div>
   </div>
 </div>

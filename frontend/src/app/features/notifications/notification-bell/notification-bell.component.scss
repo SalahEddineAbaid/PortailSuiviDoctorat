@@ -3,112 +3,107 @@
   display: inline-block;
 }
 
-// ===== BOUTON CLOCHE =====
 .bell-button {
   position: relative;
-  background: none;
+  background: transparent;
   border: none;
   cursor: pointer;
   padding: 8px;
   border-radius: 50%;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
 
   &:hover {
-    background-color: var(--hover-bg, rgba(0, 0, 0, 0.04));
+    background-color: rgba(0, 0, 0, 0.04);
   }
 
-  &:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px var(--primary-color, #1976d2);
+  &:active {
+    transform: scale(0.95);
   }
 
-  &.dropdown-open {
-    background-color: var(--active-bg, rgba(25, 118, 210, 0.1));
-  }
-
-  &.has-notifications {
-    .bell-icon {
-      color: var(--primary-color, #1976d2);
-    }
-  }
-
-  &.new-notification {
-    animation: bellShake 0.5s ease-in-out;
-    
-    .bell-icon {
-      color: var(--warning-color, #ff9800);
-    }
+  .bell-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    color: rgba(0, 0, 0, 0.7);
+    transition: color 0.3s ease;
   }
 }
 
-.bell-icon {
-  font-size: 24px;
-  color: var(--text-secondary, #757575);
-  transition: color 0.2s ease;
-}
-
-// ===== BADGE DE COMPTEUR =====
 .notification-badge {
   position: absolute;
-  top: 2px;
-  right: 2px;
-  background-color: var(--error-color, #f44336);
+  top: 4px;
+  right: 4px;
+  background-color: #f44336;
   color: white;
-  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 600;
   min-width: 18px;
   height: 18px;
+  border-radius: 9px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
-  font-weight: 600;
-  line-height: 1;
   padding: 0 4px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 
-  &.large-count {
-    font-size: 10px;
-    min-width: 22px;
-    height: 18px;
+  &.pulse {
+    animation: pulse 1.5s ease-in-out infinite;
   }
 }
 
-// ===== PULSE NOUVELLE NOTIFICATION =====
-.new-notification-pulse {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background-color: var(--warning-color, #ff9800);
-  animation: pulse 1.5s infinite;
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
 }
 
-// ===== DROPDOWN =====
+.has-notifications {
+  .bell-icon {
+    color: #2196f3;
+  }
+}
+
+.new-notification {
+  .bell-button {
+    animation: shake 0.5s ease-in-out;
+  }
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: rotate(-10deg);
+  }
+  20%, 40%, 60%, 80% {
+    transform: rotate(10deg);
+  }
+}
+
 .notification-dropdown {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 8px);
   right: 0;
   width: 380px;
-  max-height: 500px;
+  max-height: 600px;
   background: white;
-  border: 1px solid var(--border-color, #e0e0e0);
   border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   z-index: 1000;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(-10px);
-  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 
-  &.show {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
+  @media (max-width: 480px) {
+    width: calc(100vw - 32px);
+    right: -16px;
   }
 }
 
@@ -116,120 +111,139 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--border-color, #e0e0e0);
-  background-color: var(--surface-color, #fafafa);
+  padding: 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  background-color: #fafafa;
 
   h3 {
     margin: 0;
     font-size: 16px;
     font-weight: 600;
-    color: var(--text-primary, #212121);
+    color: rgba(0, 0, 0, 0.87);
   }
 
   .header-actions {
     display: flex;
     gap: 4px;
+  }
 
-    .btn-icon {
-      width: 32px;
-      height: 32px;
-      border: none;
-      background: transparent;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      color: var(--text-secondary, #757575);
+  .icon-button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
 
-      &:hover {
-        background-color: var(--hover-bg, rgba(0, 0, 0, 0.04));
-        color: var(--text-primary, #212121);
-      }
+    &:hover:not(:disabled) {
+      background-color: rgba(0, 0, 0, 0.08);
+    }
 
-      i {
-        font-size: 18px;
-      }
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      color: rgba(0, 0, 0, 0.6);
     }
   }
 }
 
 .dropdown-content {
-  max-height: 320px;
+  flex: 1;
   overflow-y: auto;
+  max-height: 450px;
 
-  .recent-notifications {
-    app-notification {
-      display: block;
-      border-bottom: 1px solid var(--border-light, #f0f0f0);
-
-      &:last-child {
-        border-bottom: none;
-      }
-    }
+  &::-webkit-scrollbar {
+    width: 6px;
   }
 
-  .no-notifications {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 40px 20px;
-    text-align: center;
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
 
-    i {
-      font-size: 48px;
-      color: var(--text-disabled, #bdbdbd);
-      margin-bottom: 12px;
-    }
+  &::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
 
-    p {
-      margin: 0;
-      color: var(--text-secondary, #757575);
-      font-size: 14px;
+    &:hover {
+      background: #555;
     }
   }
 }
 
-.dropdown-footer {
-  border-top: 1px solid var(--border-color, #e0e0e0);
-  padding: 12px;
+.notifications-list {
+  app-notification {
+    display: block;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 
-  .view-all-btn {
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  color: rgba(0, 0, 0, 0.4);
+
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 16px;
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+  }
+}
+
+.dropdown-footer {
+  padding: 12px 16px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  background-color: #fafafa;
+
+  .view-all-button {
     width: 100%;
-    background: none;
+    background: transparent;
     border: none;
-    padding: 12px 16px;
-    border-radius: 6px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    padding: 10px;
+    border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
     font-size: 14px;
     font-weight: 500;
-    color: var(--primary-color, #1976d2);
-    text-decoration: none;
+    color: #2196f3;
+    transition: background-color 0.2s ease;
 
     &:hover {
-      background-color: var(--primary-light, rgba(25, 118, 210, 0.04));
+      background-color: rgba(33, 150, 243, 0.08);
     }
 
-    i {
+    mat-icon {
       font-size: 18px;
-    }
-
-    span {
-      font-size: 12px;
-      color: var(--text-secondary, #757575);
+      width: 18px;
+      height: 18px;
     }
   }
 }
 
-// ===== OVERLAY =====
 .dropdown-overlay {
   position: fixed;
   top: 0;
@@ -240,90 +254,18 @@
   background: transparent;
 }
 
-// ===== ANIMATIONS =====
-@keyframes bellShake {
-  0%, 100% { transform: rotate(0deg); }
-  10%, 30%, 50%, 70%, 90% { transform: rotate(-10deg); }
-  20%, 40%, 60%, 80% { transform: rotate(10deg); }
-}
-
-@keyframes pulse {
-  0% {
-    transform: scale(1);
+// Animations
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
     opacity: 1;
-  }
-  50% {
-    transform: scale(1.3);
-    opacity: 0.7;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-// ===== RESPONSIVE =====
-@media (max-width: 768px) {
-  .notification-dropdown {
-    width: 320px;
-    right: -20px;
-
-    &::before {
-      content: '';
-      position: absolute;
-      top: -8px;
-      right: 32px;
-      width: 0;
-      height: 0;
-      border-left: 8px solid transparent;
-      border-right: 8px solid transparent;
-      border-bottom: 8px solid white;
-    }
-  }
-
-  .dropdown-content {
-    max-height: 280px;
-  }
-}
-
-@media (max-width: 480px) {
-  .notification-dropdown {
-    width: 280px;
-    right: -40px;
-  }
-
-  .dropdown-header {
-    padding: 12px 16px;
-
-    h3 {
-      font-size: 14px;
-    }
-  }
-
-  .dropdown-footer {
-    .view-all-btn {
-      font-size: 13px;
-      padding: 10px 12px;
-    }
-  }
-}
-
-// ===== SCROLLBAR PERSONNALISÉE =====
-.dropdown-content {
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: var(--surface-color, #f5f5f5);
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: var(--border-color, #e0e0e0);
-    border-radius: 3px;
-
-    &:hover {
-      background: var(--text-secondary, #757575);
-    }
-  }
+.notification-dropdown {
+  animation: slideDown 0.2s ease-out;
 }

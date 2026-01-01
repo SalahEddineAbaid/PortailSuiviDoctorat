@@ -27,7 +27,7 @@ export interface ForgotPasswordRequest {
 
 export interface ResetPasswordRequest {
   token: string;
-  password: string;
+  newPassword: string;
 }
 
 export interface TokenRefreshRequest {
@@ -44,7 +44,7 @@ export interface UpdateProfileRequest {
 }
 
 export interface ChangePasswordRequest {
-  currentPassword: string;
+  oldPassword: string;
   newPassword: string;
 }
 
@@ -102,8 +102,8 @@ export class AuthService {
     return this.http.post(`${this.API_URL}/register`, data, {
       headers: new HttpHeaders({ 'Content-Type': 'application/json' })
     }).pipe(
-      tap(response => console.log('✅ [AUTH SERVICE] Inscription réussie:', response)),
-      catchError(error => {
+      tap((response: any) => console.log('✅ [AUTH SERVICE] Inscription réussie:', response)),
+      catchError((error: any) => {
         console.error('❌ [AUTH SERVICE] Erreur inscription:', error);
         return throwError(() => error);
       })
@@ -117,7 +117,7 @@ export class AuthService {
     console.log('📤 [AUTH SERVICE] Tentative de connexion pour:', credentials.email);
     
     return this.http.post<TokenResponse>(`${this.API_URL}/login`, credentials).pipe(
-      tap(response => {
+      tap((response: TokenResponse) => {
         console.log('✅ [AUTH SERVICE] Tokens reçus');
         console.log('🔑 Access Token:', response.accessToken.substring(0, 20) + '...');
         console.log('🔄 Refresh Token:', response.refreshToken.substring(0, 20) + '...');
@@ -131,14 +131,14 @@ export class AuthService {
         console.log('👤 [AUTH SERVICE] Chargement des infos utilisateur...');
         return this.http.get<UserInfo>(`${this.USER_API_URL}/profile`);
       }),
-      tap(user => {
+      tap((user: UserInfo) => {
         console.log('✅ [AUTH SERVICE] Utilisateur chargé:', user);
         console.log('👤 Nom:', user.FirstName, user.LastName);
         console.log('📧 Email:', user.email);
         console.log('🎭 Rôles:', user.roles);
         this.currentUserSubject.next(user);
       }),
-      catchError(error => {
+      catchError((error: any) => {
         console.error('❌ [AUTH SERVICE] Erreur connexion:', error);
         console.error('Status:', error.status);
         console.error('Message:', error.error);
@@ -163,11 +163,11 @@ export class AuthService {
     return this.http.post<TokenResponse>(`${this.API_URL}/refresh`, {
       refreshToken
     }).pipe(
-      tap(response => {
+      tap((response: TokenResponse) => {
         console.log('✅ [AUTH SERVICE] Token rafraîchi avec succès');
         this.setTokens(response.accessToken, response.refreshToken);
       }),
-      catchError(error => {
+      catchError((error: any) => {
         console.error('❌ [AUTH SERVICE] Erreur rafraîchissement token:', error);
         this.logout();
         return throwError(() => error);
@@ -205,14 +205,14 @@ export class AuthService {
     console.log('🌐 URL:', `${this.USER_API_URL}/profile`);
 
     this.http.get<UserInfo>(`${this.USER_API_URL}/profile`).pipe(
-      catchError(error => {
+      catchError((error: any) => {
         console.error('❌ [AUTH SERVICE] Erreur chargement utilisateur:', error);
         console.error('Status:', error.status);
         console.error('Message:', error.error);
         this.currentUserSubject.next(null);
         return throwError(() => error);
       })
-    ).subscribe(user => {
+    ).subscribe((user: UserInfo) => {
       console.log('✅ [AUTH SERVICE] Utilisateur chargé:', user);
       console.log('👤 Nom:', user.FirstName, user.LastName);
       console.log('📧 Email:', user.email);
@@ -364,16 +364,16 @@ export class AuthService {
   /**
    * 👤 Mettre à jour le profil utilisateur
    */
-  updateProfile(data: UpdateProfileRequest): Observable<UserResponse> {
+  updateProfile(data: Partial<UserInfo>): Observable<UserResponse> {
     console.log('📤 [AUTH SERVICE] Mise à jour du profil utilisateur');
     
     return this.http.put<UserResponse>(`${this.USER_API_URL}/profile`, data).pipe(
-      tap(response => {
+      tap((response: UserResponse) => {
         console.log('✅ [AUTH SERVICE] Profil mis à jour:', response);
         // Recharger les informations utilisateur
         this.loadCurrentUser();
       }),
-      catchError(error => {
+      catchError((error: any) => {
         console.error('❌ [AUTH SERVICE] Erreur mise à jour profil:', error);
         return throwError(() => error);
       })
@@ -383,14 +383,14 @@ export class AuthService {
   /**
    * 🔐 Changer le mot de passe
    */
-  changePassword(data: ChangePasswordRequest): Observable<void> {
+  changePassword(data: ChangePasswordRequest): Observable<any> {
     console.log('📤 [AUTH SERVICE] Changement de mot de passe');
     
-    return this.http.put<void>(`${this.USER_API_URL}/change-password`, data).pipe(
+    return this.http.post(`${this.USER_API_URL}/change-password`, data).pipe(
       tap(() => {
         console.log('✅ [AUTH SERVICE] Mot de passe changé avec succès');
       }),
-      catchError(error => {
+      catchError((error: any) => {
         console.error('❌ [AUTH SERVICE] Erreur changement mot de passe:', error);
         return throwError(() => error);
       })
@@ -403,11 +403,11 @@ export class AuthService {
   forgotPassword(data: ForgotPasswordRequest): Observable<any> {
     console.log('📤 [AUTH SERVICE] Demande de réinitialisation mot de passe:', data.email);
     
-    return this.http.post(`${this.API_URL}/forgot-password`, data).pipe(
-      tap(response => {
+    return this.http.post(`${this.USER_API_URL}/forgot-password`, data).pipe(
+      tap((response: any) => {
         console.log('✅ [AUTH SERVICE] Email de réinitialisation envoyé');
       }),
-      catchError(error => {
+      catchError((error: any) => {
         console.error('❌ [AUTH SERVICE] Erreur demande réinitialisation:', error);
         return throwError(() => error);
       })
@@ -420,11 +420,11 @@ export class AuthService {
   resetPassword(data: ResetPasswordRequest): Observable<any> {
     console.log('📤 [AUTH SERVICE] Réinitialisation mot de passe avec token');
     
-    return this.http.post(`${this.API_URL}/reset-password`, data).pipe(
-      tap(response => {
+    return this.http.post(`${this.USER_API_URL}/reset-password`, data).pipe(
+      tap((response: any) => {
         console.log('✅ [AUTH SERVICE] Mot de passe réinitialisé');
       }),
-      catchError(error => {
+      catchError((error: any) => {
         console.error('❌ [AUTH SERVICE] Erreur réinitialisation mot de passe:', error);
         return throwError(() => error);
       })

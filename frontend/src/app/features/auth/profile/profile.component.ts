@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { AuthService, UpdateProfileRequest, ChangePasswordRequest, UserResponse } from '../../../core/services/auth.service';
+import { AuthService, ChangePasswordRequest, UserInfo } from '../../../core/services/auth.service';
 import { CustomValidators } from '../../../core/validators/custom-validators';
 import { Router } from '@angular/router';
 
@@ -15,7 +15,7 @@ import { Router } from '@angular/router';
 export class ProfileComponent implements OnInit {
   profileForm: FormGroup;
   passwordForm: FormGroup;
-  currentUser: UserResponse | null = null;
+  currentUser: UserInfo | null = null;
 
   isLoadingProfile = false;
   isLoadingPassword = false;
@@ -32,12 +32,15 @@ export class ProfileComponent implements OnInit {
     this.profileForm = this.fb.group({
       FirstName: ['', [Validators.required, Validators.minLength(2), CustomValidators.name]],
       LastName: ['', [Validators.required, Validators.minLength(2), CustomValidators.name]],
-      phoneNumber: ['', [Validators.required, CustomValidators.phoneNumber]]
+      phoneNumber: ['', [Validators.required, CustomValidators.phoneNumber]],
+      adresse: ['', [Validators.required]],
+      ville: ['', [Validators.required]],
+      pays: ['', [Validators.required]]
     });
 
     this.passwordForm = this.fb.group({
-      currentPassword: ['', [Validators.required]],
-      newPassword: ['', [Validators.required, CustomValidators.strongPassword]],
+      oldPassword: ['', [Validators.required]],
+      newPassword: ['', [Validators.required, Validators.minLength(12), CustomValidators.strongPassword]],
       confirmPassword: ['', [Validators.required]]
     }, { validators: CustomValidators.matchFields('newPassword', 'confirmPassword') });
   }
@@ -47,28 +50,25 @@ export class ProfileComponent implements OnInit {
   }
 
   private loadUserProfile(): void {
-    this.authService.getCurrentUser().subscribe(user => {
-      this.currentUser = user;
-      if (this.currentUser) {
-        this.profileForm.patchValue({
-          FirstName: this.currentUser.FirstName,
-          LastName: this.currentUser.LastName,
-          phoneNumber: this.currentUser.phoneNumber
-        });
+    this.authService.getCurrentUser().subscribe({
+      next: (user) => {
+        this.currentUser = user;
+        if (this.currentUser) {
+          this.profileForm.patchValue({
+            FirstName: this.currentUser.FirstName,
+            LastName: this.currentUser.LastName,
+            phoneNumber: this.currentUser.phoneNumber,
+            adresse: this.currentUser.adresse,
+            ville: this.currentUser.ville,
+            pays: this.currentUser.pays
+          });
+        }
+      },
+      error: (error) => {
+        console.error('❌ Erreur chargement profil:', error);
+        this.profileError = 'Impossible de charger le profil';
       }
     });
-  }
-
-  private passwordMatchValidator(form: FormGroup) {
-    const newPassword = form.get('newPassword');
-    const confirmPassword = form.get('confirmPassword');
-
-    if (newPassword && confirmPassword && newPassword.value !== confirmPassword.value) {
-      confirmPassword.setErrors({ passwordMismatch: true });
-      return { passwordMismatch: true };
-    }
-
-    return null;
   }
 
   onUpdateProfile(): void {
@@ -77,7 +77,7 @@ export class ProfileComponent implements OnInit {
       this.profileError = null;
       this.profileSuccess = false;
 
-      const updateData: UpdateProfileRequest = this.profileForm.value;
+      const updateData = this.profileForm.value;
 
       this.authService.updateProfile(updateData).subscribe({
         next: (response) => {
@@ -108,7 +108,7 @@ export class ProfileComponent implements OnInit {
       this.passwordSuccess = false;
 
       const passwordData: ChangePasswordRequest = {
-        currentPassword: this.passwordForm.value.currentPassword,
+        oldPassword: this.passwordForm.value.oldPassword,
         newPassword: this.passwordForm.value.newPassword
       };
 

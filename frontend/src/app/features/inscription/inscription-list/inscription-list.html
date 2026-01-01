@@ -1,196 +1,222 @@
-<div class="inscription-list">
-  
+<div class="inscription-list-container">
   <!-- Header -->
-  <div class="list-header" *ngIf="showTitle">
-    <h2>Liste des inscriptions</h2>
-    <button class="btn btn-outline-primary" (click)="onRefresh()" [disabled]="loading">
-      <i class="fas fa-sync-alt" [class.fa-spin]="loading"></i>
-      Actualiser
-    </button>
-  </div>
+  <mat-card class="header-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>list</mat-icon>
+        Mes Inscriptions
+      </mat-card-title>
+    </mat-card-header>
 
-  <!-- Loading State -->
-  <div *ngIf="loading" class="loading-container">
-    <div class="spinner"></div>
-    <p>Chargement des inscriptions...</p>
-  </div>
+    <!-- Statistics -->
+    <mat-card-content>
+      <div class="statistics">
+        <div class="stat-card">
+          <div class="stat-value">{{ totalInscriptions }}</div>
+          <div class="stat-label">Total</div>
+        </div>
+        <div class="stat-card success">
+          <div class="stat-value">{{ inscriptionsValidees }}</div>
+          <div class="stat-label">Validées</div>
+        </div>
+        <div class="stat-card warning">
+          <div class="stat-value">{{ inscriptionsEnAttente }}</div>
+          <div class="stat-label">En attente</div>
+        </div>
+        <div class="stat-card danger">
+          <div class="stat-value">{{ inscriptionsRejetees }}</div>
+          <div class="stat-label">Rejetées</div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
 
-  <!-- Error State -->
-  <div *ngIf="error" class="alert alert-danger">
-    <i class="fas fa-exclamation-triangle"></i>
-    {{ error }}
-    <button class="btn btn-sm btn-outline-primary" (click)="onRefresh()">
-      Réessayer
-    </button>
-  </div>
+  <!-- Filters -->
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <form [formGroup]="filterForm" class="filters-form">
+        <!-- Search -->
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Rechercher</mat-label>
+          <input matInput formControlName="searchTerm" placeholder="Sujet, CIN, titre...">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
 
-  <!-- Inscriptions List -->
-  <div *ngIf="!loading && !error" class="inscriptions-container">
-    <div *ngIf="inscriptions$ | async as inscriptions; else noInscriptions">
-      <div *ngIf="inscriptions.length > 0; else emptyInscriptions" class="inscriptions-grid">
-        
-        <div 
-          *ngFor="let inscription of inscriptions | slice:0:maxItems" 
-          class="inscription-card"
-          [class]="getStatusClass(inscription.statut)"
-        >
-          <!-- Card Header -->
-          <div class="card-header">
-            <div class="inscription-title">
-              <h3>{{ inscription.campagne.nom }}</h3>
-              <span class="inscription-date">
-                {{ inscription.dateInscription | date:'dd/MM/yyyy' }}
+        <!-- Statut filter -->
+        <mat-form-field appearance="outline">
+          <mat-label>Statut</mat-label>
+          <mat-select formControlName="statut">
+            <mat-option value="">Tous</mat-option>
+            <mat-option *ngFor="let statut of statutOptions" [value]="statut">
+              {{ getStatutLabel(statut) }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Type filter -->
+        <mat-form-field appearance="outline">
+          <mat-label>Type</mat-label>
+          <mat-select formControlName="type">
+            <mat-option value="">Tous</mat-option>
+            <mat-option *ngFor="let type of typeOptions" [value]="type">
+              {{ getTypeLabel(type) }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Année filter -->
+        <mat-form-field appearance="outline">
+          <mat-label>Année</mat-label>
+          <mat-select formControlName="annee">
+            <mat-option value="">Toutes</mat-option>
+            <mat-option *ngFor="let year of getAvailableYears()" [value]="year">
+              {{ year }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Campagne filter -->
+        <mat-form-field appearance="outline">
+          <mat-label>Campagne</mat-label>
+          <mat-select formControlName="campagneId">
+            <mat-option value="">Toutes</mat-option>
+            <mat-option *ngFor="let campagne of campagnes" [value]="campagne.id">
+              {{ campagne.libelle }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Clear filters -->
+        <button mat-raised-button (click)="clearFilters()" type="button">
+          <mat-icon>clear</mat-icon>
+          Réinitialiser
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Table -->
+  <mat-card class="table-card">
+    <mat-card-content>
+      <div class="table-actions">
+        <button mat-raised-button color="primary" routerLink="/inscription/nouvelle">
+          <mat-icon>add</mat-icon>
+          Nouvelle Inscription
+        </button>
+
+        <div class="export-buttons">
+          <button mat-button (click)="exportToExcel()">
+            <mat-icon>table_chart</mat-icon>
+            Excel
+          </button>
+          <button mat-button (click)="exportToPDF()">
+            <mat-icon>picture_as_pdf</mat-icon>
+            PDF
+          </button>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table mat-table [dataSource]="dataSource" matSort class="inscriptions-table">
+          <!-- ID Column -->
+          <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+            <td mat-cell *matCellDef="let inscription">#{{ inscription.id }}</td>
+          </ng-container>
+
+          <!-- Année Column -->
+          <ng-container matColumnDef="anneeInscription">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Année</th>
+            <td mat-cell *matCellDef="let inscription">{{ inscription.anneeInscription }}</td>
+          </ng-container>
+
+          <!-- Type Column -->
+          <ng-container matColumnDef="type">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Type</th>
+            <td mat-cell *matCellDef="let inscription">
+              <mat-chip [color]="inscription.type === 'PREMIERE_INSCRIPTION' ? 'primary' : 'accent'" selected>
+                {{ getTypeLabel(inscription.type) }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <!-- Sujet Column -->
+          <ng-container matColumnDef="sujetThese">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Sujet de thèse</th>
+            <td mat-cell *matCellDef="let inscription" class="sujet-cell">
+              <span [matTooltip]="inscription.sujetThese">
+                {{ inscription.sujetThese | slice:0:50 }}{{ inscription.sujetThese.length > 50 ? '...' : '' }}
               </span>
-            </div>
-            <div class="status-badge" [class]="getStatusClass(inscription.statut)">
-              <i class="material-icons">{{ getStatusIcon(inscription.statut) }}</i>
-              <span>{{ getStatusLabel(inscription.statut) }}</span>
-            </div>
-          </div>
+            </td>
+          </ng-container>
 
-          <!-- Card Body -->
-          <div class="card-body">
-            <!-- Basic Information -->
-            <div class="inscription-info">
-              <div class="info-item">
-                <strong>Sujet de thèse:</strong>
-                <p class="subject-text">{{ inscription.sujetThese }}</p>
-              </div>
-              
-              <div class="info-row">
-                <div class="info-item">
-                  <strong>Laboratoire:</strong>
-                  <span>{{ inscription.laboratoire }}</span>
-                </div>
-                <div class="info-item">
-                  <strong>Spécialité:</strong>
-                  <span>{{ inscription.specialite }}</span>
-                </div>
-              </div>
+          <!-- Statut Column -->
+          <ng-container matColumnDef="statut">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Statut</th>
+            <td mat-cell *matCellDef="let inscription">
+              <mat-chip [style.background-color]="getStatutColor(inscription.statut)" selected class="status-chip">
+                {{ getStatutLabel(inscription.statut) }}
+              </mat-chip>
+            </td>
+          </ng-container>
 
-              <div class="info-item">
-                <strong>Directeur de thèse:</strong>
-                <span>{{ inscription.directeur.FirstName }} {{ inscription.directeur.LastName }}</span>
-                <small class="director-email">({{ inscription.directeur.email }})</small>
-              </div>
-            </div>
+          <!-- Date Column -->
+          <ng-container matColumnDef="dateCreation">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Date de création</th>
+            <td mat-cell *matCellDef="let inscription">
+              {{ inscription.dateCreation | date:'dd/MM/yyyy' }}
+            </td>
+          </ng-container>
 
-            <!-- Progress Bar -->
-            <div class="progress-section">
-              <div class="progress-header">
-                <span class="progress-label">{{ getProgressLabel(inscription) }}</span>
-                <span class="progress-percentage">{{ getProgressPercentage(inscription) }}%</span>
-              </div>
-              <div class="progress-bar">
-                <div 
-                  class="progress-fill" 
-                  [style.width.%]="getProgressPercentage(inscription)"
-                  [class]="getStatusClass(inscription.statut)"
-                ></div>
-              </div>
-            </div>
-
-            <!-- Avis Directeur -->
-            <div *ngIf="inscription.avisDirecteur" class="avis-section">
-              <h4>Avis du Directeur</h4>
-              <div class="avis-content">
-                <p class="avis-text">{{ inscription.avisDirecteur.avis }}</p>
-                <div class="avis-meta">
-                  <span class="avis-status" [class.favorable]="inscription.avisDirecteur.valide" [class.defavorable]="!inscription.avisDirecteur.valide">
-                    <i class="fas" [class.fa-check]="inscription.avisDirecteur.valide" [class.fa-times]="!inscription.avisDirecteur.valide"></i>
-                    {{ inscription.avisDirecteur.valide ? 'Favorable' : 'Défavorable' }}
-                  </span>
-                  <span class="avis-date">{{ inscription.avisDirecteur.dateAvis | date:'dd/MM/yyyy' }}</span>
-                </div>
-                <p *ngIf="inscription.avisDirecteur.commentaire" class="avis-comment">
-                  <strong>Commentaire:</strong> {{ inscription.avisDirecteur.commentaire }}
-                </p>
-              </div>
-            </div>
-
-            <!-- Validation Admin -->
-            <div *ngIf="inscription.validationAdmin" class="validation-section">
-              <h4>Validation Administrative</h4>
-              <div class="validation-content">
-                <div class="validation-meta">
-                  <span class="validation-status" [class.validee]="inscription.validationAdmin.valide" [class.rejetee]="!inscription.validationAdmin.valide">
-                    <i class="fas" [class.fa-check]="inscription.validationAdmin.valide" [class.fa-times]="!inscription.validationAdmin.valide"></i>
-                    {{ inscription.validationAdmin.valide ? 'Validée' : 'Rejetée' }}
-                  </span>
-                  <span class="validation-date">{{ inscription.validationAdmin.dateValidation | date:'dd/MM/yyyy' }}</span>
-                </div>
-                <p class="validation-comment">
-                  <strong>Commentaire:</strong> {{ inscription.validationAdmin.commentaire }}
-                </p>
-                <p class="validation-by">
-                  <strong>Validé par:</strong> {{ inscription.validationAdmin.validateur.FirstName }} {{ inscription.validationAdmin.validateur.LastName }}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Card Footer -->
-          <div class="card-footer" *ngIf="showActions">
-            <div class="action-buttons">
-              <button 
-                class="btn btn-outline-primary" 
-                [routerLink]="['/inscription', inscription.id]"
-                title="Voir les détails"
-              >
-                <i class="fas fa-eye"></i>
-                Détails
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let inscription">
+              <button mat-icon-button [matMenuTriggerFor]="menu">
+                <mat-icon>more_vert</mat-icon>
               </button>
-              
-              <button 
-                *ngIf="canEdit(inscription)"
-                class="btn btn-outline-warning" 
-                [routerLink]="['/inscription', inscription.id, 'edit']"
-                title="Modifier l'inscription"
-              >
-                <i class="fas fa-edit"></i>
-                Modifier
-              </button>
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item (click)="onView(inscription)">
+                  <mat-icon>visibility</mat-icon>
+                  <span>Voir</span>
+                </button>
+                <button mat-menu-item (click)="onEdit(inscription)" [disabled]="!canEdit(inscription)">
+                  <mat-icon>edit</mat-icon>
+                  <span>Modifier</span>
+                </button>
+                <button mat-menu-item (click)="onDelete(inscription)" [disabled]="!canDelete(inscription)">
+                  <mat-icon color="warn">delete</mat-icon>
+                  <span>Supprimer</span>
+                </button>
+              </mat-menu>
+            </td>
+          </ng-container>
 
-              <button 
-                *ngIf="canSubmit(inscription)"
-                class="btn btn-primary" 
-                (click)="onSubmitInscription(inscription)"
-                title="Soumettre pour validation"
-              >
-                <i class="fas fa-paper-plane"></i>
-                Soumettre
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="table-row"></tr>
 
-    <!-- Empty State -->
-    <ng-template #emptyInscriptions>
-      <div class="empty-state">
-        <div class="empty-icon">
-          <i class="fas fa-file-alt"></i>
-        </div>
-        <h3>Aucune inscription trouvée</h3>
-        <p>Vous n'avez pas encore d'inscription enregistrée.</p>
-        <button class="btn btn-primary" routerLink="/inscription/nouvelle">
-          Créer ma première inscription
-        </button>
+          <!-- No data row -->
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+              <div class="no-data">
+                <mat-icon>inbox</mat-icon>
+                <p>Aucune inscription trouvée</p>
+              </div>
+            </td>
+          </tr>
+        </table>
       </div>
-    </ng-template>
 
-    <ng-template #noInscriptions>
-      <div class="empty-state">
-        <div class="empty-icon">
-          <i class="fas fa-file-alt"></i>
-        </div>
-        <h3>Aucune inscription</h3>
-        <p>Commencez par créer votre première inscription.</p>
-        <button class="btn btn-primary" routerLink="/inscription/nouvelle">
-          Nouvelle inscription
-        </button>
-      </div>
-    </ng-template>
+      <mat-paginator 
+        [pageSizeOptions]="[5, 10, 25, 50]"
+        [pageSize]="10"
+        showFirstLastButtons>
+      </mat-paginator>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Loading -->
+  <div class="loading-overlay" *ngIf="loading">
+    <mat-spinner></mat-spinner>
   </div>
 </div>

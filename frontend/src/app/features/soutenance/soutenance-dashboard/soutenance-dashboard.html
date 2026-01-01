@@ -1,0 +1,236 @@
+<div class="dashboard-container">
+    <!-- Header -->
+    <header class="dashboard-header">
+        <div class="header-content">
+            <h1>
+                <i class="icon-bar-chart"></i>
+                Dashboard Soutenances
+            </h1>
+            <p class="subtitle" *ngIf="authService.isDoctorant()">
+                Vue d'ensemble de vos demandes de soutenance
+            </p>
+            <p class="subtitle" *ngIf="authService.isDirecteur()">
+                Suivi des soutenances de vos doctorants
+            </p>
+            <p class="subtitle" *ngIf="authService.isAdmin()">
+                Administration des soutenances
+            </p>
+        </div>
+        <button class="btn btn-primary" routerLink="/soutenance/nouvelle" *ngIf="authService.isDoctorant()">
+            <i class="icon-plus"></i>
+            Nouvelle demande
+        </button>
+    </header>
+
+    <!-- Loading State -->
+    <div class="loading-container" *ngIf="isLoading">
+        <div class="spinner"></div>
+        <p>Chargement des données...</p>
+    </div>
+
+    <!-- Error State -->
+    <div class="error-container" *ngIf="errorMessage && !isLoading">
+        <i class="icon-alert-circle"></i>
+        <p>{{ errorMessage }}</p>
+        <button class="btn btn-primary" (click)="loadDashboardData()">Réessayer</button>
+    </div>
+
+    <!-- Dashboard Content -->
+    <div class="dashboard-content" *ngIf="!isLoading && !errorMessage">
+
+        <!-- Statistics Cards -->
+        <div class="stats-grid">
+            <div class="stat-card total">
+                <div class="stat-icon">
+                    <i class="icon-file-text"></i>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-value">{{ stats.total }}</span>
+                    <span class="stat-label">Total</span>
+                </div>
+            </div>
+
+            <div class="stat-card brouillon">
+                <div class="stat-icon">
+                    <i class="icon-edit"></i>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-value">{{ stats.brouillon }}</span>
+                    <span class="stat-label">Brouillons</span>
+                </div>
+                <div class="stat-percentage">{{ getStatusPercentage(stats.brouillon) }}%</div>
+            </div>
+
+            <div class="stat-card soumises">
+                <div class="stat-icon">
+                    <i class="icon-send"></i>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-value">{{ stats.soumises }}</span>
+                    <span class="stat-label">Soumises</span>
+                </div>
+                <div class="stat-percentage">{{ getStatusPercentage(stats.soumises) }}%</div>
+            </div>
+
+            <div class="stat-card en-validation">
+                <div class="stat-icon">
+                    <i class="icon-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-value">{{ stats.enCoursValidation }}</span>
+                    <span class="stat-label">En validation</span>
+                </div>
+                <div class="stat-percentage">{{ getStatusPercentage(stats.enCoursValidation) }}%</div>
+            </div>
+
+            <div class="stat-card autorisees">
+                <div class="stat-icon">
+                    <i class="icon-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-value">{{ stats.autorisees }}</span>
+                    <span class="stat-label">Autorisées</span>
+                </div>
+                <div class="stat-percentage">{{ getStatusPercentage(stats.autorisees) }}%</div>
+            </div>
+
+            <div class="stat-card soutenues">
+                <div class="stat-icon">
+                    <i class="icon-award"></i>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-value">{{ stats.soutenues }}</span>
+                    <span class="stat-label">Soutenues</span>
+                </div>
+                <div class="stat-percentage">{{ getStatusPercentage(stats.soutenues) }}%</div>
+            </div>
+        </div>
+
+        <!-- Pending Validation Section (Directeur/Admin) -->
+        <div class="section-card"
+            *ngIf="(authService.isDirecteur() || authService.isAdmin()) && pendingValidation.length > 0">
+            <div class="section-header">
+                <h2>
+                    <i class="icon-alert-circle"></i>
+                    En attente de validation
+                </h2>
+                <span class="count-badge">{{ pendingValidation.length }}</span>
+            </div>
+            <div class="section-content">
+                <div class="soutenance-list">
+                    <div class="soutenance-item" *ngFor="let soutenance of pendingValidation">
+                        <div class="soutenance-info">
+                            <h3 class="soutenance-title">{{ soutenance.titrethese }}</h3>
+                            <p class="soutenance-meta">
+                                <span class="doctorant-name">
+                                    <i class="icon-user"></i>
+                                    {{ getFullName(soutenance.doctorant) }}
+                                </span>
+                                <span class="soutenance-date" *ngIf="soutenance.dateSoutenance">
+                                    <i class="icon-calendar"></i>
+                                    {{ formatDate(soutenance.dateSoutenance) }}
+                                </span>
+                            </p>
+                        </div>
+                        <div class="soutenance-actions">
+                            <span class="status-badge" [class]="'status-' + getStatusColor(soutenance.statut)">
+                                {{ getStatusLabel(soutenance.statut) }}
+                            </span>
+                            <button class="btn btn-sm btn-primary" [routerLink]="['/soutenance', soutenance.id]">
+                                <i class="icon-eye"></i>
+                                Voir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Defenses Section -->
+        <div class="section-card" *ngIf="upcomingDefenses.length > 0">
+            <div class="section-header">
+                <h2>
+                    <i class="icon-calendar"></i>
+                    Soutenances à venir
+                </h2>
+                <a routerLink="/soutenance/liste" class="view-all-link">Voir tout</a>
+            </div>
+            <div class="section-content">
+                <div class="upcoming-list">
+                    <div class="upcoming-item" *ngFor="let soutenance of upcomingDefenses">
+                        <div class="upcoming-date">
+                            <div class="date-day">{{ formatDate(soutenance.dateSoutenance).split(' ')[0] }}</div>
+                            <div class="date-month">{{ formatDate(soutenance.dateSoutenance).split(' ')[1] }}</div>
+                        </div>
+                        <div class="upcoming-info">
+                            <h3 class="upcoming-title">{{ soutenance.titrethese }}</h3>
+                            <p class="upcoming-meta">
+                                <span>
+                                    <i class="icon-user"></i>
+                                    {{ getFullName(soutenance.doctorant) }}
+                                </span>
+                                <span *ngIf="soutenance.lieuSoutenance">
+                                    <i class="icon-map-pin"></i>
+                                    {{ soutenance.lieuSoutenance }}
+                                </span>
+                            </p>
+                        </div>
+                        <div class="upcoming-countdown">
+                            <span class="days-count">{{ getDaysUntil(soutenance.dateSoutenance) }}</span>
+                            <span class="days-label">jours</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Defenses Section -->
+        <div class="section-card" *ngIf="recentDefenses.length > 0">
+            <div class="section-header">
+                <h2>
+                    <i class="icon-award"></i>
+                    Soutenances récentes
+                </h2>
+            </div>
+            <div class="section-content">
+                <div class="recent-grid">
+                    <div class="recent-card" *ngFor="let soutenance of recentDefenses">
+                        <div class="recent-header">
+                            <i class="icon-check-circle"></i>
+                            <span class="recent-date">{{ formatDate(soutenance.dateSoutenance) }}</span>
+                        </div>
+                        <h3 class="recent-title">{{ soutenance.titrethese }}</h3>
+                        <p class="recent-author">{{ getFullName(soutenance.doctorant) }}</p>
+                        <button class="btn btn-sm btn-outline" [routerLink]="['/soutenance', soutenance.id]">
+                            <i class="icon-eye"></i>
+                            Détails
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State (Doctorant) -->
+        <div class="empty-state" *ngIf="authService.isDoctorant() && stats.total === 0">
+            <i class="icon-file-text"></i>
+            <h3>Aucune demande de soutenance</h3>
+            <p>Vous n'avez pas encore créé de demande de soutenance</p>
+            <button class="btn btn-primary" routerLink="/soutenance/nouvelle">
+                <i class="icon-plus"></i>
+                Créer une demande
+            </button>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <a class="quick-action-card" routerLink="/soutenance/liste">
+                <i class="icon-list"></i>
+                <span>Voir toutes les soutenances</span>
+            </a>
+            <a class="quick-action-card" routerLink="/soutenance/nouvelle" *ngIf="authService.isDoctorant()">
+                <i class="icon-plus"></i>
+                <span>Nouvelle demande</span>
+            </a>
+        </div>
+    </div>
+</div>

@@ -1,164 +1,157 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, ActivatedRoute, Router } from '@angular/router';
-import { Observable } from 'rxjs';
+import { ActivatedRoute, Router } from '@angular/router';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatListModule } from '@angular/material/list';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { InscriptionService } from '../../../core/services/inscription.service';
-import { DocumentsManager } from '../documents-manager/documents-manager';
-import { InscriptionResponse, InscriptionStatus } from '../../../core/models/inscription.model';
+import { DocumentService } from '../../../core/services/document.service';
+import { AuthService } from '../../../core/services/auth.service';
+
+import { 
+  InscriptionResponse,
+  getStatutLabel,
+  getStatutColor,
+  getTypeInscriptionLabel,
+  canEditInscription
+} from '../../../core/models/inscription.model';
 
 @Component({
   selector: 'app-inscription-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, DocumentsManager],
+  imports: [
+    CommonModule,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatChipsModule,
+    MatDividerModule,
+    MatListModule,
+    MatProgressSpinnerModule,
+    MatTabsModule,
+    MatExpansionModule,
+    MatTooltipModule
+  ],
   templateUrl: './inscription-detail.html',
   styleUrls: ['./inscription-detail.scss']
 })
 export class InscriptionDetail implements OnInit {
-  inscription$!: Observable<InscriptionResponse>;
+  inscription: InscriptionResponse | null = null;
   loading = false;
   error: string | null = null;
-  inscriptionId!: number;
+  currentUser: any;
 
   constructor(
-    private inscriptionService: InscriptionService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private inscriptionService: InscriptionService,
+    private documentService: DocumentService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
-    this.route.params.subscribe(params => {
-      this.inscriptionId = +params['id'];
-      if (this.inscriptionId) {
-        this.loadInscription();
-      } else {
-        this.error = 'ID d\'inscription invalide';
-      }
-    });
+    this.currentUser = this.authService.getCurrentUser();
+    this.loadInscription();
   }
 
-  loadInscription(): void {
-    this.loading = true;
-    this.error = null;
+  private loadInscription(): void {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (!id) {
+      this.router.navigate(['/inscription']);
+      return;
+    }
 
-    this.inscription$ = this.inscriptionService.getInscription(this.inscriptionId);
-    
-    this.inscription$.subscribe({
-      next: () => {
+    this.loading = true;
+    this.inscriptionService.getInscription(+id).subscribe({
+      next: (inscription) => {
+        this.inscription = inscription;
         this.loading = false;
       },
       error: (error) => {
         this.error = 'Erreur lors du chargement de l\'inscription';
         this.loading = false;
-        console.error('Erreur chargement inscription:', error);
+        console.error('Error loading inscription:', error);
       }
     });
+  }
+
+  onEdit(): void {
+    if (this.inscription) {
+      this.router.navigate(['/inscription', this.inscription.id, 'edit']);
+    }
+  }
+
+  onDownloadAttestation(): void {
+    if (!this.inscription) return;
+
+    this.inscriptionService.downloadAttestation(
+      this.inscription.id,
+      this.currentUser.id,
+      this.currentUser.role?.name
+    ).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `attestation_${this.inscription!.id}.pdf`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: (error) => {
+        console.error('Error downloading attestation:', error);
+      }
+    });
+  }
+
+  onDownloadDocument(documentId: number, fileName: string): void {
+    this.documentService.downloadAndSave(documentId, fileName);
   }
 
   onBack(): void {
     this.router.navigate(['/inscription']);
   }
 
-  onEdit(inscription: InscriptionResponse): void {
-    if (this.canEdit(inscription)) {
-      this.router.navigate(['/inscription', inscription.id, 'edit']);
+  canEdit(): boolean {
+    return this.inscription ? canEditInscription(this.inscription.statut) : false;
+  }
+
+  canDownloadAttestation(): boolean {
+    return this.inscription?.statut === 'VALIDE';
+  }
+
+  getStatutLabel(statut: string): string {
+    return getStatutLabel(statut as any);
+  }
+
+  getStatutColor(statut: string): string {
+    return getStatutColor(statut as any);
+  }
+
+  getTypeLabel(type: string): string {
+    return getTypeInscriptionLabel(type as any);
+  }
+
+  getValidationIcon(statut: string): string {
+    switch (statut) {
+      case 'APPROUVE': return 'check_circle';
+      case 'REJETE': return 'cancel';
+      default: return 'pending';
     }
   }
 
-  onSubmit(inscription: InscriptionResponse): void {
-    if (!this.canSubmit(inscription)) return;
-
-    if (confirm('Êtes-vous sûr de vouloir soumettre cette inscription ? Vous ne pourrez plus la modifier après soumission.')) {
-      this.inscriptionService.submitInscription(inscription.id).subscribe({
-        next: () => {
-          this.loadInscription(); // Refresh the data
-        },
-        error: (error) => {
-          this.error = 'Erreur lors de la soumission de l\'inscription';
-          console.error('Erreur soumission inscription:', error);
-        }
-      });
+  getValidationColor(statut: string): string {
+    switch (statut) {
+      case 'APPROUVE': return 'primary';
+      case 'REJETE': return 'warn';
+      default: return 'accent';
     }
-  }
-
-  getStatusClass(status: InscriptionStatus): string {
-    const statusClasses: { [key: string]: string } = {
-      [InscriptionStatus.BROUILLON]: 'status-draft',
-      [InscriptionStatus.SOUMISE]: 'status-submitted',
-      [InscriptionStatus.EN_COURS_VALIDATION]: 'status-pending',
-      [InscriptionStatus.VALIDEE]: 'status-approved',
-      [InscriptionStatus.REJETEE]: 'status-rejected'
-    };
-    return statusClasses[status] || 'status-default';
-  }
-
-  getStatusLabel(status: InscriptionStatus): string {
-    return this.inscriptionService.getStatusLabel(status);
-  }
-
-  getStatusIcon(status: InscriptionStatus): string {
-    const statusIcons: { [key: string]: string } = {
-      [InscriptionStatus.BROUILLON]: 'edit',
-      [InscriptionStatus.SOUMISE]: 'send',
-      [InscriptionStatus.EN_COURS_VALIDATION]: 'hourglass_empty',
-      [InscriptionStatus.VALIDEE]: 'check_circle',
-      [InscriptionStatus.REJETEE]: 'cancel'
-    };
-    return statusIcons[status] || 'help';
-  }
-
-  canEdit(inscription: InscriptionResponse): boolean {
-    return inscription.statut === InscriptionStatus.BROUILLON;
-  }
-
-  canSubmit(inscription: InscriptionResponse): boolean {
-    return inscription.statut === InscriptionStatus.BROUILLON;
-  }
-
-  getProgressSteps(inscription: InscriptionResponse): Array<{label: string, completed: boolean, current: boolean}> {
-    const steps = [
-      { label: 'Création', completed: true, current: false },
-      { label: 'Soumission', completed: false, current: false },
-      { label: 'Avis Directeur', completed: false, current: false },
-      { label: 'Validation Admin', completed: false, current: false },
-      { label: 'Validée', completed: false, current: false }
-    ];
-
-    switch (inscription.statut) {
-      case InscriptionStatus.BROUILLON:
-        steps[0].current = true;
-        break;
-      case InscriptionStatus.SOUMISE:
-        steps[1].completed = true;
-        steps[1].current = true;
-        break;
-      case InscriptionStatus.EN_COURS_VALIDATION:
-        steps[1].completed = true;
-        if (inscription.avisDirecteur) {
-          steps[2].completed = true;
-          steps[3].current = true;
-        } else {
-          steps[2].current = true;
-        }
-        break;
-      case InscriptionStatus.VALIDEE:
-        steps[1].completed = true;
-        steps[2].completed = true;
-        steps[3].completed = true;
-        steps[4].completed = true;
-        steps[4].current = true;
-        break;
-      case InscriptionStatus.REJETEE:
-        steps[1].completed = true;
-        if (inscription.avisDirecteur) {
-          steps[2].completed = true;
-        }
-        if (inscription.validationAdmin) {
-          steps[3].completed = true;
-        }
-        break;
-    }
-
-    return steps;
   }
 }

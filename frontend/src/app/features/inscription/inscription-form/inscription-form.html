@@ -1,189 +1,483 @@
 <div class="inscription-form-container">
-  <div class="form-header">
-    <h1>{{ isEditMode ? 'Modifier l\'inscription' : 'Nouvelle inscription' }}</h1>
-    <p class="form-description">
-      Remplissez tous les champs obligatoires pour {{ isEditMode ? 'modifier votre' : 'créer votre' }} demande d'inscription.
-    </p>
-  </div>
+  <mat-card class="form-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>school</mat-icon>
+        {{ isEditMode ? 'Modifier l\'inscription' : 'Nouvelle Inscription' }}
+      </mat-card-title>
+      <mat-card-subtitle>
+        Remplissez le formulaire en plusieurs étapes
+      </mat-card-subtitle>
+    </mat-card-header>
 
-  <!-- Loading State -->
-  <div *ngIf="loading" class="loading-container">
-    <div class="spinner"></div>
-    <p>{{ isEditMode ? 'Chargement des données...' : 'Enregistrement en cours...' }}</p>
-  </div>
-
-  <!-- Success Message -->
-  <div *ngIf="success" class="alert alert-success">
-    <i class="fas fa-check-circle"></i>
-    {{ success }}
-  </div>
-
-  <!-- Error Message -->
-  <div *ngIf="error" class="alert alert-danger">
-    <i class="fas fa-exclamation-triangle"></i>
-    {{ error }}
-  </div>
-
-  <!-- Campagne Info -->
-  <div *ngIf="campagneActive$ | async as campagne" class="campagne-info">
-    <div class="info-card">
-      <h3>Campagne d'inscription active</h3>
-      <div class="campagne-details">
-        <p><strong>{{ campagne.nom }}</strong></p>
-        <p>Année universitaire: {{ campagne.anneeUniversitaire }}</p>
-        <p>Type: {{ campagne.typeInscription }}</p>
-        <p>Fermeture: {{ campagne.dateFermeture | date:'dd/MM/yyyy' }}</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Form -->
-  <form [formGroup]="inscriptionForm" (ngSubmit)="onSubmit()" class="inscription-form" *ngIf="!loading">
-    
-    <!-- Directeur de thèse -->
-    <div class="form-section">
-      <h2>Directeur de thèse</h2>
-      
-      <div class="form-group">
-        <label for="directeurSearch">Rechercher un directeur *</label>
-        <input
-          type="text"
-          id="directeurSearch"
-          formControlName="directeurSearch"
-          class="form-control"
-          placeholder="Tapez le nom ou l'email du directeur..."
-          [class.is-invalid]="isFieldInvalid('directeurId')"
-        />
-        <div class="invalid-feedback" *ngIf="isFieldInvalid('directeurId')">
-          {{ getFieldError('directeurId') }}
-        </div>
+    <mat-card-content>
+      <!-- Auto-save indicator -->
+      <div class="auto-save-indicator" *ngIf="lastSaved">
+        <mat-icon>cloud_done</mat-icon>
+        <span>Dernière sauvegarde: {{ lastSaved | date:'short' }}</span>
       </div>
 
-      <!-- Directeurs filtrés -->
-      <div class="directeurs-list" *ngIf="filteredDirecteurs$ | async as directeurs">
-        <div 
-          *ngFor="let directeur of directeurs" 
-          class="directeur-item"
-          [class.selected]="inscriptionForm.get('directeurId')?.value === directeur.id"
-          (click)="onDirecteurSelect(directeur)"
-        >
-          <div class="directeur-info">
-            <h4>{{ directeur.FirstName }} {{ directeur.LastName }}</h4>
-            <p>{{ directeur.email }}</p>
-          </div>
-          <div class="directeur-actions">
-            <i class="fas fa-check" *ngIf="inscriptionForm.get('directeurId')?.value === directeur.id"></i>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Informations de la thèse -->
-    <div class="form-section">
-      <h2>Informations de la thèse</h2>
-      
-      <div class="form-group">
-        <label for="sujetThese">Sujet de thèse *</label>
-        <textarea
-          id="sujetThese"
-          formControlName="sujetThese"
-          class="form-control"
-          rows="4"
-          placeholder="Décrivez le sujet de votre thèse..."
-          [class.is-invalid]="isFieldInvalid('sujetThese')"
-        ></textarea>
-        <div class="form-text">
-          Minimum 10 caractères, maximum 500 caractères
-        </div>
-        <div class="invalid-feedback" *ngIf="isFieldInvalid('sujetThese')">
-          {{ getFieldError('sujetThese') }}
-        </div>
+      <div class="saving-indicator" *ngIf="saving">
+        <mat-spinner diameter="20"></mat-spinner>
+        <span>Sauvegarde en cours...</span>
       </div>
 
-      <div class="form-row">
-        <div class="form-group">
-          <label for="laboratoire">Laboratoire *</label>
-          <select
-            id="laboratoire"
-            formControlName="laboratoire"
-            class="form-control"
-            [class.is-invalid]="isFieldInvalid('laboratoire')"
-          >
-            <option value="">Sélectionnez un laboratoire</option>
-            <option *ngFor="let lab of laboratoires" [value]="lab">{{ lab }}</option>
-          </select>
-          <div class="invalid-feedback" *ngIf="isFieldInvalid('laboratoire')">
-            {{ getFieldError('laboratoire') }}
-          </div>
-        </div>
+      <!-- Stepper -->
+      <mat-stepper #stepper linear>
+        <!-- Étape 1: Informations Générales -->
+        <mat-step [stepControl]="infoGeneralesForm" label="Informations Générales">
+          <form [formGroup]="infoGeneralesForm">
+            <h3>Informations Générales</h3>
 
-        <div class="form-group" *ngIf="inscriptionForm.get('laboratoire')?.value === 'Autre'">
-          <label for="laboratoireAutre">Précisez le laboratoire *</label>
-          <input
-            type="text"
-            id="laboratoireAutre"
-            formControlName="laboratoireAutre"
-            class="form-control"
-            placeholder="Nom du laboratoire"
-            [class.is-invalid]="isFieldInvalid('laboratoireAutre')"
-          />
-          <div class="invalid-feedback" *ngIf="isFieldInvalid('laboratoireAutre')">
-            {{ getFieldError('laboratoireAutre') }}
-          </div>
-        </div>
-      </div>
+            <!-- Campagne -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Campagne d'inscription</mat-label>
+              <mat-select formControlName="campagneId" required>
+                <mat-option *ngIf="campagneActive$ | async as campagne" [value]="campagne.id">
+                  {{ campagne.libelle }} ({{ campagne.dateDebut | date:'dd/MM/yyyy' }} - {{ campagne.dateFin | date:'dd/MM/yyyy' }})
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="isFieldInvalid(infoGeneralesForm, 'campagneId')">
+                {{ getFieldError(infoGeneralesForm, 'campagneId') }}
+              </mat-error>
+            </mat-form-field>
 
-      <div class="form-row">
-        <div class="form-group">
-          <label for="specialite">Spécialité *</label>
-          <select
-            id="specialite"
-            formControlName="specialite"
-            class="form-control"
-            [class.is-invalid]="isFieldInvalid('specialite')"
-          >
-            <option value="">Sélectionnez une spécialité</option>
-            <option *ngFor="let spec of specialites" [value]="spec">{{ spec }}</option>
-          </select>
-          <div class="invalid-feedback" *ngIf="isFieldInvalid('specialite')">
-            {{ getFieldError('specialite') }}
-          </div>
-        </div>
+            <!-- Directeur de thèse -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Rechercher un directeur de thèse</mat-label>
+              <input matInput 
+                     formControlName="directeurSearch"
+                     [matAutocomplete]="autoDirecteur"
+                     placeholder="Nom, prénom ou email">
+              <mat-icon matSuffix>search</mat-icon>
+              <mat-autocomplete #autoDirecteur="matAutocomplete" 
+                                (optionSelected)="onDirecteurSelect($event.option.value)">
+                <mat-option *ngFor="let directeur of filteredDirecteurs$ | async" [value]="directeur">
+                  {{ directeur.FirstName }} {{ directeur.LastName }} ({{ directeur.email }})
+                </mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
 
-        <div class="form-group" *ngIf="inscriptionForm.get('specialite')?.value === 'Autre'">
-          <label for="specialiteAutre">Précisez la spécialité *</label>
-          <input
-            type="text"
-            id="specialiteAutre"
-            formControlName="specialiteAutre"
-            class="form-control"
-            placeholder="Nom de la spécialité"
-            [class.is-invalid]="isFieldInvalid('specialiteAutre')"
-          />
-          <div class="invalid-feedback" *ngIf="isFieldInvalid('specialiteAutre')">
-            {{ getFieldError('specialiteAutre') }}
-          </div>
-        </div>
-      </div>
-    </div>
+            <mat-form-field appearance="outline" class="full-width" style="display: none;">
+              <input matInput formControlName="directeurTheseId">
+            </mat-form-field>
 
-    <!-- Form Actions -->
-    <div class="form-actions">
-      <button type="button" class="btn btn-secondary" (click)="onCancel()" [disabled]="loading">
+            <mat-error *ngIf="isFieldInvalid(infoGeneralesForm, 'directeurTheseId')" class="field-error">
+              Veuillez sélectionner un directeur de thèse
+            </mat-error>
+
+            <!-- Sujet de thèse -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Sujet de thèse</mat-label>
+              <textarea matInput 
+                        formControlName="sujetThese"
+                        rows="4"
+                        placeholder="Décrivez brièvement le sujet de votre thèse"
+                        required></textarea>
+              <mat-hint align="end">{{ infoGeneralesForm.get('sujetThese')?.value?.length || 0 }}/500</mat-hint>
+              <mat-error *ngIf="isFieldInvalid(infoGeneralesForm, 'sujetThese')">
+                {{ getFieldError(infoGeneralesForm, 'sujetThese') }}
+              </mat-error>
+            </mat-form-field>
+
+            <div class="step-actions">
+              <button mat-raised-button color="primary" matStepperNext>
+                Suivant
+                <mat-icon>arrow_forward</mat-icon>
+              </button>
+            </div>
+          </form>
+        </mat-step>
+
+        <!-- Étape 2: Informations Personnelles -->
+        <mat-step [stepControl]="infosPersonnellesForm" label="Informations Personnelles">
+          <form [formGroup]="infosPersonnellesForm">
+            <h3>Informations Personnelles</h3>
+
+            <div class="form-row">
+              <!-- CIN -->
+              <mat-form-field appearance="outline">
+                <mat-label>CIN</mat-label>
+                <input matInput formControlName="cin" placeholder="AB123456" required>
+                <mat-error *ngIf="isFieldInvalid(infosPersonnellesForm, 'cin')">
+                  {{ getFieldError(infosPersonnellesForm, 'cin') }}
+                </mat-error>
+              </mat-form-field>
+
+              <!-- CNE -->
+              <mat-form-field appearance="outline">
+                <mat-label>CNE (optionnel)</mat-label>
+                <input matInput formControlName="cne" placeholder="K123456789">
+                <mat-error *ngIf="isFieldInvalid(infosPersonnellesForm, 'cne')">
+                  {{ getFieldError(infosPersonnellesForm, 'cne') }}
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <!-- Téléphone -->
+              <mat-form-field appearance="outline">
+                <mat-label>Téléphone</mat-label>
+                <input matInput formControlName="telephone" placeholder="0612345678" required>
+                <mat-error *ngIf="isFieldInvalid(infosPersonnellesForm, 'telephone')">
+                  {{ getFieldError(infosPersonnellesForm, 'telephone') }}
+                </mat-error>
+              </mat-form-field>
+
+              <!-- Date de naissance -->
+              <mat-form-field appearance="outline">
+                <mat-label>Date de naissance</mat-label>
+                <input matInput [matDatepicker]="picker" formControlName="dateNaissance" required>
+                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+                <mat-error *ngIf="isFieldInvalid(infosPersonnellesForm, 'dateNaissance')">
+                  {{ getFieldError(infosPersonnellesForm, 'dateNaissance') }}
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <!-- Adresse -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Adresse</mat-label>
+              <textarea matInput formControlName="adresse" rows="2" required></textarea>
+              <mat-error *ngIf="isFieldInvalid(infosPersonnellesForm, 'adresse')">
+                {{ getFieldError(infosPersonnellesForm, 'adresse') }}
+              </mat-error>
+            </mat-form-field>
+
+            <div class="form-row">
+              <!-- Ville -->
+              <mat-form-field appearance="outline">
+                <mat-label>Ville</mat-label>
+                <input matInput formControlName="ville" required>
+                <mat-error *ngIf="isFieldInvalid(infosPersonnellesForm, 'ville')">
+                  {{ getFieldError(infosPersonnellesForm, 'ville') }}
+                </mat-error>
+              </mat-form-field>
+
+              <!-- Pays -->
+              <mat-form-field appearance="outline">
+                <mat-label>Pays</mat-label>
+                <mat-select formControlName="pays" required>
+                  <mat-option *ngFor="let p of pays" [value]="p">{{ p }}</mat-option>
+                </mat-select>
+                <mat-error *ngIf="isFieldInvalid(infosPersonnellesForm, 'pays')">
+                  {{ getFieldError(infosPersonnellesForm, 'pays') }}
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <!-- Lieu de naissance -->
+              <mat-form-field appearance="outline">
+                <mat-label>Lieu de naissance</mat-label>
+                <input matInput formControlName="lieuNaissance" required>
+                <mat-error *ngIf="isFieldInvalid(infosPersonnellesForm, 'lieuNaissance')">
+                  {{ getFieldError(infosPersonnellesForm, 'lieuNaissance') }}
+                </mat-error>
+              </mat-form-field>
+
+              <!-- Nationalité -->
+              <mat-form-field appearance="outline">
+                <mat-label>Nationalité</mat-label>
+                <input matInput formControlName="nationalite" required>
+                <mat-error *ngIf="isFieldInvalid(infosPersonnellesForm, 'nationalite')">
+                  {{ getFieldError(infosPersonnellesForm, 'nationalite') }}
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="step-actions">
+              <button mat-button matStepperPrevious>
+                <mat-icon>arrow_back</mat-icon>
+                Précédent
+              </button>
+              <button mat-raised-button color="primary" matStepperNext>
+                Suivant
+                <mat-icon>arrow_forward</mat-icon>
+              </button>
+            </div>
+          </form>
+        </mat-step>
+
+        <!-- Étape 3: Informations de Thèse -->
+        <mat-step [stepControl]="infosTheseForm" label="Informations de Thèse">
+          <form [formGroup]="infosTheseForm">
+            <h3>Informations de Thèse</h3>
+
+            <!-- Titre de thèse -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Titre de la thèse</mat-label>
+              <textarea matInput 
+                        formControlName="titreThese"
+                        rows="3"
+                        required></textarea>
+              <mat-hint align="end">{{ infosTheseForm.get('titreThese')?.value?.length || 0 }}/500</mat-hint>
+              <mat-error *ngIf="isFieldInvalid(infosTheseForm, 'titreThese')">
+                {{ getFieldError(infosTheseForm, 'titreThese') }}
+              </mat-error>
+            </mat-form-field>
+
+            <div class="form-row">
+              <!-- Discipline -->
+              <mat-form-field appearance="outline">
+                <mat-label>Discipline</mat-label>
+                <mat-select formControlName="discipline" required>
+                  <mat-option *ngFor="let d of disciplines" [value]="d">{{ d }}</mat-option>
+                </mat-select>
+                <mat-error *ngIf="isFieldInvalid(infosTheseForm, 'discipline')">
+                  {{ getFieldError(infosTheseForm, 'discipline') }}
+                </mat-error>
+              </mat-form-field>
+
+              <!-- Discipline autre -->
+              <mat-form-field appearance="outline" *ngIf="infosTheseForm.get('discipline')?.value === 'Autre'">
+                <mat-label>Précisez la discipline</mat-label>
+                <input matInput formControlName="disciplineAutre">
+                <mat-error *ngIf="isFieldInvalid(infosTheseForm, 'disciplineAutre')">
+                  {{ getFieldError(infosTheseForm, 'disciplineAutre') }}
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <!-- Laboratoire -->
+              <mat-form-field appearance="outline">
+                <mat-label>Laboratoire</mat-label>
+                <mat-select formControlName="laboratoire" required>
+                  <mat-option *ngFor="let l of laboratoires" [value]="l">{{ l }}</mat-option>
+                </mat-select>
+                <mat-error *ngIf="isFieldInvalid(infosTheseForm, 'laboratoire')">
+                  {{ getFieldError(infosTheseForm, 'laboratoire') }}
+                </mat-error>
+              </mat-form-field>
+
+              <!-- Laboratoire autre -->
+              <mat-form-field appearance="outline" *ngIf="infosTheseForm.get('laboratoire')?.value === 'Autre'">
+                <mat-label>Précisez le laboratoire</mat-label>
+                <input matInput formControlName="laboratoireAutre">
+                <mat-error *ngIf="isFieldInvalid(infosTheseForm, 'laboratoireAutre')">
+                  {{ getFieldError(infosTheseForm, 'laboratoireAutre') }}
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <!-- Établissement -->
+              <mat-form-field appearance="outline">
+                <mat-label>Établissement d'accueil</mat-label>
+                <mat-select formControlName="etablissementAccueil" required>
+                  <mat-option *ngFor="let e of etablissements" [value]="e">{{ e }}</mat-option>
+                </mat-select>
+                <mat-error *ngIf="isFieldInvalid(infosTheseForm, 'etablissementAccueil')">
+                  {{ getFieldError(infosTheseForm, 'etablissementAccueil') }}
+                </mat-error>
+              </mat-form-field>
+
+              <!-- Établissement autre -->
+              <mat-form-field appearance="outline" *ngIf="infosTheseForm.get('etablissementAccueil')?.value === 'Autre'">
+                <mat-label>Précisez l'établissement</mat-label>
+                <input matInput formControlName="etablissementAutre">
+                <mat-error *ngIf="isFieldInvalid(infosTheseForm, 'etablissementAutre')">
+                  {{ getFieldError(infosTheseForm, 'etablissementAutre') }}
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <!-- Date de début prévue -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Date de début prévue</mat-label>
+              <input matInput [matDatepicker]="pickerDebut" formControlName="dateDebutPrevue" required>
+              <mat-datepicker-toggle matSuffix [for]="pickerDebut"></mat-datepicker-toggle>
+              <mat-datepicker #pickerDebut></mat-datepicker>
+              <mat-error *ngIf="isFieldInvalid(infosTheseForm, 'dateDebutPrevue')">
+                {{ getFieldError(infosTheseForm, 'dateDebutPrevue') }}
+              </mat-error>
+            </mat-form-field>
+
+            <!-- Cotutelle -->
+            <mat-checkbox formControlName="cotutelle" class="full-width">
+              Thèse en cotutelle
+            </mat-checkbox>
+
+            <div *ngIf="infosTheseForm.get('cotutelle')?.value" class="cotutelle-section">
+              <div class="form-row">
+                <!-- Université partenaire -->
+                <mat-form-field appearance="outline">
+                  <mat-label>Université partenaire</mat-label>
+                  <input matInput formControlName="universitePartenaire">
+                  <mat-error *ngIf="isFieldInvalid(infosTheseForm, 'universitePartenaire')">
+                    {{ getFieldError(infosTheseForm, 'universitePartenaire') }}
+                  </mat-error>
+                </mat-form-field>
+
+                <!-- Pays partenaire -->
+                <mat-form-field appearance="outline">
+                  <mat-label>Pays partenaire</mat-label>
+                  <mat-select formControlName="paysPartenaire">
+                    <mat-option *ngFor="let p of pays" [value]="p">{{ p }}</mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="isFieldInvalid(infosTheseForm, 'paysPartenaire')">
+                    {{ getFieldError(infosTheseForm, 'paysPartenaire') }}
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <div class="step-actions">
+              <button mat-button matStepperPrevious>
+                <mat-icon>arrow_back</mat-icon>
+                Précédent
+              </button>
+              <button mat-raised-button color="primary" matStepperNext>
+                Suivant
+                <mat-icon>arrow_forward</mat-icon>
+              </button>
+            </div>
+          </form>
+        </mat-step>
+
+        <!-- Étape 4: Documents -->
+        <mat-step label="Documents">
+          <h3>Documents Requis</h3>
+          
+          <div class="documents-progress">
+            <mat-progress-bar mode="determinate" [value]="uploadProgressPercentage"></mat-progress-bar>
+            <span>{{ uploadedDocuments.size }} / {{ requiredDocuments.length }} documents uploadés</span>
+          </div>
+
+          <div class="documents-list">
+            <mat-card *ngFor="let docConfig of requiredDocuments" class="document-card">
+              <mat-card-header>
+                <mat-icon mat-card-avatar>{{ docConfig.icon }}</mat-icon>
+                <mat-card-title>{{ docConfig.label }}</mat-card-title>
+                <mat-card-subtitle>{{ docConfig.description }}</mat-card-subtitle>
+              </mat-card-header>
+
+              <mat-card-content>
+                <div *ngIf="!uploadedDocuments.has(docConfig.type)" class="upload-zone">
+                  <input type="file" 
+                         #fileInput
+                         [accept]="docConfig.allowedTypes.join(',')"
+                         (change)="onFileSelected($event, docConfig.type)"
+                         style="display: none">
+                  
+                  <button mat-raised-button color="primary" (click)="fileInput.click()">
+                    <mat-icon>cloud_upload</mat-icon>
+                    Choisir un fichier
+                  </button>
+                  
+                  <p class="upload-hint">
+                    Formats acceptés: {{ docConfig.allowedTypes.join(', ') }}<br>
+                    Taille max: {{ docConfig.maxSizeMB }} MB
+                  </p>
+
+                  <mat-progress-bar *ngIf="uploadProgress.has(docConfig.type)" 
+                                    mode="determinate" 
+                                    [value]="uploadProgress.get(docConfig.type)">
+                  </mat-progress-bar>
+                </div>
+
+                <div *ngIf="uploadedDocuments.has(docConfig.type)" class="uploaded-file">
+                  <mat-icon color="primary">check_circle</mat-icon>
+                  <span>{{ uploadedDocuments.get(docConfig.type)?.nomFichier }}</span>
+                  <button mat-icon-button color="warn" (click)="removeDocument(docConfig.type)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+
+          <div class="step-actions">
+            <button mat-button matStepperPrevious>
+              <mat-icon>arrow_back</mat-icon>
+              Précédent
+            </button>
+            <button mat-raised-button color="primary" matStepperNext>
+              Suivant
+                <mat-icon>arrow_forward</mat-icon>
+            </button>
+          </div>
+        </mat-step>
+
+        <!-- Étape 5: Révision et Soumission -->
+        <mat-step label="Révision">
+          <h3>Révision de votre inscription</h3>
+
+          <mat-card class="review-card">
+            <mat-card-header>
+              <mat-card-title>Informations Générales</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <p><strong>Sujet:</strong> {{ infoGeneralesForm.get('sujetThese')?.value }}</p>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="review-card">
+            <mat-card-header>
+              <mat-card-title>Informations Personnelles</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <p><strong>CIN:</strong> {{ infosPersonnellesForm.get('cin')?.value }}</p>
+              <p><strong>Téléphone:</strong> {{ infosPersonnellesForm.get('telephone')?.value }}</p>
+              <p><strong>Adresse:</strong> {{ infosPersonnellesForm.get('adresse')?.value }}, {{ infosPersonnellesForm.get('ville')?.value }}</p>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="review-card">
+            <mat-card-header>
+              <mat-card-title>Informations de Thèse</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <p><strong>Titre:</strong> {{ infosTheseForm.get('titreThese')?.value }}</p>
+              <p><strong>Discipline:</strong> {{ infosTheseForm.get('discipline')?.value }}</p>
+              <p><strong>Laboratoire:</strong> {{ infosTheseForm.get('laboratoire')?.value }}</p>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="review-card">
+            <mat-card-header>
+              <mat-card-title>Documents</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <p>{{ uploadedDocuments.size }} / {{ requiredDocuments.length }} documents uploadés</p>
+              <mat-chip-list *ngIf="!allRequiredDocumentsUploaded">
+                <mat-chip color="warn" selected>Documents manquants</mat-chip>
+              </mat-chip-list>
+              <mat-chip-list *ngIf="allRequiredDocumentsUploaded">
+                <mat-chip color="primary" selected>Tous les documents sont uploadés</mat-chip>
+              </mat-chip-list>
+            </mat-card-content>
+          </mat-card>
+
+          <div class="step-actions">
+            <button mat-button matStepperPrevious>
+              <mat-icon>arrow_back</mat-icon>
+              Précédent
+            </button>
+            <button mat-raised-button 
+                    color="accent" 
+                    (click)="onSubmit()"
+                    [disabled]="submitting || !allRequiredDocumentsUploaded">
+              <mat-spinner *ngIf="submitting" diameter="20"></mat-spinner>
+              <mat-icon *ngIf="!submitting">send</mat-icon>
+              {{ submitting ? 'Soumission...' : 'Soumettre l\'inscription' }}
+            </button>
+          </div>
+        </mat-step>
+      </mat-stepper>
+    </mat-card-content>
+
+    <mat-card-actions>
+      <button mat-button (click)="onCancel()">
+        <mat-icon>cancel</mat-icon>
         Annuler
       </button>
-      <button type="submit" class="btn btn-primary" [disabled]="loading || inscriptionForm.invalid">
-        <i class="fas fa-save"></i>
-        {{ isEditMode ? 'Modifier' : 'Créer' }} l'inscription
+      <button mat-button (click)="saveDraft()" [disabled]="saving">
+        <mat-icon>save</mat-icon>
+        Sauvegarder le brouillon
       </button>
-    </div>
-  </form>
-
-  <!-- Form Debug (Development only) -->
-  <!-- <div class="form-debug" *ngIf="!environment.production">
-    <h4>Debug Form</h4>
-    <p>Form Valid: {{ inscriptionForm.valid }}</p>
-    <p>Form Value: {{ inscriptionForm.value | json }}</p>
-    <p>Form Errors: {{ inscriptionForm.errors | json }}</p>
-  </div> -->
+    </mat-card-actions>
+  </mat-card>
 </div>

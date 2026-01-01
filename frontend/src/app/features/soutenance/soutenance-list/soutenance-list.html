@@ -1,0 +1,249 @@
+<div class="soutenance-list-container">
+  <header class="list-header">
+    <div class="header-content">
+      <h1>Liste des Soutenances</h1>
+      <button class="btn btn-primary" routerLink="/soutenance/nouvelle" *ngIf="authService.isDoctorant()">
+        <i class="icon-plus"></i>
+        Nouvelle demande
+      </button>
+    </div>
+  </header>
+
+  <!-- Filters Section -->
+  <div class="filters-section">
+    <div class="filters-container">
+      <!-- Search -->
+      <div class="filter-group search-group">
+        <label for="search">
+          <i class="icon-search"></i>
+          Rechercher
+        </label>
+        <input
+          type="text"
+          id="search"
+          placeholder="Titre, doctorant, directeur, spécialité..."
+          [ngModel]="filters.searchTerm"
+          (ngModelChange)="onSearchChange($event)"
+          class="search-input">
+      </div>
+
+      <!-- Status Filter -->
+      <div class="filter-group">
+        <label for="status">Statut</label>
+        <select
+          id="status"
+          [(ngModel)]="filters.status"
+          (ngModelChange)="onFilterChange()"
+          class="filter-select">
+          <option *ngFor="let status of availableStatuses" [value]="status.value">
+            {{ status.label }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Date Range Filters -->
+      <div class="filter-group">
+        <label for="dateFrom">Date de</label>
+        <input
+          type="date"
+          id="dateFrom"
+          [(ngModel)]="filters.dateFrom"
+          (ngModelChange)="onFilterChange()"
+          class="filter-input">
+      </div>
+
+      <div class="filter-group">
+        <label for="dateTo">Date à</label>
+        <input
+          type="date"
+          id="dateTo"
+          [(ngModel)]="filters.dateTo"
+          (ngModelChange)="onFilterChange()"
+          class="filter-input">
+      </div>
+
+      <!-- Clear Filters Button -->
+      <button class="btn btn-secondary" (click)="clearFilters()">
+        <i class="icon-x"></i>
+        Réinitialiser
+      </button>
+    </div>
+
+    <!-- Results Summary -->
+    <div class="results-summary">
+      <span class="results-count">
+        {{ filteredSoutenances.length }} résultat(s)
+      </span>
+      <div class="page-size-selector">
+        <label>Afficher</label>
+        <select [(ngModel)]="itemsPerPage" (ngModelChange)="onPageSizeChange($event)" class="filter-select-small">
+          <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</option>
+        </select>
+        <span>par page</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Chargement des soutenances...</p>
+  </div>
+
+  <!-- Error State -->
+  <div class="error-container" *ngIf="errorMessage && !isLoading">
+    <i class="icon-alert-circle"></i>
+    <p>{{ errorMessage }}</p>
+    <button class="btn btn-primary" (click)="loadSoutenances()">Réessayer</button>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!isLoading && !errorMessage && filteredSoutenances.length === 0">
+    <i class="icon-file-text"></i>
+    <h3>Aucune soutenance trouvée</h3>
+    <p *ngIf="filters.searchTerm || filters.status !== 'ALL'">
+      Essayez de modifier vos critères de recherche
+    </p>
+    <p *ngIf="authService.isDoctorant() && !filters.searchTerm && filters.status === 'ALL'">
+      Vous n'avez pas encore de demande de soutenance
+    </p>
+    <button class="btn btn-primary" routerLink="/soutenance/nouvelle" *ngIf="authService.isDoctorant()">
+      Créer une demande
+    </button>
+  </div>
+
+  <!-- Soutenances Table -->
+  <div class="table-container" *ngIf="!isLoading && !errorMessage && filteredSoutenances.length > 0">
+    <table class="soutenances-table">
+      <thead>
+        <tr>
+          <th>Titre</th>
+          <th>Doctorant</th>
+          <th>Directeur</th>
+          <th>Spécialité</th>
+          <th>Date</th>
+          <th>Statut</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let soutenance of getPaginatedSoutenances()" class="soutenance-row">
+          <td class="title-cell">
+            <div class="title-content">
+              <span class="title-text" [title]="soutenance.titrethese">
+                {{ soutenance.titrethese }}
+              </span>
+              <span class="subtitle-text" *ngIf="soutenance.laboratoire">
+                {{ soutenance.laboratoire }}
+              </span>
+            </div>
+          </td>
+          <td>
+            <div class="user-info">
+              <span class="user-name">{{ getFullName(soutenance.doctorant) }}</span>
+              <span class="user-email" *ngIf="soutenance.doctorant.email">
+                {{ soutenance.doctorant.email }}
+              </span>
+            </div>
+          </td>
+          <td>
+            <div class="user-info">
+              <span class="user-name">{{ getFullName(soutenance.directeur) }}</span>
+            </div>
+          </td>
+          <td>
+            <span class="specialite-badge">{{ soutenance.specialite }}</span>
+          </td>
+          <td>
+            <span class="date-text">{{ formatDate(soutenance.dateSoutenance) }}</span>
+          </td>
+          <td>
+            <span 
+              class="status-badge" 
+              [class]="'status-' + getStatusColor(soutenance.statut)">
+              {{ getStatusLabel(soutenance.statut) }}
+            </span>
+          </td>
+          <td class="actions-cell">
+            <div class="action-buttons">
+              <!-- View Details Button -->
+              <button 
+                class="btn-icon" 
+                (click)="viewDetails(soutenance.id)"
+                title="Voir les détails">
+                <i class="icon-eye"></i>
+              </button>
+
+              <!-- Edit Button (Doctorant only, BROUILLON or REJETEE) -->
+              <button 
+                class="btn-icon" 
+                (click)="editSoutenance(soutenance.id)"
+                *ngIf="canEdit(soutenance)"
+                title="Modifier">
+                <i class="icon-edit"></i>
+              </button>
+
+              <!-- Delete Button (Doctorant only, BROUILLON) -->
+              <button 
+                class="btn-icon btn-danger" 
+                (click)="deleteSoutenance(soutenance.id)"
+                *ngIf="canDelete(soutenance)"
+                title="Supprimer">
+                <i class="icon-trash"></i>
+              </button>
+
+              <!-- Validate Button (Directeur/Admin) -->
+              <button 
+                class="btn-icon btn-success" 
+                (click)="viewDetails(soutenance.id)"
+                *ngIf="canValidate(soutenance)"
+                title="Valider">
+                <i class="icon-check"></i>
+              </button>
+
+              <!-- Authorize Button (Admin only) -->
+              <button 
+                class="btn-icon btn-primary" 
+                (click)="viewDetails(soutenance.id)"
+                *ngIf="canAuthorize(soutenance)"
+                title="Autoriser">
+                <i class="icon-check-circle"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination-container" *ngIf="totalPages > 1">
+    <button 
+      class="btn btn-secondary"
+      (click)="onPageChange(currentPage - 1)"
+      [disabled]="currentPage === 1">
+      Précédent
+    </button>
+
+    <div class="page-numbers">
+      <button 
+        *ngFor="let page of [].constructor(totalPages); let i = index"
+        class="page-number"
+        [class.active]="currentPage === i + 1"
+        (click)="onPageChange(i + 1)">
+        {{ i + 1 }}
+      </button>
+    </div>
+
+    <button 
+      class="btn btn-secondary"
+      (click)="onPageChange(currentPage + 1)"
+      [disabled]="currentPage === totalPages">
+      Suivant
+    </button>
+
+    <span class="pagination-info">
+      Page {{ currentPage }} sur {{ totalPages }}
+    </span>
+  </div>
+</div>

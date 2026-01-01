@@ -1,0 +1,232 @@
+<div class="admin-dashboard">
+    <!-- Header -->
+    <header class="dashboard-header">
+        <h1>
+            <i class="icon-bar-chart"></i>
+            Administration
+        </h1>
+        <p class="subtitle">Vue d'ensemble de la plateforme</p>
+    </header>
+
+    <!-- Loading State -->
+    <div class="loading-container" *ngIf="isLoading">
+        <div class="spinner"></div>
+        <p>Chargement des statistiques...</p>
+    </div>
+
+    <!-- Error State -->
+    <div class="error-container" *ngIf="errorMessage && !isLoading">
+        <i class="icon-alert-circle"></i>
+        <p>{{ errorMessage }}</p>
+        <button class="btn btn-primary" (click)="loadDashboardData()">Réessayer</button>
+    </div>
+
+    <!-- Dashboard Content -->
+    <div class="dashboard-content" *ngIf="!isLoading && !errorMessage && statistics">
+
+        <!-- Statistics Grid -->
+        <div class="stats-grid">
+            <!-- Users Stats -->
+            <div class="stat-card users">
+                <div class="stat-header">
+                    <i class="icon-users"></i>
+                    <h3>Utilisateurs</h3>
+                </div>
+                <div class="stat-body">
+                    <div class="stat-main">
+                        <span class="stat-value">{{ statistics.users.totalUsers }}</span>
+                        <span class="stat-label">Total</span>
+                    </div>
+                    <div class="stat-details">
+                        <div class="stat-item">
+                            <span class="label">Actifs</span>
+                            <span class="value green">{{ statistics.users.activeUsers }}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="label">Désactivés</span>
+                            <span class="value red">{{ statistics.users.disabledUsers }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-footer">
+                    <a routerLink="/admin/users" class="link">Gérer les utilisateurs →</a>
+                </div>
+            </div>
+
+            <!-- Connections Stats -->
+            <div class="stat-card connections">
+                <div class="stat-header">
+                    <i class="icon-activity"></i>
+                    <h3>Connexions</h3>
+                </div>
+                <div class="stat-body">
+                    <div class="stat-main">
+                        <span class="stat-value">{{ statistics.connections.todayLogins }}</span>
+                        <span class="stat-label">Aujourd'hui</span>
+                    </div>
+                    <div class="stat-details">
+                        <div class="stat-item">
+                            <span class="label">Cette semaine</span>
+                            <span class="value">{{ statistics.connections.weekLogins }}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="label">Ce mois</span>
+                            <span class="value">{{ statistics.connections.monthLogins }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Campagnes Stats -->
+            <div class="stat-card campagnes">
+                <div class="stat-header">
+                    <i class="icon-calendar"></i>
+                    <h3>Campagnes</h3>
+                </div>
+                <div class="stat-body">
+                    <div class="stat-main">
+                        <span class="stat-value">{{ statistics.campagnes.actives }}</span>
+                        <span class="stat-label">Actives</span>
+                    </div>
+                    <div class="stat-details">
+                        <div class="stat-item">
+                            <span class="label">Total</span>
+                            <span class="value">{{ statistics.campagnes.total }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-footer">
+                    <a routerLink="/admin/campagnes" class="link">Gérer les campagnes →</a>
+                </div>
+            </div>
+
+            <!-- Dossiers Stats -->
+            <div class="stat-card dossiers">
+                <div class="stat-header">
+                    <i class="icon-file-text"></i>
+                    <h3>Dossiers</h3>
+                </div>
+                <div class="stat-body">
+                    <div class="stat-main">
+                        <span class="stat-value">{{ statistics.dossiers.enAttente }}</span>
+                        <span class="stat-label">En attente</span>
+                    </div>
+                    <div class="stat-details">
+                        <div class="stat-item">
+                            <span class="label">Total</span>
+                            <span class="value">{{ statistics.dossiers.total }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-footer">
+                    <a routerLink="/admin/dossiers" class="link">Valider les dossiers →</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <h2>Actions rapides</h2>
+            <div class="actions-grid">
+                <a routerLink="/admin/users/new" class="action-card">
+                    <i class="icon-user-plus"></i>
+                    <span>Créer un utilisateur</span>
+                </a>
+                <a routerLink="/admin/campagnes/new" class="action-card">
+                    <i class="icon-plus-circle"></i>
+                    <span>Créer une campagne</span>
+                </a>
+                <a routerLink="/admin/dossiers" class="action-card">
+                    <i class="icon-check-square"></i>
+                    <span>Valider les dossiers</span>
+                </a>
+                <a routerLink="/admin/configuration" class="action-card">
+                    <i class="icon-settings"></i>
+                    <span>Configuration</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Recent Campagnes -->
+        <div class="section-card" *ngIf="recentCampagnes.length > 0">
+            <div class="section-header">
+                <h2>
+                    <i class="icon-calendar"></i>
+                    Campagnes récentes
+                </h2>
+                <a routerLink="/admin/campagnes" class="link">Voir toutes →</a>
+            </div>
+            <div class="section-content">
+                <div class="campagne-list">
+                    <div class="campagne-item" *ngFor="let campagne of recentCampagnes">
+                        <div class="campagne-info">
+                            <h4>{{ campagne.nom }}</h4>
+                            <p class="campagne-dates">
+                                {{ formatDate(campagne.dateDebut) }} - {{ formatDate(campagne.dateFin) }}
+                            </p>
+                        </div>
+                        <span class="status-badge"
+                            [class]="'status-' + (campagne.statut === 'ACTIVE' ? 'green' : 'gray')">
+                            {{ campagne.statut === 'ACTIVE' ? 'Active' : 'Fermée' }}
+                        </span>
+                        <a [routerLink]="['/admin/campagnes', campagne.id]" class="btn btn-sm btn-outline">
+                            <i class="icon-eye"></i>
+                            Voir
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Dossiers -->
+        <div class="section-card" *ngIf="pendingDossiers.length > 0">
+            <div class="section-header">
+                <h2>
+                    <i class="icon-alert-circle"></i>
+                    Dossiers en attente de validation
+                </h2>
+                <span class="count-badge">{{ pendingDossiers.length }}</span>
+            </div>
+            <div class="section-content">
+                <div class="dossier-list">
+                    <div class="dossier-item" *ngFor="let dossier of pendingDossiers">
+                        <div class="dossier-info">
+                            <h4 *ngIf="dossier.doctorant">{{ dossier.doctorant.prenom }} {{ dossier.doctorant.nom }}
+                            </h4>
+                            <p class="dossier-meta">
+                                <span *ngIf="dossier.campagne">{{ dossier.campagne.nom }}</span>
+                                <span class="date">{{ formatDate(dossier.createdAt) }}</span>
+                            </p>
+                        </div>
+                        <span class="status-badge" [class]="'status-' + dossierService.getStatusColor(dossier.statut)">
+                            {{ dossierService.getStatusLabel(dossier.statut) }}
+                        </span>
+                        <button class="btn btn-sm btn-primary" [routerLink]="['/admin/dossiers', dossier.id]">
+                            <i class="icon-check"></i>
+                            Valider
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Roles Distribution -->
+        <div class="section-card" *ngIf="statistics.users.usersByRole">
+            <div class="section-header">
+                <h2>
+                    <i class="icon-pie-chart"></i>
+                    Répartition par rôle
+                </h2>
+            </div>
+            <div class="section-content">
+                <div class="roles-grid">
+                    <div class="role-card" *ngFor="let role of statistics.users.usersByRole | keyvalue">
+                        <div class="role-name">{{ role.key }}</div>
+                        <div class="role-count">{{ role.value }}</div>
+                        <div class="role-percentage">{{ getUserRolePercentage(role.key) }}%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

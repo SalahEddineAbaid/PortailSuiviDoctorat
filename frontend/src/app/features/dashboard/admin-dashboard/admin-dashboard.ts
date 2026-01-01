@@ -1,13 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { Observable } from 'rxjs';
-import { UserService } from '../../../core/services/user.service';
-import { DashboardService } from '../../../core/services/dashboard.service';
-import { AdminDashboardData, DashboardStats } from '../../../core/models/dashboard.model';
-import { AlertComponent } from '../../../shared/components/alert/alert.component';
-import { StatisticsComponent } from '../../../shared/components/statistics/statistics.component';
-import { DossierValidationListComponent, ValidationAction } from '../../../shared/components/dossier-validation-list/dossier-validation-list.component';
+import { RouterModule, ActivatedRoute } from '@angular/router';
+import { Subject, takeUntil } from 'rxjs';
+import { DashboardService } from '../services/dashboard.service';
+import { AdminDashboard as AdminDashboardModel } from '../models/dashboard.model';
+import { Navbar } from '../../../shared/components/navbar/navbar';
+import { Sidebar, MenuItem } from '../../../shared/components/sidebar/sidebar';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -15,16 +13,29 @@ import { DossierValidationListComponent, ValidationAction } from '../../../share
   imports: [
     CommonModule,
     RouterModule,
-    AlertComponent,
-    StatisticsComponent,
-    DossierValidationListComponent
+    Navbar,
+    Sidebar
   ],
   templateUrl: './admin-dashboard.html',
-  styleUrl: './admin-dashboard.scss'
+  styleUrl: './admin-dashboard.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AdminDashboard implements OnInit {
-  dashboardData$!: Observable<AdminDashboardData>;
-  loading = true;
+export class AdminDashboard implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+  
+  dashboard: AdminDashboardModel | null = null;
+  isLoading = false;
+  error: string | null = null;
+
+  menuItems: MenuItem[] = [
+    { icon: 'fas fa-home', label: 'Accueil', route: '/dashboard/admin' },
+    { icon: 'fas fa-users', label: 'Utilisateurs', route: '/admin/users' },
+    { icon: 'fas fa-calendar-alt', label: 'Campagnes', route: '/admin/campagnes' },
+    { icon: 'fas fa-check-circle', label: 'Validations', route: '/admin/validations' },
+    { icon: 'fas fa-cogs', label: 'Paramétrage', route: '/admin/parametrage' },
+    { icon: 'fas fa-bell', label: 'Notifications', route: '/notifications' },
+    { icon: 'fas fa-user', label: 'Mon profil', route: '/profile' }
+  ];
 
   // Raccourcis de gestion
   managementShortcuts = [
@@ -46,7 +57,7 @@ export class AdminDashboard implements OnInit {
       title: 'Gestion des Utilisateurs',
       description: 'Administrer les comptes utilisateurs',
       icon: 'fas fa-users',
-      route: '/admin/utilisateurs',
+      route: '/admin/users',
       color: 'purple'
     },
     {
@@ -59,76 +70,92 @@ export class AdminDashboard implements OnInit {
   ];
 
   constructor(
-    private userService: UserService,
-    private dashboardService: DashboardService
+    private route: ActivatedRoute,
+    private dashboardService: DashboardService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
-    console.log('✅ AdminDashboard chargé');
-    this.loadDashboardData();
+    // ✅ Récupérer les données préchargées par le resolver
+    this.route.data.pipe(takeUntil(this.destroy$)).subscribe(data => {
+      console.log('📊 [ADMIN DASHBOARD] Données reçues du resolver:', data);
+      this.dashboard = data['dashboard'];
+      
+      if (!this.dashboard) {
+        this.error = 'Impossible de charger les données du dashboard';
+      }
+      
+      this.cdr.markForCheck();
+    });
   }
 
-  private loadDashboardData(): void {
-    this.loading = true;
-    this.dashboardData$ = this.dashboardService.getAdminDashboardData();
-    
-    // Simuler le chargement
-    setTimeout(() => {
-      this.loading = false;
-    }, 1000);
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
-  onRefresh(): void {
-    this.loadDashboardData();
+  /**
+   * 🔄 Rafraîchir manuellement le dashboard
+   */
+  refreshDashboard(): void {
+    this.isLoading = true;
+    this.error = null;
+
+    this.dashboardService.getAdminDashboard()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          this.dashboard = data;
+          this.isLoading = false;
+          this.cdr.markForCheck();
+        },
+        error: (error) => {
+          console.error('❌ Erreur rafraîchissement dashboard:', error);
+          this.error = 'Erreur lors du rafraîchissement';
+          this.isLoading = false;
+          this.cdr.markForCheck();
+        }
+      });
   }
 
-  onValidationAction(action: ValidationAction): void {
-    console.log('Action de validation:', action);
-    
-    switch (action.action) {
-      case 'consulter':
-        this.consulterDossier(action.dossier);
-        break;
-      case 'valider':
-        this.validerDossier(action.dossier);
-        break;
-      case 'rejeter':
-        this.rejeterDossier(action.dossier);
-        break;
+  /**
+   * 🎯 Getters pour le template
+   */
+  getWelcomeMessage(): string {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Bonjour';
+    if (hour < 18) return 'Bon après-midi';
+    return 'Bonsoir';
+  }
+
+  getSystemHealthClass(): string {
+    if (!this.dashboard) return 'unknown';
+    return this.dashboard.statistics.systemHealth;
+  }
+
+  getSystemHealthIcon(): string {
+    const health = this.dashboard?.statistics.systemHealth;
+    switch (health) {
+      case 'healthy': return 'fa-check-circle';
+      case 'warning': return 'fa-exclamation-triangle';
+      case 'critical': return 'fa-times-circle';
+      default: return 'fa-question-circle';
     }
   }
 
-  onFilterChanged(filters: {type?: string, priorite?: string, search?: string}): void {
-    console.log('Filtres changés:', filters);
-    // Ici on pourrait implémenter une logique de filtrage côté serveur
-    // Pour l'instant, le filtrage se fait côté client dans le composant
+  hasCampagnes(): boolean {
+    return (this.dashboard?.campagnes?.length || 0) > 0;
   }
 
-  private consulterDossier(dossier: any): void {
-    // Navigation vers la page de consultation du dossier
-    const route = dossier.type === 'inscription' 
-      ? `/admin/inscriptions/${dossier.id}`
-      : `/admin/soutenances/${dossier.id}`;
-    
-    console.log(`Navigation vers: ${route}`);
-    // this.router.navigate([route]);
+  hasActiveUsers(): boolean {
+    return (this.dashboard?.activeUsers?.length || 0) > 0;
   }
 
-  private validerDossier(dossier: any): void {
-    // Logique de validation du dossier
-    console.log(`Validation du dossier ${dossier.type} #${dossier.id}`);
-    
-    // Ici on appellerait le service approprié pour valider
-    // Puis on rechargerait les données
-    // this.loadDashboardData();
+  hasAuditLogs(): boolean {
+    return (this.dashboard?.recentAudits?.length || 0) > 0;
   }
 
-  private rejeterDossier(dossier: any): void {
-    // Logique de rejet du dossier
-    console.log(`Rejet du dossier ${dossier.type} #${dossier.id}`);
-    
-    // Ici on appellerait le service approprié pour rejeter
-    // Puis on rechargerait les données
-    // this.loadDashboardData();
+  hasSystemAlerts(): boolean {
+    return (this.dashboard?.systemAlerts?.length || 0) > 0;
   }
 }

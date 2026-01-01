@@ -5,6 +5,9 @@ import { DirecteurDashboardComponent } from './directeur-dashboard/directeur-das
 import { AdminDashboard } from './admin-dashboard/admin-dashboard';
 import { roleGuard } from '../../core/guards/role.guard';
 import { RoleName } from '../../core/models/role.model';
+import { doctorantDashboardResolver } from './resolvers/doctorant-dashboard.resolver';
+import { directeurDashboardResolver } from './resolvers/directeur-dashboard.resolver';
+import { adminDashboardResolver } from './resolvers/admin-dashboard.resolver';
 
 export const dashboardRoutes: Routes = [
   {
@@ -16,19 +19,22 @@ export const dashboardRoutes: Routes = [
         path: 'doctorant',
         component: DoctorantDashboard,
         canActivate: [roleGuard],
-        data: { role: RoleName.DOCTORANT }
+        data: { role: RoleName.DOCTORANT },
+        resolve: { dashboard: doctorantDashboardResolver }
       },
       {
         path: 'directeur',
         component: DirecteurDashboardComponent,
         canActivate: [roleGuard],
-        data: { role: RoleName.DIRECTEUR }
+        data: { role: RoleName.DIRECTEUR },
+        resolve: { dashboard: directeurDashboardResolver }
       },
       {
         path: 'admin',
         component: AdminDashboard,
         canActivate: [roleGuard],
-        data: { role: RoleName.ADMIN }
+        data: { role: RoleName.ADMIN },
+        resolve: { dashboard: adminDashboardResolver }
       }
     ]
   }

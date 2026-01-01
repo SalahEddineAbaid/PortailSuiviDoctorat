@@ -1,0 +1,220 @@
+<div class="campagne-management">
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <mat-icon>calendar_today</mat-icon>
+        Gestion des Campagnes
+      </h1>
+      <button 
+        mat-raised-button
+        color="primary"
+        (click)="showCreateForm = true"
+        [disabled]="showCreateForm">
+        <mat-icon>add</mat-icon>
+        Nouvelle Campagne
+      </button>
+    </div>
+  </div>
+
+  <!-- Alert Messages -->
+  <app-alert 
+    *ngIf="successMessage" 
+    [type]="'success'" 
+    [message]="successMessage"
+    [dismissible]="true"
+    (dismissed)="successMessage = ''">
+  </app-alert>
+
+  <app-alert 
+    *ngIf="errorMessage" 
+    [type]="'error'" 
+    [message]="errorMessage"
+    [dismissible]="true"
+    (dismissed)="errorMessage = ''">
+  </app-alert>
+
+  <!-- Create/Edit Form -->
+  <mat-card *ngIf="showCreateForm || editingCampagne" class="form-card">
+    <mat-card-header>
+      <mat-card-title>
+        {{ editingCampagne ? 'Modifier' : 'Créer' }} une campagne
+      </mat-card-title>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <form [formGroup]="campagneForm" (ngSubmit)="onSubmit()">
+        <div class="form-grid">
+          <!-- Nom -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Nom de la campagne</mat-label>
+            <input matInput formControlName="nom" placeholder="Ex: Campagne d'inscription 2024-2025">
+            <mat-error *ngIf="campagneForm.get('nom')?.hasError('required')">
+              Le nom est obligatoire
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Année universitaire -->
+          <mat-form-field appearance="outline">
+            <mat-label>Année universitaire</mat-label>
+            <input matInput formControlName="anneeUniversitaire" placeholder="2024-2025">
+            <mat-error *ngIf="campagneForm.get('anneeUniversitaire')?.hasError('required')">
+              L'année est obligatoire
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Type d'inscription -->
+          <mat-form-field appearance="outline">
+            <mat-label>Type d'inscription</mat-label>
+            <mat-select formControlName="typeInscription">
+              <mat-option value="PREMIERE_INSCRIPTION">Première inscription</mat-option>
+              <mat-option value="REINSCRIPTION">Réinscription</mat-option>
+            </mat-select>
+            <mat-error *ngIf="campagneForm.get('typeInscription')?.hasError('required')">
+              Le type est obligatoire
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Date d'ouverture -->
+          <mat-form-field appearance="outline">
+            <mat-label>Date d'ouverture</mat-label>
+            <input matInput [matDatepicker]="pickerOuverture" formControlName="dateOuverture">
+            <mat-datepicker-toggle matSuffix [for]="pickerOuverture"></mat-datepicker-toggle>
+            <mat-datepicker #pickerOuverture></mat-datepicker>
+            <mat-error *ngIf="campagneForm.get('dateOuverture')?.hasError('required')">
+              La date d'ouverture est obligatoire
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Date de fermeture -->
+          <mat-form-field appearance="outline">
+            <mat-label>Date de fermeture</mat-label>
+            <input matInput [matDatepicker]="pickerFermeture" formControlName="dateFermeture">
+            <mat-datepicker-toggle matSuffix [for]="pickerFermeture"></mat-datepicker-toggle>
+            <mat-datepicker #pickerFermeture></mat-datepicker>
+            <mat-error *ngIf="campagneForm.get('dateFermeture')?.hasError('required')">
+              La date de fermeture est obligatoire
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Active -->
+          <div class="checkbox-field">
+            <mat-checkbox formControlName="active">
+              Campagne active
+            </mat-checkbox>
+          </div>
+
+          <!-- Description -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Description (optionnel)</mat-label>
+            <textarea matInput formControlName="description" rows="3" 
+                      placeholder="Description de la campagne..."></textarea>
+          </mat-form-field>
+        </div>
+
+        <div class="form-actions">
+          <button mat-button type="button" (click)="onCancel()">
+            Annuler
+          </button>
+          <button mat-raised-button color="primary" type="submit" [disabled]="!campagneForm.valid || isSubmitting">
+            <mat-spinner *ngIf="isSubmitting" diameter="20"></mat-spinner>
+            <span *ngIf="!isSubmitting">{{ editingCampagne ? 'Modifier' : 'Créer' }}</span>
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Campagnes List -->
+  <mat-card class="list-card">
+    <mat-card-header>
+      <mat-card-title>Liste des campagnes</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Loading State -->
+      <div *ngIf="isLoading" class="loading-container">
+        <mat-spinner></mat-spinner>
+        <p>Chargement des campagnes...</p>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="!isLoading && campagnes.length === 0" class="empty-state">
+        <mat-icon>event_busy</mat-icon>
+        <h3>Aucune campagne</h3>
+        <p>Créez votre première campagne pour commencer</p>
+      </div>
+
+      <!-- Campagnes Table -->
+      <div *ngIf="!isLoading && campagnes.length > 0" class="table-container">
+        <table mat-table [dataSource]="campagnes" class="campagnes-table">
+          <!-- Nom Column -->
+          <ng-container matColumnDef="nom">
+            <th mat-header-cell *matHeaderCellDef>Nom</th>
+            <td mat-cell *matCellDef="let campagne">{{ campagne.nom }}</td>
+          </ng-container>
+
+          <!-- Année Column -->
+          <ng-container matColumnDef="anneeUniversitaire">
+            <th mat-header-cell *matHeaderCellDef>Année</th>
+            <td mat-cell *matCellDef="let campagne">{{ campagne.anneeUniversitaire }}</td>
+          </ng-container>
+
+          <!-- Type Column -->
+          <ng-container matColumnDef="type">
+            <th mat-header-cell *matHeaderCellDef>Type</th>
+            <td mat-cell *matCellDef="let campagne">
+              <mat-chip [color]="campagne.typeInscription === 'PREMIERE_INSCRIPTION' ? 'primary' : 'accent'">
+                {{ campagne.typeInscription === 'PREMIERE_INSCRIPTION' ? 'Première inscription' : 'Réinscription' }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <!-- Dates Column -->
+          <ng-container matColumnDef="dates">
+            <th mat-header-cell *matHeaderCellDef>Période</th>
+            <td mat-cell *matCellDef="let campagne">
+              {{ campagne.dateOuverture | date:'dd/MM/yyyy' }} - {{ campagne.dateFermeture | date:'dd/MM/yyyy' }}
+            </td>
+          </ng-container>
+
+          <!-- Statut Column -->
+          <ng-container matColumnDef="statut">
+            <th mat-header-cell *matHeaderCellDef>Statut</th>
+            <td mat-cell *matCellDef="let campagne">
+              <mat-chip [color]="campagne.active ? 'primary' : ''">
+                {{ campagne.active ? 'Active' : 'Inactive' }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let campagne">
+              <button mat-icon-button [matMenuTriggerFor]="menu">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item (click)="onEdit(campagne)">
+                  <mat-icon>edit</mat-icon>
+                  <span>Modifier</span>
+                </button>
+                <button mat-menu-item (click)="onToggleActive(campagne)">
+                  <mat-icon>{{ campagne.active ? 'visibility_off' : 'visibility' }}</mat-icon>
+                  <span>{{ campagne.active ? 'Désactiver' : 'Activer' }}</span>
+                </button>
+                <button mat-menu-item (click)="onDelete(campagne)" class="danger">
+                  <mat-icon>delete</mat-icon>
+                  <span>Supprimer</span>
+                </button>
+              </mat-menu>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,384 +1,337 @@
-.inscription-dashboard {
-  max-width: 1200px;
+.dashboard-container {
+  padding: 24px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 20px;
+}
 
-  .dashboard-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid #e0e0e0;
+.loading-container,
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 16px;
 
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+  }
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+
+  .header-info {
     h1 {
       margin: 0;
-      color: #333;
-      font-size: 2rem;
-      font-weight: 600;
-    }
-
-    .btn {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 20px;
-      border-radius: 6px;
-      text-decoration: none;
+      font-size: 28px;
       font-weight: 500;
-      transition: all 0.3s ease;
+    }
 
-      &.btn-primary {
-        background-color: #007bff;
-        color: white;
-        border: 1px solid #007bff;
+    .subtitle {
+      margin: 4px 0 0 0;
+      color: rgba(0, 0, 0, 0.6);
+      font-size: 14px;
+    }
+  }
 
-        &:hover {
-          background-color: #0056b3;
-          border-color: #0056b3;
-        }
+  .header-actions {
+    display: flex;
+    gap: 12px;
+
+    button {
+      mat-icon {
+        margin-right: 8px;
       }
     }
   }
+}
 
-  .loading-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 60px 20px;
-    text-align: center;
+.statistics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
 
-    .spinner {
-      width: 40px;
-      height: 40px;
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #007bff;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-bottom: 20px;
-    }
-
-    p {
-      color: #666;
-      font-size: 1.1rem;
-    }
-  }
-
-  .error-container {
-    margin-bottom: 30px;
-
-    .alert {
+  .stat-card {
+    mat-card-content {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding: 15px 20px;
-      border-radius: 6px;
-      
-      &.alert-danger {
-        background-color: #f8d7da;
-        border: 1px solid #f5c6cb;
-        color: #721c24;
-      }
+      gap: 16px;
+      padding: 16px !important;
 
-      i {
-        margin-right: 10px;
-      }
-    }
-  }
+      .stat-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
 
-  .dashboard-content {
-    .campagne-info {
-      margin-bottom: 40px;
-
-      .card {
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-
-        .card-header {
-          background-color: #f8f9fa;
-          padding: 15px 20px;
-          border-bottom: 1px solid #e0e0e0;
-
-          h3 {
-            margin: 0;
-            color: #333;
-            font-size: 1.3rem;
-          }
-        }
-
-        .card-body {
-          padding: 20px;
-
-          h4 {
-            color: #007bff;
-            margin-bottom: 15px;
-          }
-
-          p {
-            margin-bottom: 8px;
-            color: #555;
-
-            strong {
-              color: #333;
-            }
-          }
-
-          .badge {
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 0.85rem;
-            font-weight: 500;
-
-            &.badge-success {
-              background-color: #28a745;
-              color: white;
-            }
-
-            &.badge-secondary {
-              background-color: #6c757d;
-              color: white;
-            }
-          }
-        }
-      }
-    }
-
-    .inscriptions-section {
-      h2 {
-        color: #333;
-        margin-bottom: 25px;
-        font-size: 1.5rem;
-      }
-
-      .inscriptions-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-        gap: 25px;
-
-        .inscription-card {
-          .card {
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-
-            &:hover {
-              transform: translateY(-2px);
-              box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            }
-
-            .card-header {
-              background-color: #f8f9fa;
-              padding: 15px 20px;
-              border-bottom: 1px solid #e0e0e0;
-
-              .inscription-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-
-                h4 {
-                  margin: 0;
-                  color: #333;
-                  font-size: 1.2rem;
-                }
-
-                .badge {
-                  padding: 6px 12px;
-                  border-radius: 4px;
-                  font-size: 0.8rem;
-                  font-weight: 500;
-
-                  &.status-draft {
-                    background-color: #6c757d;
-                    color: white;
-                  }
-
-                  &.status-submitted {
-                    background-color: #007bff;
-                    color: white;
-                  }
-
-                  &.status-pending {
-                    background-color: #ffc107;
-                    color: #212529;
-                  }
-
-                  &.status-approved {
-                    background-color: #28a745;
-                    color: white;
-                  }
-
-                  &.status-rejected {
-                    background-color: #dc3545;
-                    color: white;
-                  }
-                }
-              }
-            }
-
-            .card-body {
-              padding: 20px;
-
-              p {
-                margin-bottom: 10px;
-                color: #555;
-                line-height: 1.4;
-
-                strong {
-                  color: #333;
-                }
-              }
-
-              .avis-section, .validation-section {
-                margin-top: 20px;
-                padding-top: 15px;
-                border-top: 1px solid #e0e0e0;
-
-                h5 {
-                  color: #333;
-                  margin-bottom: 10px;
-                  font-size: 1rem;
-                }
-
-                .avis-text, .validation-text {
-                  font-style: italic;
-                  color: #666;
-                  margin-bottom: 10px;
-                }
-
-                .badge {
-                  padding: 4px 8px;
-                  border-radius: 4px;
-                  font-size: 0.75rem;
-
-                  &.badge-success {
-                    background-color: #28a745;
-                    color: white;
-                  }
-
-                  &.badge-danger {
-                    background-color: #dc3545;
-                    color: white;
-                  }
-                }
-              }
-            }
-
-            .card-footer {
-              background-color: #f8f9fa;
-              padding: 15px 20px;
-              border-top: 1px solid #e0e0e0;
-              display: flex;
-              gap: 10px;
-
-              .btn {
-                padding: 8px 16px;
-                border-radius: 4px;
-                text-decoration: none;
-                font-size: 0.9rem;
-                font-weight: 500;
-                transition: all 0.3s ease;
-                border: 1px solid;
-
-                &.btn-outline-primary {
-                  color: #007bff;
-                  border-color: #007bff;
-                  background-color: transparent;
-
-                  &:hover {
-                    background-color: #007bff;
-                    color: white;
-                  }
-                }
-
-                &.btn-primary {
-                  background-color: #007bff;
-                  color: white;
-                  border-color: #007bff;
-
-                  &:hover {
-                    background-color: #0056b3;
-                    border-color: #0056b3;
-                  }
-                }
-              }
-            }
-          }
+        mat-icon {
+          font-size: 32px;
+          width: 32px;
+          height: 32px;
         }
       }
 
-      .empty-state {
-        text-align: center;
-        padding: 60px 20px;
-
-        .empty-icon {
-          font-size: 4rem;
-          color: #ccc;
-          margin-bottom: 20px;
-        }
-
+      .stat-info {
         h3 {
-          color: #666;
-          margin-bottom: 15px;
+          margin: 0;
+          font-size: 32px;
+          font-weight: 600;
         }
 
         p {
-          color: #888;
-          margin-bottom: 25px;
-          font-size: 1.1rem;
-        }
-
-        .btn {
-          padding: 12px 24px;
-          border-radius: 6px;
-          text-decoration: none;
-          font-weight: 500;
-          transition: all 0.3s ease;
-
-          &.btn-primary {
-            background-color: #007bff;
-            color: white;
-            border: 1px solid #007bff;
-
-            &:hover {
-              background-color: #0056b3;
-              border-color: #0056b3;
-            }
-          }
+          margin: 4px 0 0 0;
+          color: rgba(0, 0, 0, 0.6);
+          font-size: 14px;
         }
       }
     }
   }
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+  }
 }
 
-// Responsive Design
-@media (max-width: 768px) {
-  .inscription-dashboard {
-    padding: 15px;
+.left-column,
+.right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
 
-    .dashboard-header {
-      flex-direction: column;
-      gap: 15px;
-      align-items: stretch;
+mat-card {
+  mat-card-header {
+    mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 18px;
+      font-weight: 500;
+    }
+  }
 
-      h1 {
-        font-size: 1.5rem;
-        text-align: center;
+  mat-card-content {
+    padding-top: 16px;
+  }
+
+  mat-card-actions {
+    padding: 8px 16px;
+  }
+}
+
+.current-inscription-card {
+  .inscription-info {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .label {
+        font-weight: 500;
+        color: rgba(0, 0, 0, 0.6);
+      }
+
+      .value {
+        font-weight: 400;
+      }
+
+      mat-chip {
+        color: white;
+        font-size: 12px;
+        height: 24px;
+        padding: 0 8px;
+      }
+    }
+  }
+}
+
+.progress-card {
+  .progress-info {
+    .progress-stats {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 16px;
+
+      .stat {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        mat-icon {
+          color: rgba(0, 0, 0, 0.6);
+        }
+
+        span {
+          font-weight: 500;
+        }
       }
     }
 
-    .inscriptions-grid {
-      grid-template-columns: 1fr;
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background-color: #e0e0e0;
+      border-radius: 4px;
+      overflow: hidden;
+
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #2196f3, #4caf50);
+        transition: width 0.3s ease;
+      }
     }
+  }
+}
+
+.documents-card,
+.history-card,
+.milestones-card,
+.alerts-card {
+  mat-list {
+    padding: 0;
+
+    mat-list-item {
+      height: auto;
+      min-height: 56px;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      mat-icon {
+        margin-right: 16px;
+      }
+
+      .date {
+        font-size: 12px;
+        color: rgba(0, 0, 0, 0.6);
+        margin-left: 8px;
+      }
+
+      .description {
+        font-size: 12px;
+        color: rgba(0, 0, 0, 0.6);
+        display: block;
+        margin-top: 4px;
+      }
+    }
+  }
+
+  .empty-message {
+    text-align: center;
+    color: rgba(0, 0, 0, 0.6);
+    padding: 24px;
+    margin: 0;
+  }
+}
+
+.count-chip {
+  background-color: #2196f3 !important;
+  color: white !important;
+  font-size: 12px;
+  height: 20px;
+  padding: 0 8px;
+  margin-left: 8px;
+
+  &.warn {
+    background-color: #ff9800 !important;
+  }
+}
+
+.required-chip {
+  background-color: #f44336 !important;
+  color: white !important;
+  font-size: 11px;
+  height: 20px;
+  padding: 0 6px;
+}
+
+.alert-item {
+  background-color: #fff3e0;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  padding: 8px !important;
+}
+
+.deadline-card {
+  background: linear-gradient(135deg, #ff9800, #ff5722);
+  color: white;
+
+  mat-card-content {
+    padding: 16px !important;
+
+    .deadline-content {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+
+      mat-icon {
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+        color: white;
+      }
+
+      .deadline-info {
+        h3 {
+          margin: 0;
+          font-size: 16px;
+          font-weight: 500;
+        }
+
+        .deadline-date {
+          margin: 4px 0 0 0;
+          font-size: 20px;
+          font-weight: 600;
+        }
+      }
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 16px;
+  }
+
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+
+    .header-actions {
+      width: 100%;
+
+      button {
+        flex: 1;
+      }
+    }
+  }
+
+  .statistics-grid {
+    grid-template-columns: 1fr;
   }
 }

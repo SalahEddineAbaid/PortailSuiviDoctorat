@@ -1,0 +1,177 @@
+<div class="user-list-container">
+    <!-- Header -->
+    <header class="list-header">
+        <div class="header-content">
+            <h1>Gestion des Utilisateurs</h1>
+            <p class="subtitle">{{ totalElements }} utilisateur(s)</p>
+        </div>
+        <button class="btn btn-primary" routerLink="/admin/users/new">
+            <i class="icon-user-plus"></i>
+            Nouvel utilisateur
+        </button>
+    </header>
+
+    <!-- Success/Error Messages -->
+    <div class="alert alert-success" *ngIf="successMessage">
+        <i class="icon-check-circle"></i>
+        {{ successMessage }}
+    </div>
+    <div class="alert alert-error" *ngIf="errorMessage">
+        <i class="icon-alert-circle"></i>
+        {{ errorMessage }}
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-section">
+        <div class="filters-container">
+            <!-- Search -->
+            <div class="filter-group search-group">
+                <label for="search">
+                    <i class="icon-search"></i>
+                    Rechercher
+                </label>
+                <input type="text" id="search" placeholder="Email, nom, prénom, téléphone..."
+                    [ngModel]="filters.searchTerm" (ngModelChange)="onSearchChange($event)" class="search-input">
+            </div>
+
+            <!-- Role Filter -->
+            <div class="filter-group">
+                <label for="role">Rôle</label>
+                <select id="role" [(ngModel)]="filters.role" (ngModelChange)="onFilterChange()" class="filter-select">
+                    <option *ngFor="let role of availableRoles" [value]="role">
+                        {{ role === 'ALL' ? 'Tous les rôles' : role }}
+                    </option>
+                </select>
+            </div>
+
+            <!-- Status Filter -->
+            <div class="filter-group">
+                <label for="status">Statut</label>
+                <select id="status" [(ngModel)]="filters.status" (ngModelChange)="onFilterChange()"
+                    class="filter-select">
+                    <option value="ALL">Tous</option>
+                    <option value="ACTIVE">Actifs</option>
+                    <option value="DISABLED">Désactivés</option>
+                </select>
+            </div>
+
+            <!-- Clear Filters -->
+            <button class="btn btn-secondary" (click)="clearFilters()">
+                <i class="icon-x"></i>
+                Réinitialiser
+            </button>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-container" *ngIf="isLoading">
+        <div class="spinner"></div>
+        <p>Chargement des utilisateurs...</p>
+    </div>
+
+    <!-- Error State -->
+    <div class="error-container" *ngIf="errorMessage && !isLoading">
+        <i class="icon-alert-circle"></i>
+        <p>{{ errorMessage }}</p>
+        <button class="btn btn-primary" (click)="loadUsers()">Réessayer</button>
+    </div>
+
+    <!-- Users Table -->
+    <div class="table-container" *ngIf="!isLoading && filteredUsers.length > 0">
+        <table class="users-table">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Email</th>
+                    <th>Rôles</th>
+                    <th>Téléphone</th>
+                    <th>Statut</th>
+                    <th>Créé le</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let user of getPaginatedUsers()" class="user-row">
+                    <td class="user-name">{{ getFullName(user) }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                        <div class="roles-badges">
+                            <span class="role-badge" *ngFor="let role of user.roles">
+                                {{ role.name }}
+                            </span>
+                        </div>
+                    </td>
+                    <td>{{ user.tel || '-' }}</td>
+                    <td>
+                        <span class="status-badge" [class]="'status-' + getStatusColor(user)">
+                            {{ getUserStatus(user) }}
+                        </span>
+                    </td>
+                    <td>{{ formatDate(user.createdAt) }}</td>
+                    <td class="actions-cell">
+                        <div class="action-buttons">
+                            <!-- View -->
+                            <button class="btn-icon" (click)="viewUser(user.id)" title="Voir les détails">
+                                <i class="icon-eye"></i>
+                            </button>
+
+                            <!-- Edit -->
+                            <button class="btn-icon" (click)="editUser(user.id)" title="Modifier">
+                                <i class="icon-edit"></i>
+                            </button>
+
+                            <!-- Enable/Disable -->
+                            <button class="btn-icon" [class.btn-success]="!userManagementService.isUserEnabled(user)"
+                                [class.btn-warning]="userManagementService.isUserEnabled(user)"
+                                (click)="userManagementService.isUserEnabled(user) ? disableUser(user) : enableUser(user)"
+                                [title]="userManagementService.isUserEnabled(user) ? 'Désactiver' : 'Activer'">
+                                <i
+                                    [class]="userManagementService.isUserEnabled(user) ? 'icon-x-circle' : 'icon-check-circle'"></i>
+                            </button>
+
+                            <!-- Delete -->
+                            <button class="btn-icon btn-danger" (click)="deleteUser(user)" title="Supprimer">
+                                <i class="icon-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!isLoading && filteredUsers.length === 0">
+        <i class="icon-users"></i>
+        <h3>Aucun utilisateur trouvé</h3>
+        <p *ngIf="filters.searchTerm || filters.role !== 'ALL' || filters.status !== 'ALL'">
+            Essayez de modifier vos critères de recherche
+        </p>
+        <button class="btn btn-primary" (click)="clearFilters()">
+            Réinitialiser les filtres
+        </button>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-container" *ngIf="totalPages > 1">
+        <button class="btn btn-secondary" (click)="onPageChange(currentPage - 1)" [disabled]="currentPage === 0">
+            Précédent
+        </button>
+
+        <div class="page-numbers">
+            <button *ngFor="let page of [].constructor(totalPages); let i = index" class="page-number"
+                [class.active]="currentPage === i" (click)="onPageChange(i)">
+                {{ i + 1 }}
+            </button>
+        </div>
+
+        <button class="btn btn-secondary" (click)="onPageChange(currentPage + 1)"
+            [disabled]="currentPage === totalPages - 1">
+            Suivant
+        </button>
+
+        <span class="pagination-info">
+            Page {{ currentPage + 1 }} sur {{ totalPages }} ({{ totalElements }} utilisateur(s))
+        </span>
+    </div>
+</div>

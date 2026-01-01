@@ -1,12 +1,9 @@
 import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, ActivatedRoute } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
-import { UserService } from '../../../core/services/user.service';
-import { DashboardService } from '../../../core/services/dashboard.service';
-import { UserResponse } from '../../../core/models/user.model';
-import { DoctorantDashboardData, DashboardAlert, TimelineEvent, ProgressIndicator } from '../../../core/models/dashboard.model';
-import { StatusWidgetData } from '../../../shared/components/status-widget/status-widget.component';
+import { DashboardService } from '../services/dashboard.service';
+import { DoctorantDashboard as DoctorantDashboardModel } from '../models/dashboard.model';
 import { Navbar } from '../../../shared/components/navbar/navbar';
 import { Sidebar, MenuItem } from '../../../shared/components/sidebar/sidebar';
 import { TimelineComponent } from '../../../shared/components/timeline/timeline.component';
@@ -34,11 +31,8 @@ import { StatusWidgetComponent } from '../../../shared/components/status-widget/
 export class DoctorantDashboard implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   
-  user: UserResponse | null = null;
-  dashboardData: DoctorantDashboardData | null = null;
-  statusWidgets: StatusWidgetData[] = [];
-  progressIndicators: ProgressIndicator[] = [];
-  isLoading = true;
+  dashboard: DoctorantDashboardModel | null = null;
+  isLoading = false;
   error: string | null = null;
 
   menuItems: MenuItem[] = [
@@ -46,17 +40,27 @@ export class DoctorantDashboard implements OnInit, OnDestroy {
     { icon: 'fas fa-user-plus', label: 'Inscription', route: '/inscription', badge: '1' },
     { icon: 'fas fa-graduation-cap', label: 'Soutenance', route: '/soutenance' },
     { icon: 'fas fa-bell', label: 'Notifications', route: '/notifications' },
-    { icon: 'fas fa-user', label: 'Mon profil', route: '/auth/profile' }
+    { icon: 'fas fa-user', label: 'Mon profil', route: '/profile' }
   ];
 
   constructor(
-    private userService: UserService,
+    private route: ActivatedRoute,
     private dashboardService: DashboardService,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
-    this.loadDashboardData();
+    // ✅ Récupérer les données préchargées par le resolver
+    this.route.data.pipe(takeUntil(this.destroy$)).subscribe(data => {
+      console.log('📊 [DOCTORANT DASHBOARD] Données reçues du resolver:', data);
+      this.dashboard = data['dashboard'];
+      
+      if (!this.dashboard) {
+        this.error = 'Impossible de charger les données du dashboard';
+      }
+      
+      this.cdr.markForCheck();
+    });
   }
 
   ngOnDestroy(): void {
@@ -64,83 +68,35 @@ export class DoctorantDashboard implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  private loadDashboardData(): void {
+  /**
+   * 🔄 Rafraîchir manuellement le dashboard
+   */
+  refreshDashboard(): void {
+    if (!this.dashboard?.user?.id) return;
+
     this.isLoading = true;
     this.error = null;
 
-    // Charger les données utilisateur
-    this.userService.getCurrentUser()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (user) => {
-          this.user = user;
-          this.cdr.markForCheck();
-        },
-        error: (error) => {
-          console.error('❌ Erreur chargement utilisateur:', error);
-          this.error = 'Erreur lors du chargement des informations utilisateur';
-        }
-      });
-
-    // Charger les données du dashboard
-    this.dashboardService.getDoctorantDashboardData()
+    this.dashboardService.getDoctorantDashboard(this.dashboard.user.id)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
-          this.dashboardData = data;
+          this.dashboard = data;
           this.isLoading = false;
           this.cdr.markForCheck();
         },
         error: (error) => {
-          console.error('❌ Erreur chargement dashboard:', error);
-          this.error = 'Erreur lors du chargement du dashboard';
+          console.error('❌ Erreur rafraîchissement dashboard:', error);
+          this.error = 'Erreur lors du rafraîchissement';
           this.isLoading = false;
           this.cdr.markForCheck();
         }
       });
-
-    // Charger les widgets de statut
-    this.dashboardService.getDoctorantStatusWidgets()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (widgets) => {
-          this.statusWidgets = widgets;
-          this.cdr.markForCheck();
-        },
-        error: (error) => {
-          console.error('❌ Erreur chargement widgets:', error);
-        }
-      });
-
-    // Charger les indicateurs de progression
-    this.dashboardService.getDoctorantProgressIndicators()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (indicators) => {
-          this.progressIndicators = indicators;
-          this.cdr.markForCheck();
-        },
-        error: (error) => {
-          console.error('❌ Erreur chargement indicateurs:', error);
-        }
-      });
   }
 
-  onAlertDismiss(alertId: string): void {
-    if (this.dashboardData) {
-      this.dashboardData.alertes = this.dashboardData.alertes.filter(alert => alert.id !== alertId);
-      this.cdr.markForCheck();
-    }
-  }
-
-  refreshDashboard(): void {
-    this.loadDashboardData();
-  }
-
-  get userInfo(): UserResponse | null {
-    return this.user;
-  }
-
+  /**
+   * 🎯 Getters pour le template
+   */
   getWelcomeMessage(): string {
     const hour = new Date().getHours();
     if (hour < 12) return 'Bonjour';
@@ -149,18 +105,22 @@ export class DoctorantDashboard implements OnInit, OnDestroy {
   }
 
   getUserName(): string {
-    return this.user?.FirstName || 'Doctorant';
+    return this.dashboard?.user?.FirstName || 'Doctorant';
   }
 
-  hasAlerts(): boolean {
-    return !!(this.dashboardData?.alertes && this.dashboardData.alertes.length > 0);
-  }
-
-  hasTimeline(): boolean {
-    return !!(this.dashboardData?.timeline && this.dashboardData.timeline.length > 0);
+  hasNotifications(): boolean {
+    return (this.dashboard?.notifications?.length || 0) > 0;
   }
 
   getNotificationCount(): number {
-    return this.dashboardData?.notifications?.filter(n => !n.lue).length || 0;
+    return this.dashboard?.notifications?.filter(n => !n.lu).length || 0;
+  }
+
+  hasInscriptions(): boolean {
+    return (this.dashboard?.inscriptions?.length || 0) > 0;
+  }
+
+  getProgressPercentage(): number {
+    return this.dashboard?.progression?.pourcentage || 0;
   }
 }

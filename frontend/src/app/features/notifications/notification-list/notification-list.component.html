@@ -1,160 +1,170 @@
 <div class="notification-list-container">
-  <!-- En-tête -->
-  <div class="notification-header">
-    <div class="header-title">
-      <h2>
-        <i class="material-icons">notifications</i>
-        Notifications
-      </h2>
-      <span class="unread-badge" *ngIf="(unreadCount$ | async) as unreadCount">
-        {{ unreadCount }} non lue{{ unreadCount > 1 ? 's' : '' }}
-      </span>
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1>Notifications</h1>
+      <p class="subtitle">Gérez toutes vos notifications</p>
     </div>
-
+    
     <div class="header-actions">
-      <button 
-        class="btn btn-outline-primary"
-        (click)="markAllAsRead()"
-        [disabled]="(unreadCount$ | async) === 0"
-      >
-        <i class="material-icons">done_all</i>
+      <button mat-raised-button 
+              color="primary"
+              (click)="markAllAsRead()"
+              [disabled]="(unreadCount$ | async) === 0">
+        <mat-icon>done_all</mat-icon>
         Tout marquer comme lu
       </button>
-
-      <button 
-        class="btn btn-outline-secondary"
-        (click)="deleteAllRead()"
-      >
-        <i class="material-icons">delete_sweep</i>
+      
+      <button mat-raised-button 
+              color="warn"
+              (click)="deleteAllRead()">
+        <mat-icon>delete_sweep</mat-icon>
         Supprimer les lues
-      </button>
-
-      <button 
-        class="btn btn-primary"
-        (click)="loadNotifications()"
-        [disabled]="loading"
-      >
-        <i class="material-icons" [class.spinning]="loading">refresh</i>
-        Actualiser
       </button>
     </div>
   </div>
 
-  <!-- Filtres -->
-  <div class="notification-filters">
-    <div class="filter-row">
-      <!-- Recherche -->
-      <div class="filter-group">
-        <label for="search">Rechercher</label>
-        <div class="search-input">
-          <i class="material-icons">search</i>
-          <input
-            id="search"
-            type="text"
-            [formControl]="searchControl"
-            placeholder="Rechercher dans les notifications..."
-            class="form-control"
-          >
-          <button 
-            *ngIf="searchControl.value"
-            class="clear-search"
-            (click)="searchControl.setValue('')"
-          >
-            <i class="material-icons">clear</i>
+  <!-- Filters -->
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <div class="filters-grid">
+        <!-- Search -->
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Rechercher</mat-label>
+          <input matInput 
+                 [formControl]="searchControl"
+                 placeholder="Titre ou message...">
+          <mat-icon matPrefix>search</mat-icon>
+          <button mat-icon-button 
+                  matSuffix 
+                  *ngIf="searchControl.value"
+                  (click)="searchControl.setValue('')"
+                  matTooltip="Effacer">
+            <mat-icon>close</mat-icon>
           </button>
-        </div>
-      </div>
+        </mat-form-field>
 
-      <!-- Filtre par type -->
-      <div class="filter-group">
-        <label for="type-filter">Type</label>
-        <select id="type-filter" [formControl]="typeFilter" class="form-control">
-          <option *ngFor="let type of notificationTypes" [value]="type.value">
-            {{ type.label }}
-          </option>
-        </select>
-      </div>
+        <!-- Type Filter -->
+        <mat-form-field appearance="outline">
+          <mat-label>Type</mat-label>
+          <mat-select [formControl]="typeFilter">
+            <mat-option *ngFor="let type of notificationTypes" [value]="type.value">
+              {{ type.label }}
+            </mat-option>
+          </mat-select>
+          <mat-icon matPrefix>category</mat-icon>
+        </mat-form-field>
 
-      <!-- Filtre par statut -->
-      <div class="filter-group">
-        <label for="status-filter">Statut</label>
-        <select id="status-filter" [formControl]="statusFilter" class="form-control">
-          <option *ngFor="let status of statusOptions" [value]="status.value">
-            {{ status.label }}
-          </option>
-        </select>
-      </div>
+        <!-- Status Filter -->
+        <mat-form-field appearance="outline">
+          <mat-label>Statut</mat-label>
+          <mat-select [formControl]="statusFilter">
+            <mat-option *ngFor="let status of statusOptions" [value]="status.value">
+              {{ status.label }}
+            </mat-option>
+          </mat-select>
+          <mat-icon matPrefix>filter_list</mat-icon>
+        </mat-form-field>
 
-      <!-- Réinitialiser -->
-      <div class="filter-group">
-        <button 
-          class="btn btn-outline-secondary"
-          (click)="resetFilters()"
-          [disabled]="!hasActiveFilters()"
-        >
-          <i class="material-icons">clear_all</i>
+        <!-- Reset Button -->
+        <button mat-stroked-button 
+                (click)="resetFilters()"
+                [disabled]="!hasActiveFilters()"
+                class="reset-button">
+          <mat-icon>refresh</mat-icon>
           Réinitialiser
         </button>
       </div>
-    </div>
 
-    <!-- Résumé des filtres -->
-    <div class="filter-summary" *ngIf="getFilterSummary()">
-      <i class="material-icons">filter_list</i>
-      {{ getFilterSummary() }}
-    </div>
+      <!-- Filter Summary -->
+      <div class="filter-summary" *ngIf="hasActiveFilters()">
+        <mat-icon>info</mat-icon>
+        <span>{{ getFilterSummary() }}</span>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Statistics -->
+  <div class="statistics-grid">
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-icon" style="background-color: #e3f2fd;">
+          <mat-icon style="color: #2196f3;">notifications</mat-icon>
+        </div>
+        <div class="stat-info">
+          <h3>{{ (notifications$ | async)?.length || 0 }}</h3>
+          <p>Total</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-icon" style="background-color: #fff3e0;">
+          <mat-icon style="color: #ff9800;">mark_email_unread</mat-icon>
+        </div>
+        <div class="stat-info">
+          <h3>{{ (unreadCount$ | async) || 0 }}</h3>
+          <p>Non lues</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-icon" style="background-color: #e8f5e9;">
+          <mat-icon style="color: #4caf50;">mark_email_read</mat-icon>
+        </div>
+        <div class="stat-info">
+          <h3>{{ ((notifications$ | async)?.length || 0) - ((unreadCount$ | async) || 0) }}</h3>
+          <p>Lues</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
   </div>
 
-  <!-- Liste des notifications -->
-  <div class="notification-content">
-    <!-- Chargement -->
-    <div class="loading-container" *ngIf="loading">
-      <div class="loading-spinner">
-        <i class="material-icons spinning">refresh</i>
-        <p>Chargement des notifications...</p>
-      </div>
+  <!-- Notifications List -->
+  <mat-card class="notifications-card">
+    <!-- Loading State -->
+    <div *ngIf="loading" class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Chargement des notifications...</p>
     </div>
 
-    <!-- Liste -->
-    <div class="notifications-list" *ngIf="!loading">
+    <!-- Notifications -->
+    <div *ngIf="!loading" class="notifications-content">
       <ng-container *ngIf="(filteredNotifications$ | async) as notifications">
-        <!-- Notifications trouvées -->
-        <div *ngIf="notifications.length > 0" class="notifications-found">
-          <div class="results-info">
-            {{ notifications.length }} notification{{ notifications.length > 1 ? 's' : '' }} trouvée{{ notifications.length > 1 ? 's' : '' }}
-          </div>
-
-          <div class="notifications-container">
-            <app-notification
-              *ngFor="let notification of notifications; trackBy: trackByNotificationId"
-              [notification]="notification"
-              [showActions]="true"
-              [compact]="false"
-              (notificationClicked)="onNotificationClicked($event)"
-              (notificationRead)="onNotificationRead($event)"
-              (notificationDeleted)="onNotificationDeleted($event)"
-            ></app-notification>
-          </div>
+        <!-- Has Notifications -->
+        <div *ngIf="notifications.length > 0" class="notifications-list">
+          <app-notification
+            *ngFor="let notification of notifications; trackBy: trackByNotificationId"
+            [notification]="notification"
+            [showActions]="true"
+            [compact]="false"
+            (notificationClicked)="onNotificationClicked($event)"
+            (notificationRead)="onNotificationRead($event)"
+            (notificationDeleted)="onNotificationDeleted($event)">
+          </app-notification>
         </div>
 
-        <!-- Aucune notification -->
-        <div *ngIf="notifications.length === 0" class="no-notifications">
-          <div class="empty-state">
-            <i class="material-icons">notifications_none</i>
-            <h3>Aucune notification</h3>
-            <p *ngIf="!hasActiveFilters()">
-              Vous n'avez aucune notification pour le moment.
-            </p>
-            <p *ngIf="hasActiveFilters()">
-              Aucune notification ne correspond à vos critères de recherche.
-              <br>
-              <button class="btn btn-link" (click)="resetFilters()">
-                Réinitialiser les filtres
-              </button>
-            </p>
-          </div>
+        <!-- Empty State -->
+        <div *ngIf="notifications.length === 0" class="empty-state">
+          <mat-icon>notifications_none</mat-icon>
+          <h3>Aucune notification</h3>
+          <p *ngIf="hasActiveFilters()">
+            Aucune notification ne correspond à vos critères de recherche.
+          </p>
+          <p *ngIf="!hasActiveFilters()">
+            Vous n'avez aucune notification pour le moment.
+          </p>
+          <button mat-raised-button 
+                  color="primary"
+                  *ngIf="hasActiveFilters()"
+                  (click)="resetFilters()">
+            Réinitialiser les filtres
+          </button>
         </div>
       </ng-container>
     </div>
-  </div>
+  </mat-card>
 </div>

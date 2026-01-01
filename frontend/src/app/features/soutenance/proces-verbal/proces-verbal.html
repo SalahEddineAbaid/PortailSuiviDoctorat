@@ -1,0 +1,160 @@
+<div class="proces-verbal-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>description</mat-icon>
+        Procès-Verbal de Soutenance
+      </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="procesVerbalForm" (ngSubmit)="onSubmit()">
+        
+        <!-- Résultat de la Délibération -->
+        <div class="form-section">
+          <h3>Résultat de la Délibération</h3>
+          
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Mention</mat-label>
+            <mat-select formControlName="mention">
+              <mat-option *ngFor="let mention of mentions" [value]="mention.value">
+                {{ mention.label }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="isFieldInvalid('mention')">
+              La mention est obligatoire
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Date de Délibération</mat-label>
+            <input matInput [matDatepicker]="picker" formControlName="deliberationDate">
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+            <mat-error *ngIf="isFieldInvalid('deliberationDate')">
+              La date est obligatoire
+            </mat-error>
+          </mat-form-field>
+
+          <mat-checkbox formControlName="publicationRecommended" class="checkbox-field">
+            Recommandation de Publication
+          </mat-checkbox>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Commentaires du Jury -->
+        <div class="form-section">
+          <h3>Commentaires du Jury</h3>
+          
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Commentaires Généraux</mat-label>
+            <textarea matInput formControlName="juryComments" rows="6"
+                      placeholder="Commentaires du jury sur la soutenance (minimum 50 caractères)..."></textarea>
+            <mat-hint align="end">{{ procesVerbalForm.get('juryComments')?.value?.length || 0 }} / 50 min</mat-hint>
+            <mat-error *ngIf="isFieldInvalid('juryComments')">
+              Minimum 50 caractères requis
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Observations Générales</mat-label>
+            <textarea matInput formControlName="observationsGenerales" rows="4"
+                      placeholder="Observations générales du jury..."></textarea>
+          </mat-form-field>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Recommandations de Publication -->
+        <div class="form-section" *ngIf="procesVerbalForm.value.publicationRecommended">
+          <h3>Recommandations de Publication</h3>
+          
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Détails des Recommandations</mat-label>
+            <textarea matInput formControlName="recommandationsPublication" rows="4"
+                      placeholder="Détaillez les recommandations pour la publication..."></textarea>
+            <mat-error *ngIf="isFieldInvalid('recommandationsPublication')">
+              Les recommandations sont obligatoires
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Corrections Requises -->
+        <div class="form-section" *ngIf="procesVerbalForm.value.mention === 'AJOURNE' || procesVerbalForm.value.mention === 'PASSABLE'">
+          <h3>Corrections Requises</h3>
+          
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Liste des Corrections</mat-label>
+            <textarea matInput formControlName="correctionsRequises" rows="6"
+                      placeholder="Listez les corrections à apporter..."></textarea>
+            <mat-error *ngIf="isFieldInvalid('correctionsRequises')">
+              Les corrections sont obligatoires
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Délai pour les Corrections</mat-label>
+            <input matInput formControlName="delaiCorrections" 
+                   placeholder="Ex: 3 mois">
+            <mat-error *ngIf="isFieldInvalid('delaiCorrections')">
+              Le délai est obligatoire
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Signatures -->
+        <div class="form-section">
+          <h3>Signatures</h3>
+          
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Président du Jury</mat-label>
+            <input matInput formControlName="presidentSignature" 
+                   placeholder="Nom et signature du président">
+            <mat-icon matPrefix>person</mat-icon>
+            <mat-error *ngIf="isFieldInvalid('presidentSignature')">
+              La signature du président est obligatoire
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Rapporteur</mat-label>
+            <input matInput formControlName="rapporteurSignature" 
+                   placeholder="Nom et signature du rapporteur">
+            <mat-icon matPrefix>person</mat-icon>
+            <mat-error *ngIf="isFieldInvalid('rapporteurSignature')">
+              La signature du rapporteur est obligatoire
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Examinateurs</mat-label>
+            <textarea matInput formControlName="examinateurSignatures" rows="3"
+                      placeholder="Noms et signatures des examinateurs (un par ligne)"></textarea>
+            <mat-icon matPrefix>groups</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <!-- Actions -->
+        <div class="form-actions">
+          <button mat-button type="button" routerLink="/soutenance">
+            Annuler
+          </button>
+          <button mat-raised-button type="button" color="accent" 
+                  (click)="generatePDF()" [disabled]="!procesVerbalForm.valid || generating">
+            <mat-spinner *ngIf="generating" diameter="20"></mat-spinner>
+            <mat-icon *ngIf="!generating">picture_as_pdf</mat-icon>
+            <span *ngIf="!generating">Générer PDF</span>
+          </button>
+          <button mat-raised-button color="primary" type="submit" 
+                  [disabled]="!procesVerbalForm.valid || submitting">
+            <mat-spinner *ngIf="submitting" diameter="20"></mat-spinner>
+            <span *ngIf="!submitting">Enregistrer</span>
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

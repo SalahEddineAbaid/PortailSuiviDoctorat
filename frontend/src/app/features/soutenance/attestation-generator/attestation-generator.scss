@@ -1,0 +1,96 @@
+.attestation-container {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 1rem;
+
+  mat-card {
+    mat-card-header {
+      margin-bottom: 1.5rem;
+
+      mat-card-title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1.5rem;
+        color: #1976d2;
+      }
+    }
+
+    mat-card-content {
+      form {
+        .form-section {
+          margin: 2rem 0;
+
+          h3 {
+            color: #424242;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            font-weight: 500;
+          }
+
+          .full-width {
+            width: 100%;
+            margin-bottom: 1rem;
+          }
+
+          .form-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+
+            .half-width {
+              flex: 1;
+            }
+          }
+        }
+
+        mat-divider {
+          margin: 2rem 0;
+        }
+
+        .form-actions {
+          display: flex;
+          justify-content: flex-end;
+          gap: 1rem;
+          margin-top: 2rem;
+          padding-top: 1rem;
+          border-top: 1px solid #e0e0e0;
+
+          button {
+            min-width: 120px;
+
+            mat-spinner {
+              display: inline-block;
+              margin-right: 0.5rem;
+            }
+
+            mat-icon {
+              margin-right: 0.5rem;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .attestation-container {
+    margin: 1rem;
+    padding: 0.5rem;
+
+    mat-card-content form {
+      .form-section .form-row {
+        flex-direction: column;
+      }
+
+      .form-actions {
+        flex-direction: column;
+
+        button {
+          width: 100%;
+        }
+      }
+    }
+  }
+}

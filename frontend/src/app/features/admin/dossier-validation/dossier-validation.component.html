@@ -1,0 +1,205 @@
+<div class="dossier-validation">
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <mat-icon>check_circle</mat-icon>
+        Validation des Dossiers
+      </h1>
+      <div class="header-stats">
+        <mat-chip color="warn">
+          {{ pendingCount }} en attente
+        </mat-chip>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <form [formGroup]="filterForm" class="filters-form">
+        <mat-form-field appearance="outline">
+          <mat-label>Rechercher</mat-label>
+          <input matInput formControlName="searchTerm" placeholder="Nom, email, titre...">
+          <mat-icon matPrefix>search</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Type</mat-label>
+          <mat-select formControlName="type">
+            <mat-option value="">Tous</mat-option>
+            <mat-option value="inscription">Inscriptions</mat-option>
+            <mat-option value="soutenance">Soutenances</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Statut</mat-label>
+          <mat-select formControlName="statut">
+            <mat-option value="">Tous</mat-option>
+            <mat-option value="EN_ATTENTE_ADMIN">En attente</mat-option>
+            <mat-option value="APPROUVE_DIRECTEUR">Approuvé directeur</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Priorité</mat-label>
+          <mat-select formControlName="priorite">
+            <mat-option value="">Toutes</mat-option>
+            <mat-option value="haute">Haute</mat-option>
+            <mat-option value="normale">Normale</mat-option>
+            <mat-option value="basse">Basse</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <button mat-raised-button (click)="clearFilters()">
+          <mat-icon>clear</mat-icon>
+          Réinitialiser
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner></mat-spinner>
+    <p>Chargement des dossiers...</p>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && filteredDossiers.length === 0" class="empty-state">
+    <mat-icon>inbox</mat-icon>
+    <h3>Aucun dossier à valider</h3>
+    <p>Tous les dossiers ont été traités</p>
+  </div>
+
+  <!-- Dossiers List -->
+  <div *ngIf="!isLoading && filteredDossiers.length > 0" class="dossiers-grid">
+    <mat-card *ngFor="let dossier of filteredDossiers" class="dossier-card" 
+              [class.priority-high]="dossier.priorite === 'haute'">
+      <mat-card-header>
+        <div class="dossier-header">
+          <div class="dossier-type">
+            <mat-icon [color]="dossier.type === 'inscription' ? 'primary' : 'accent'">
+              {{ dossier.type === 'inscription' ? 'description' : 'school' }}
+            </mat-icon>
+            <span class="type-label">{{ dossier.type === 'inscription' ? 'Inscription' : 'Soutenance' }}</span>
+          </div>
+          <mat-chip [color]="getPriorityColor(dossier.priorite)">
+            {{ dossier.priorite }}
+          </mat-chip>
+        </div>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div class="dossier-info">
+          <div class="info-section">
+            <h3>{{ dossier.doctorant.prenom }} {{ dossier.doctorant.nom }}</h3>
+            <p class="email">{{ dossier.doctorant.email }}</p>
+          </div>
+
+          <div class="info-section">
+            <label>Directeur de thèse</label>
+            <p>{{ dossier.directeur.prenom }} {{ dossier.directeur.nom }}</p>
+          </div>
+
+          <div class="info-section">
+            <label>Titre</label>
+            <p class="titre">{{ dossier.titre }}</p>
+          </div>
+
+          <div class="info-row">
+            <div class="info-item">
+              <mat-icon>event</mat-icon>
+              <span>{{ dossier.dateCreation | date:'dd/MM/yyyy' }}</span>
+            </div>
+            <div class="info-item" *ngIf="dossier.dateSoumission">
+              <mat-icon>send</mat-icon>
+              <span>{{ dossier.dateSoumission | date:'dd/MM/yyyy' }}</span>
+            </div>
+          </div>
+
+          <!-- Documents manquants -->
+          <div *ngIf="dossier.documentsManquants && dossier.documentsManquants.length > 0" 
+               class="warning-section">
+            <mat-icon color="warn">warning</mat-icon>
+            <div>
+              <strong>Documents manquants:</strong>
+              <ul>
+                <li *ngFor="let doc of dossier.documentsManquants">{{ doc }}</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button mat-button color="primary" (click)="onViewDossier(dossier)">
+          <mat-icon>visibility</mat-icon>
+          Consulter
+        </button>
+        <button mat-raised-button color="primary" (click)="onValidate(dossier)"
+                [disabled]="dossier.documentsManquants && dossier.documentsManquants.length > 0">
+          <mat-icon>check</mat-icon>
+          Valider
+        </button>
+        <button mat-raised-button color="warn" (click)="onReject(dossier)">
+          <mat-icon>close</mat-icon>
+          Rejeter
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+
+  <!-- Pagination -->
+  <mat-paginator *ngIf="filteredDossiers.length > 0"
+                 [length]="filteredDossiers.length"
+                 [pageSize]="pageSize"
+                 [pageSizeOptions]="[10, 25, 50, 100]"
+                 (page)="onPageChange($event)">
+  </mat-paginator>
+</div>
+
+<!-- Validation Dialog -->
+<ng-template #validationDialog>
+  <h2 mat-dialog-title>Valider le dossier</h2>
+  <mat-dialog-content>
+    <form [formGroup]="validationForm">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Commentaire (optionnel)</mat-label>
+        <textarea matInput formControlName="commentaire" rows="4"
+                  placeholder="Ajoutez un commentaire..."></textarea>
+      </mat-form-field>
+    </form>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close>Annuler</button>
+    <button mat-raised-button color="primary" (click)="confirmValidation()">
+      Valider
+    </button>
+  </mat-dialog-actions>
+</ng-template>
+
+<!-- Rejection Dialog -->
+<ng-template #rejectionDialog>
+  <h2 mat-dialog-title>Rejeter le dossier</h2>
+  <mat-dialog-content>
+    <form [formGroup]="validationForm">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Motif du rejet *</mat-label>
+        <textarea matInput formControlName="commentaire" rows="4"
+                  placeholder="Expliquez les raisons du rejet..."
+                  required></textarea>
+        <mat-error *ngIf="validationForm.get('commentaire')?.hasError('required')">
+          Le motif est obligatoire
+        </mat-error>
+      </mat-form-field>
+    </form>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close>Annuler</button>
+    <button mat-raised-button color="warn" (click)="confirmRejection()"
+            [disabled]="!validationForm.valid">
+      Rejeter
+    </button>
+  </mat-dialog-actions>
+</ng-template>

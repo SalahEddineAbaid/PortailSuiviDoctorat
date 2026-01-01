@@ -135,17 +135,17 @@
       
       <form [formGroup]="passwordForm" (ngSubmit)="onChangePassword()" class="password-form">
         <div class="form-group">
-          <label for="currentPassword">Mot de passe actuel *</label>
+          <label for="oldPassword">Mot de passe actuel *</label>
           <input
             type="password"
-            id="currentPassword"
-            formControlName="currentPassword"
+            id="oldPassword"
+            formControlName="oldPassword"
             class="form-control"
-            [class.is-invalid]="isFieldInvalid(passwordForm, 'currentPassword')"
+            [class.is-invalid]="isFieldInvalid(passwordForm, 'oldPassword')"
             placeholder="Votre mot de passe actuel"
           />
-          <div class="invalid-feedback" *ngIf="isFieldInvalid(passwordForm, 'currentPassword')">
-            {{ getFieldError(passwordForm, 'currentPassword') }}
+          <div class="invalid-feedback" *ngIf="isFieldInvalid(passwordForm, 'oldPassword')">
+            {{ getFieldError(passwordForm, 'oldPassword') }}
           </div>
         </div>
 

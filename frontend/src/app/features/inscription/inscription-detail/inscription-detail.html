@@ -1,235 +1,328 @@
-<div class="inscription-detail">
-  
+<div class="inscription-detail-container" *ngIf="!loading && inscription">
   <!-- Header -->
-  <div class="detail-header">
-    <button class="btn btn-outline-secondary back-btn" (click)="onBack()">
-      <i class="fas fa-arrow-left"></i>
+  <mat-card class="header-card">
+    <mat-card-header>
+      <mat-card-title>
+        <div class="title-section">
+          <div>
+            <mat-icon>description</mat-icon>
+            Inscription #{{ inscription.id }}
+          </div>
+          <mat-chip [style.background-color]="getStatutColor(inscription.statut)" selected class="status-chip">
+            {{ getStatutLabel(inscription.statut) }}
+          </mat-chip>
+        </div>
+      </mat-card-title>
+      <mat-card-subtitle>
+        {{ getTypeLabel(inscription.type) }} - Année {{ inscription.anneeInscription }}
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-actions>
+      <button mat-button (click)="onBack()">
+        <mat-icon>arrow_back</mat-icon>
+        Retour
+      </button>
+      <button mat-raised-button color="primary" (click)="onEdit()" [disabled]="!canEdit()">
+        <mat-icon>edit</mat-icon>
+        Modifier
+      </button>
+      <button mat-raised-button color="accent" (click)="onDownloadAttestation()" [disabled]="!canDownloadAttestation()">
+        <mat-icon>download</mat-icon>
+        Attestation
+      </button>
+    </mat-card-actions>
+  </mat-card>
+
+  <!-- Tabs -->
+  <mat-tab-group class="detail-tabs">
+    <!-- Informations générales -->
+    <mat-tab label="Informations">
+      <div class="tab-content">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Sujet de thèse</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p>{{ inscription.sujetThese }}</p>
+          </mat-card-content>
+        </mat-card>
+
+        <div class="info-grid">
+          <!-- Informations personnelles -->
+          <mat-card>
+            <mat-card-header>
+              <mat-icon mat-card-avatar>person</mat-icon>
+              <mat-card-title>Informations Personnelles</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <mat-list>
+                <mat-list-item>
+                  <mat-icon matListItemIcon>badge</mat-icon>
+                  <div matListItemTitle>CIN</div>
+                  <div matListItemLine>{{ inscription.infosDoctorant.cin }}</div>
+                </mat-list-item>
+                <mat-divider></mat-divider>
+                
+                <mat-list-item *ngIf="inscription.infosDoctorant.cne">
+                  <mat-icon matListItemIcon>school</mat-icon>
+                  <div matListItemTitle>CNE</div>
+                  <div matListItemLine>{{ inscription.infosDoctorant.cne }}</div>
+                </mat-list-item>
+                <mat-divider *ngIf="inscription.infosDoctorant.cne"></mat-divider>
+                
+                <mat-list-item>
+                  <mat-icon matListItemIcon>phone</mat-icon>
+                  <div matListItemTitle>Téléphone</div>
+                  <div matListItemLine>{{ inscription.infosDoctorant.telephone }}</div>
+                </mat-list-item>
+                <mat-divider></mat-divider>
+                
+                <mat-list-item>
+                  <mat-icon matListItemIcon>location_on</mat-icon>
+                  <div matListItemTitle>Adresse</div>
+                  <div matListItemLine>{{ inscription.infosDoctorant.adresse }}, {{ inscription.infosDoctorant.ville }}, {{ inscription.infosDoctorant.pays }}</div>
+                </mat-list-item>
+                <mat-divider></mat-divider>
+                
+                <mat-list-item>
+                  <mat-icon matListItemIcon>cake</mat-icon>
+                  <div matListItemTitle>Date de naissance</div>
+                  <div matListItemLine>{{ inscription.infosDoctorant.dateNaissance | date:'dd/MM/yyyy' }} à {{ inscription.infosDoctorant.lieuNaissance }}</div>
+                </mat-list-item>
+                <mat-divider></mat-divider>
+                
+                <mat-list-item>
+                  <mat-icon matListItemIcon>flag</mat-icon>
+                  <div matListItemTitle>Nationalité</div>
+                  <div matListItemLine>{{ inscription.infosDoctorant.nationalite }}</div>
+                </mat-list-item>
+              </mat-list>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Informations de thèse -->
+          <mat-card>
+            <mat-card-header>
+              <mat-icon mat-card-avatar>menu_book</mat-icon>
+              <mat-card-title>Informations de Thèse</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <mat-list>
+                <mat-list-item>
+                  <mat-icon matListItemIcon>title</mat-icon>
+                  <div matListItemTitle>Titre</div>
+                  <div matListItemLine>{{ inscription.infosThese.titreThese }}</div>
+                </mat-list-item>
+                <mat-divider></mat-divider>
+                
+                <mat-list-item>
+                  <mat-icon matListItemIcon>category</mat-icon>
+                  <div matListItemTitle>Discipline</div>
+                  <div matListItemLine>{{ inscription.infosThese.discipline }}</div>
+                </mat-list-item>
+                <mat-divider></mat-divider>
+                
+                <mat-list-item>
+                  <mat-icon matListItemIcon>science</mat-icon>
+                  <div matListItemTitle>Laboratoire</div>
+                  <div matListItemLine>{{ inscription.infosThese.laboratoire }}</div>
+                </mat-list-item>
+                <mat-divider></mat-divider>
+                
+                <mat-list-item>
+                  <mat-icon matListItemIcon>business</mat-icon>
+                  <div matListItemTitle>Établissement</div>
+                  <div matListItemLine>{{ inscription.infosThese.etablissementAccueil }}</div>
+                </mat-list-item>
+                <mat-divider></mat-divider>
+                
+                <mat-list-item>
+                  <mat-icon matListItemIcon>event</mat-icon>
+                  <div matListItemTitle>Date de début prévue</div>
+                  <div matListItemLine>{{ inscription.infosThese.dateDebutPrevue | date:'dd/MM/yyyy' }}</div>
+                </mat-list-item>
+                
+                <mat-divider *ngIf="inscription.infosThese.cotutelle"></mat-divider>
+                <mat-list-item *ngIf="inscription.infosThese.cotutelle">
+                  <mat-icon matListItemIcon>public</mat-icon>
+                  <div matListItemTitle>Cotutelle</div>
+                  <div matListItemLine>{{ inscription.infosThese.universitePartenaire }} ({{ inscription.infosThese.paysPartenaire }})</div>
+                </mat-list-item>
+              </mat-list>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <!-- Dates -->
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Dates importantes</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="dates-grid">
+              <div class="date-item">
+                <mat-icon>add_circle</mat-icon>
+                <div>
+                  <div class="date-label">Création</div>
+                  <div class="date-value">{{ inscription.dateCreation | date:'dd/MM/yyyy HH:mm' }}</div>
+                </div>
+              </div>
+              
+              <div class="date-item" *ngIf="inscription.dateValidation">
+                <mat-icon>check_circle</mat-icon>
+                <div>
+                  <div class="date-label">Validation</div>
+                  <div class="date-value">{{ inscription.dateValidation | date:'dd/MM/yyyy HH:mm' }}</div>
+                </div>
+              </div>
+              
+              <div class="date-item" *ngIf="inscription.dureeDoctorat">
+                <mat-icon>schedule</mat-icon>
+                <div>
+                  <div class="date-label">Durée du doctorat</div>
+                  <div class="date-value">{{ inscription.dureeDoctorat }} mois</div>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-tab>
+
+    <!-- Documents -->
+    <mat-tab label="Documents">
+      <div class="tab-content">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Documents uploadés ({{ inscription.documents.length }})</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <mat-list *ngIf="inscription.documents.length > 0">
+              <mat-list-item *ngFor="let doc of inscription.documents; let last = last">
+                <mat-icon matListItemIcon [color]="doc.valide ? 'primary' : 'accent'">
+                  {{ doc.valide ? 'check_circle' : 'pending' }}
+                </mat-icon>
+                <div matListItemTitle>{{ doc.nomFichier }}</div>
+                <div matListItemLine>
+                  {{ doc.typeDocument }} - {{ doc.tailleFichier | number }} octets
+                  <span *ngIf="doc.dateUpload"> - Uploadé le {{ doc.dateUpload | date:'dd/MM/yyyy' }}</span>
+                </div>
+                <button mat-icon-button matListItemMeta (click)="onDownloadDocument(doc.id, doc.nomFichier)">
+                  <mat-icon>download</mat-icon>
+                </button>
+                <mat-divider *ngIf="!last"></mat-divider>
+              </mat-list-item>
+            </mat-list>
+            
+            <div class="no-data" *ngIf="inscription.documents.length === 0">
+              <mat-icon>folder_open</mat-icon>
+              <p>Aucun document uploadé</p>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-tab>
+
+    <!-- Validations -->
+    <mat-tab label="Validations">
+      <div class="tab-content">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Historique des validations</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="timeline" *ngIf="inscription.validations && inscription.validations.length > 0">
+              <div class="timeline-item" *ngFor="let validation of inscription.validations">
+                <div class="timeline-icon" [ngClass]="getValidationColor(validation.statut)">
+                  <mat-icon>{{ getValidationIcon(validation.statut) }}</mat-icon>
+                </div>
+                <div class="timeline-content">
+                  <div class="timeline-header">
+                    <strong>{{ validation.typeValidateur }}</strong>
+                    <span class="timeline-date">{{ validation.dateValidation | date:'dd/MM/yyyy HH:mm' }}</span>
+                  </div>
+                  <div class="timeline-body">
+                    <p><strong>Validateur:</strong> {{ validation.validateurNom }}</p>
+                    <p><strong>Statut:</strong> {{ validation.statut }}</p>
+                    <p *ngIf="validation.commentaire"><strong>Commentaire:</strong> {{ validation.commentaire }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="no-data" *ngIf="!inscription.validations || inscription.validations.length === 0">
+              <mat-icon>history</mat-icon>
+              <p>Aucune validation enregistrée</p>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Commentaires -->
+        <mat-card *ngIf="inscription.commentaireDirecteur || inscription.commentaireAdmin">
+          <mat-card-header>
+            <mat-card-title>Commentaires</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <mat-expansion-panel *ngIf="inscription.commentaireDirecteur">
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                  <mat-icon>person</mat-icon>
+                  Commentaire du directeur
+                </mat-panel-title>
+              </mat-expansion-panel-header>
+              <p>{{ inscription.commentaireDirecteur }}</p>
+            </mat-expansion-panel>
+
+            <mat-expansion-panel *ngIf="inscription.commentaireAdmin">
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                  <mat-icon>admin_panel_settings</mat-icon>
+                  Commentaire de l'administration
+                </mat-panel-title>
+              </mat-expansion-panel-header>
+              <p>{{ inscription.commentaireAdmin }}</p>
+            </mat-expansion-panel>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-tab>
+
+    <!-- Dérogation -->
+    <mat-tab label="Dérogation" *ngIf="inscription.derogation">
+      <div class="tab-content">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>warning</mat-icon>
+              Demande de dérogation
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p><strong>Motif:</strong> {{ inscription.motifDerogation }}</p>
+            <p *ngIf="inscription.dureeDoctorat">
+              <strong>Durée du doctorat:</strong> {{ inscription.dureeDoctorat }} mois
+            </p>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>
+
+<!-- Loading -->
+<div class="loading-container" *ngIf="loading">
+  <mat-spinner></mat-spinner>
+  <p>Chargement...</p>
+</div>
+
+<!-- Error -->
+<mat-card class="error-card" *ngIf="error && !loading">
+  <mat-card-content>
+    <mat-icon color="warn">error</mat-icon>
+    <p>{{ error }}</p>
+    <button mat-raised-button color="primary" (click)="onBack()">
       Retour à la liste
     </button>
-    <h1>Détails de l'inscription</h1>
-  </div>
-
-  <!-- Loading State -->
-  <div *ngIf="loading" class="loading-container">
-    <div class="spinner"></div>
-    <p>Chargement des détails...</p>
-  </div>
-
-  <!-- Error State -->
-  <div *ngIf="error" class="alert alert-danger">
-    <i class="fas fa-exclamation-triangle"></i>
-    {{ error }}
-    <button class="btn btn-sm btn-outline-primary" (click)="loadInscription()">
-      Réessayer
-    </button>
-  </div>
-
-  <!-- Content -->
-  <div *ngIf="!loading && !error && (inscription$ | async) as inscription" class="detail-content">
-    
-    <!-- Status and Actions -->
-    <div class="status-section">
-      <div class="status-info">
-        <div class="status-badge" [class]="getStatusClass(inscription.statut)">
-          <i class="material-icons">{{ getStatusIcon(inscription.statut) }}</i>
-          <span>{{ getStatusLabel(inscription.statut) }}</span>
-        </div>
-        <div class="inscription-meta">
-          <span class="inscription-date">
-            Créée le {{ inscription.dateInscription | date:'dd/MM/yyyy à HH:mm' }}
-          </span>
-        </div>
-      </div>
-      
-      <div class="action-buttons">
-        <button 
-          *ngIf="canEdit(inscription)"
-          class="btn btn-warning" 
-          (click)="onEdit(inscription)"
-        >
-          <i class="fas fa-edit"></i>
-          Modifier
-        </button>
-        
-        <button 
-          *ngIf="canSubmit(inscription)"
-          class="btn btn-primary" 
-          (click)="onSubmit(inscription)"
-        >
-          <i class="fas fa-paper-plane"></i>
-          Soumettre
-        </button>
-      </div>
-    </div>
-
-    <!-- Progress Steps -->
-    <div class="progress-section">
-      <h2>Progression du dossier</h2>
-      <div class="progress-steps">
-        <div 
-          *ngFor="let step of getProgressSteps(inscription); let i = index" 
-          class="progress-step"
-          [class.completed]="step.completed"
-          [class.current]="step.current"
-        >
-          <div class="step-indicator">
-            <i class="fas" [class.fa-check]="step.completed" [class.fa-circle]="!step.completed"></i>
-          </div>
-          <div class="step-label">{{ step.label }}</div>
-          <div *ngIf="i < getProgressSteps(inscription).length - 1" class="step-connector"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Campaign Information -->
-    <div class="info-section">
-      <h2>Informations de la campagne</h2>
-      <div class="info-card">
-        <div class="info-grid">
-          <div class="info-item">
-            <strong>Campagne:</strong>
-            <span>{{ inscription.campagne.nom }}</span>
-          </div>
-          <div class="info-item">
-            <strong>Année universitaire:</strong>
-            <span>{{ inscription.campagne.anneeUniversitaire }}</span>
-          </div>
-          <div class="info-item">
-            <strong>Type:</strong>
-            <span>{{ inscription.campagne.typeInscription }}</span>
-          </div>
-          <div class="info-item">
-            <strong>Statut campagne:</strong>
-            <span class="badge" [class.badge-success]="inscription.campagne.active" [class.badge-secondary]="!inscription.campagne.active">
-              {{ inscription.campagne.active ? 'Active' : 'Fermée' }}
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Thesis Information -->
-    <div class="info-section">
-      <h2>Informations de la thèse</h2>
-      <div class="info-card">
-        <div class="thesis-info">
-          <div class="info-item full-width">
-            <strong>Sujet de thèse:</strong>
-            <p class="thesis-subject">{{ inscription.sujetThese }}</p>
-          </div>
-          
-          <div class="info-grid">
-            <div class="info-item">
-              <strong>Laboratoire:</strong>
-              <span>{{ inscription.laboratoire }}</span>
-            </div>
-            <div class="info-item">
-              <strong>Spécialité:</strong>
-              <span>{{ inscription.specialite }}</span>
-            </div>
-          </div>
-
-          <div class="info-item">
-            <strong>Directeur de thèse:</strong>
-            <div class="director-info">
-              <span class="director-name">{{ inscription.directeur.FirstName }} {{ inscription.directeur.LastName }}</span>
-              <span class="director-email">{{ inscription.directeur.email }}</span>
-              <span class="director-phone" *ngIf="inscription.directeur.phoneNumber">{{ inscription.directeur.phoneNumber }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Director's Opinion -->
-    <div *ngIf="inscription.avisDirecteur" class="info-section">
-      <h2>Avis du Directeur de thèse</h2>
-      <div class="info-card" [class.favorable]="inscription.avisDirecteur.valide" [class.defavorable]="!inscription.avisDirecteur.valide">
-        <div class="avis-header">
-          <div class="avis-status" [class.favorable]="inscription.avisDirecteur.valide" [class.defavorable]="!inscription.avisDirecteur.valide">
-            <i class="fas" [class.fa-check-circle]="inscription.avisDirecteur.valide" [class.fa-times-circle]="!inscription.avisDirecteur.valide"></i>
-            <span>{{ inscription.avisDirecteur.valide ? 'Avis Favorable' : 'Avis Défavorable' }}</span>
-          </div>
-          <span class="avis-date">{{ inscription.avisDirecteur.dateAvis | date:'dd/MM/yyyy à HH:mm' }}</span>
-        </div>
-        
-        <div class="avis-content">
-          <div class="avis-text">
-            <strong>Avis:</strong>
-            <p>{{ inscription.avisDirecteur.avis }}</p>
-          </div>
-          
-          <div *ngIf="inscription.avisDirecteur.commentaire" class="avis-comment">
-            <strong>Commentaire:</strong>
-            <p>{{ inscription.avisDirecteur.commentaire }}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Administrative Validation -->
-    <div *ngIf="inscription.validationAdmin" class="info-section">
-      <h2>Validation Administrative</h2>
-      <div class="info-card" [class.validee]="inscription.validationAdmin.valide" [class.rejetee]="!inscription.validationAdmin.valide">
-        <div class="validation-header">
-          <div class="validation-status" [class.validee]="inscription.validationAdmin.valide" [class.rejetee]="!inscription.validationAdmin.valide">
-            <i class="fas" [class.fa-check-circle]="inscription.validationAdmin.valide" [class.fa-times-circle]="!inscription.validationAdmin.valide"></i>
-            <span>{{ inscription.validationAdmin.valide ? 'Inscription Validée' : 'Inscription Rejetée' }}</span>
-          </div>
-          <span class="validation-date">{{ inscription.validationAdmin.dateValidation | date:'dd/MM/yyyy à HH:mm' }}</span>
-        </div>
-        
-        <div class="validation-content">
-          <div class="validation-comment">
-            <strong>Commentaire:</strong>
-            <p>{{ inscription.validationAdmin.commentaire }}</p>
-          </div>
-          
-          <div class="validation-by">
-            <strong>Validé par:</strong>
-            <span>{{ inscription.validationAdmin.validateur.FirstName }} {{ inscription.validationAdmin.validateur.LastName }}</span>
-            <span class="validator-email">({{ inscription.validationAdmin.validateur.email }})</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Documents Section -->
-    <div class="info-section">
-      <h2>Documents</h2>
-      <app-documents-manager 
-        [inscriptionId]="inscription.id"
-        [disabled]="!canEdit(inscription)"
-        [showTitle]="false"
-      ></app-documents-manager>
-    </div>
-
-    <!-- Actions Footer -->
-    <div class="actions-footer">
-      <button class="btn btn-outline-secondary" (click)="onBack()">
-        <i class="fas fa-arrow-left"></i>
-        Retour à la liste
-      </button>
-      
-      <div class="footer-actions">
-        <button 
-          *ngIf="canEdit(inscription)"
-          class="btn btn-warning" 
-          (click)="onEdit(inscription)"
-        >
-          <i class="fas fa-edit"></i>
-          Modifier l'inscription
-        </button>
-        
-        <button 
-          *ngIf="canSubmit(inscription)"
-          class="btn btn-primary" 
-          (click)="onSubmit(inscription)"
-        >
-          <i class="fas fa-paper-plane"></i>
-          Soumettre pour validation
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
+  </mat-card-content>
+</mat-card>

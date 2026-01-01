@@ -1,0 +1,281 @@
+<div class="soutenance-detail-container" *ngIf="soutenance">
+    <!-- Header -->
+    <header class="detail-header">
+        <div class="breadcrumb">
+            <a routerLink="/soutenance/liste">Soutenances</a>
+            <span class="separator">›</span>
+            <span>{{ soutenance.titrethese }}</span>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-secondary" (click)="goBack()">
+                <i class="icon-arrow-left"></i>
+                Retour
+            </button>
+            <button class="btn btn-primary" (click)="editSoutenance()" *ngIf="canEdit">
+                <i class="icon-edit"></i>
+                Modifier
+            </button>
+        </div>
+    </header>
+
+    <!-- Status Badge -->
+    <div class="status-banner" [class]="'status-' + getStatusColor()">
+        <div class="status-content">
+            <span class="status-label">{{ getStatusLabel() }}</span>
+            <span class="status-date" *ngIf="soutenance.dateSoutenance">
+                Prévue le {{ formatDate(soutenance.dateSoutenance) }}
+            </span>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div class="alert alert-success" *ngIf="successMessage">
+        <i class="icon-check-circle"></i>
+        {{ successMessage }}
+    </div>
+    <div class="alert alert-error" *ngIf="errorMessage">
+        <i class="icon-alert-circle"></i>
+        {{ errorMessage }}
+    </div>
+
+    <!-- Main Content -->
+    <div class="detail-content">
+        <!-- General Information Card -->
+        <div class="card">
+            <div class="card-header">
+                <h2>
+                    <i class="icon-file-text"></i>
+                    Informations générales
+                </h2>
+            </div>
+            <div class="card-body">
+                <div class="info-grid">
+                    <div class="info-item full-width">
+                        <label>Titre de la thèse</label>
+                        <p class="title-text">{{ soutenance.titrethese }}</p>
+                    </div>
+
+                    <div class="info-item full-width" *ngIf="soutenance.resumeThese">
+                        <label>Résumé</label>
+                        <p class="resume-text">{{ soutenance.resumeThese }}</p>
+                    </div>
+
+                    <div class="info-item">
+                        <label>Spécialité</label>
+                        <p>{{ soutenance.specialite || 'Non renseignée' }}</p>
+                    </div>
+
+                    <div class="info-item">
+                        <label>Laboratoire</label>
+                        <p>{{ soutenance.laboratoire || 'Non renseigné' }}</p>
+                    </div>
+
+                    <div class="info-item">
+                        <label>Date de soutenance</label>
+                        <p>{{ formatDate(soutenance.dateSoutenance) }}</p>
+                    </div>
+
+                    <div class="info-item">
+                        <label>Lieu</label>
+                        <p>{{ soutenance.lieuSoutenance || 'Non défini' }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Participants Card -->
+        <div class="card">
+            <div class="card-header">
+                <h2>
+                    <i class="icon-users"></i>
+                    Participants
+                </h2>
+            </div>
+            <div class="card-body">
+                <div class="participants-grid">
+                    <div class="participant-card">
+                        <div class="participant-role">Doctorant</div>
+                        <div class="participant-name">{{ getFullName(soutenance.doctorant) }}</div>
+                        <div class="participant-email" *ngIf="soutenance.doctorant.email">
+                            <i class="icon-mail"></i>
+                            {{ soutenance.doctorant.email }}
+                        </div>
+                    </div>
+
+                    <div class="participant-card">
+                        <div class="participant-role">Directeur de thèse</div>
+                        <div class="participant-name">{{ getFullName(soutenance.directeur) }}</div>
+                        <div class="participant-email" *ngIf="soutenance.directeur.email">
+                            <i class="icon-mail"></i>
+                            {{ soutenance.directeur.email }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prerequisites Card -->
+        <div class="card" *ngIf="soutenance.prerequis">
+            <div class="card-header">
+                <h2>
+                    <i class="icon-check-square"></i>
+                    Prérequis
+                </h2>
+                <div class="progress-indicator">
+                    <span class="progress-percentage">{{ getPrerequisPercentage() }}%</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="prerequis-list"
+                    *ngIf="soutenance.prerequis.details && soutenance.prerequis.details.length > 0">
+                    <div class="prerequis-item" *ngFor="let detail of soutenance.prerequis.details"
+                        [class.validated]="detail.valide">
+                        <i [class]="detail.valide ? 'icon-check-circle' : 'icon-x-circle'"></i>
+                        <div class="prerequis-content">
+                            <span class="prerequis-label">{{ detail.critere }}</span>
+                            <span class="prerequis-comment" *ngIf="detail.commentaire">{{ detail.commentaire }}</span>
+                            <div class="prerequis-values" *ngIf="detail.valeurRequise || detail.valeurActuelle">
+                                <span *ngIf="detail.valeurRequise">Requis: {{ detail.valeurRequise }}</span>
+                                <span *ngIf="detail.valeurActuelle">Actuel: {{ detail.valeurActuelle }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="prerequis-summary" [class.all-met]="soutenance.prerequis.prerequisRemplis">
+                    <i [class]="soutenance.prerequis.prerequisRemplis ? 'icon-check-circle' : 'icon-alert-circle'"></i>
+                    <span>
+                        {{ soutenance.prerequis.prerequisRemplis ?
+                        'Tous les prérequis sont remplis' :
+                        'Certains prérequis ne sont pas encore remplis' }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Jury Card -->
+        <div class="card" *ngIf="soutenance.jury && soutenance.jury.length > 0">
+            <div class="card-header">
+                <h2>
+                    <i class="icon-users"></i>
+                    Composition du jury
+                </h2>
+                <span class="jury-count">{{ soutenance.jury.length }} membres</span>
+            </div>
+            <div class="card-body">
+                <div class="jury-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Établissement</th>
+                                <th>Grade</th>
+                                <th>Rôle</th>
+                                <th>Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let member of soutenance.jury">
+                                <td class="member-name">{{ member.prenom }} {{ member.nom }}</td>
+                                <td>{{ member.etablissement }}</td>
+                                <td>{{ member.grade }}</td>
+                                <td>
+                                    <span class="role-badge" [class]="'role-' + member.role">
+                                        {{ getRoleLabel(member.role) }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="type-badge" [class.externe]="member.externe">
+                                        {{ member.externe ? 'Externe' : 'Interne' }}
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Documents Card -->
+        <div class="card" *ngIf="soutenance.documents && soutenance.documents.length > 0">
+            <div class="card-header">
+                <h2>
+                    <i class="icon-paperclip"></i>
+                    Documents
+                </h2>
+                <span class="doc-count">{{ soutenance.documents.length }} document(s)</span>
+            </div>
+            <div class="card-body">
+                <div class="documents-list">
+                    <div class="document-item" *ngFor="let doc of soutenance.documents">
+                        <i class="icon-file-text"></i>
+                        <div class="document-info">
+                            <span class="document-name">{{ doc.nomFichier || doc.type }}</span>
+                            <span class="document-meta">
+                                {{ doc.taille ? (doc.taille / 1024 / 1024).toFixed(2) + ' MB' : '' }}
+                                <span *ngIf="doc.dateUpload"> • {{ formatDate(doc.dateUpload) }}</span>
+                            </span>
+                        </div>
+                        <div class="document-actions">
+                            <button class="btn-icon" title="Télécharger">
+                                <i class="icon-download"></i>
+                            </button>
+                            <button class="btn-icon" title="Visualiser">
+                                <i class="icon-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="detail-actions">
+        <!-- Doctorant Actions -->
+        <div class="action-group" *ngIf="authService.isDoctorant()">
+            <button class="btn btn-danger" (click)="deleteSoutenance()"
+                *ngIf="soutenance.statut === SoutenanceStatus.BROUILLON" [disabled]="isProcessing">
+                <i class="icon-trash"></i>
+                Supprimer
+            </button>
+        </div>
+
+        <!-- Directeur/Admin Validation Actions -->
+        <div class="action-group" *ngIf="canValidate">
+            <button class="btn btn-success" (click)="validateDefense()" [disabled]="isProcessing">
+                <i class="icon-check"></i>
+                {{ isProcessing ? 'Validation...' : 'Valider' }}
+            </button>
+            <button class="btn btn-danger" (click)="rejectDefense()" [disabled]="isProcessing">
+                <i class="icon-x"></i>
+                Rejeter
+            </button>
+        </div>
+
+        <!-- Admin Authorization Actions -->
+        <div class="action-group" *ngIf="canAuthorize">
+            <button class="btn btn-success" (click)="authorizeDefense()" [disabled]="isProcessing">
+                <i class="icon-check-circle"></i>
+                {{ isProcessing ? 'Autorisation...' : 'Autoriser la soutenance' }}
+            </button>
+            <button class="btn btn-danger" (click)="rejectDefense()" [disabled]="isProcessing">
+                <i class="icon-x-circle"></i>
+                Refuser
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Loading State -->
+<div class="loading-container" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Chargement des détails...</p>
+</div>
+
+<!-- Error State -->
+<div class="error-container" *ngIf="errorMessage && !soutenance && !isLoading">
+    <i class="icon-alert-circle"></i>
+    <h3>Erreur</h3>
+    <p>{{ errorMessage }}</p>
+    <button class="btn btn-primary" (click)="goBack()">Retour à la liste</button>
+</div>

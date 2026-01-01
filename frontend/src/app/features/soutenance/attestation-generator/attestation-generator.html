@@ -1,0 +1,192 @@
+<div class="attestation-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>workspace_premium</mat-icon>
+        Générateur d'Attestations
+      </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="attestationForm">
+        
+        <!-- Type d'Attestation -->
+        <div class="form-section">
+          <h3>Type d'Attestation</h3>
+          
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Type</mat-label>
+            <mat-select formControlName="type">
+              <mat-option *ngFor="let type of attestationTypes" [value]="type.value">
+                {{ type.label }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Numéro d'Attestation</mat-label>
+            <input matInput formControlName="numeroAttestation" readonly>
+            <mat-icon matPrefix>tag</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Date d'Émission</mat-label>
+            <input matInput [matDatepicker]="picker" formControlName="dateEmission">
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Informations Doctorant -->
+        <div class="form-section">
+          <h3>Informations du Doctorant</h3>
+          
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="half-width">
+              <mat-label>Nom</mat-label>
+              <input matInput formControlName="doctorantNom">
+              <mat-error *ngIf="isFieldInvalid('doctorantNom')">
+                Le nom est obligatoire
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="half-width">
+              <mat-label>Prénom</mat-label>
+              <input matInput formControlName="doctorantPrenom">
+              <mat-error *ngIf="isFieldInvalid('doctorantPrenom')">
+                Le prénom est obligatoire
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>CIN</mat-label>
+            <input matInput formControlName="cin">
+            <mat-icon matPrefix>badge</mat-icon>
+            <mat-error *ngIf="isFieldInvalid('cin')">
+              Le CIN est obligatoire
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Informations Thèse -->
+        <div class="form-section">
+          <h3>Informations de la Thèse</h3>
+          
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Titre de la Thèse</mat-label>
+            <textarea matInput formControlName="titreThese" rows="2"></textarea>
+            <mat-error *ngIf="isFieldInvalid('titreThese')">
+              Le titre est obligatoire
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Discipline</mat-label>
+            <input matInput formControlName="discipline">
+            <mat-error *ngIf="isFieldInvalid('discipline')">
+              La discipline est obligatoire
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Directeur de Thèse</mat-label>
+            <input matInput formControlName="directeurThese">
+            <mat-icon matPrefix>person</mat-icon>
+            <mat-error *ngIf="isFieldInvalid('directeurThese')">
+              Le directeur est obligatoire
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Établissement</mat-label>
+            <input matInput formControlName="etablissement">
+            <mat-icon matPrefix>school</mat-icon>
+            <mat-error *ngIf="isFieldInvalid('etablissement')">
+              L'établissement est obligatoire
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Informations Soutenance -->
+        <div class="form-section">
+          <h3>Informations de la Soutenance</h3>
+          
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Date de Soutenance</mat-label>
+            <input matInput [matDatepicker]="soutenancePicker" formControlName="dateSoutenance">
+            <mat-datepicker-toggle matSuffix [for]="soutenancePicker"></mat-datepicker-toggle>
+            <mat-datepicker #soutenancePicker></mat-datepicker>
+            <mat-error *ngIf="isFieldInvalid('dateSoutenance')">
+              La date est obligatoire
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width" 
+                          *ngIf="attestationForm.value.type === 'REUSSITE'">
+            <mat-label>Mention</mat-label>
+            <mat-select formControlName="mention">
+              <mat-option value="TRES_HONORABLE_AVEC_FELICITATIONS">
+                Très Honorable avec Félicitations du Jury
+              </mat-option>
+              <mat-option value="TRES_HONORABLE">Très Honorable</mat-option>
+              <mat-option value="HONORABLE">Honorable</mat-option>
+              <mat-option value="PASSABLE">Passable</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Signature -->
+        <div class="form-section">
+          <h3>Signature</h3>
+          
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Signataire</mat-label>
+            <input matInput formControlName="signataire" 
+                   placeholder="Nom du signataire">
+            <mat-icon matPrefix>draw</mat-icon>
+            <mat-error *ngIf="isFieldInvalid('signataire')">
+              Le signataire est obligatoire
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Qualité du Signataire</mat-label>
+            <input matInput formControlName="qualiteSignataire" 
+                   placeholder="Ex: Directeur de l'École Doctorale">
+            <mat-error *ngIf="isFieldInvalid('qualiteSignataire')">
+              La qualité est obligatoire
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Actions -->
+        <div class="form-actions">
+          <button mat-button type="button" routerLink="/soutenance">
+            Annuler
+          </button>
+          <button mat-raised-button type="button" color="accent" 
+                  (click)="previewAttestation()" [disabled]="!attestationForm.valid">
+            <mat-icon>visibility</mat-icon>
+            Prévisualiser
+          </button>
+          <button mat-raised-button color="primary" type="button" 
+                  (click)="generateAttestation()" 
+                  [disabled]="!attestationForm.valid || generating">
+            <mat-spinner *ngIf="generating" diameter="20"></mat-spinner>
+            <mat-icon *ngIf="!generating">download</mat-icon>
+            <span *ngIf="!generating">Générer PDF</span>
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

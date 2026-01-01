@@ -1,256 +1,370 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject, throwError } from 'rxjs';
+import { map, tap, catchError, shareReplay } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
-import { CacheService } from './cache.service';
 import {
-  Inscription,
   InscriptionRequest,
   InscriptionResponse,
-  Campagne,
-  CampagneRequest,
-  CampagneResponse,
   ValidationRequest,
-  InscriptionStatus
+  DashboardResponse,
+  StatistiquesDossier,
+  AlerteVerificationSummary,
+  StatutInscription,
+  InscriptionListFilter,
+  InscriptionListSort
 } from '../models/inscription.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class InscriptionService {
-  private readonly API_URL = `${environment.apiUrl}/inscriptions`;
-  private readonly CAMPAGNE_API_URL = `${environment.apiUrl}/campagnes`;
+  private readonly apiUrl = `${environment.apiUrl}/inscriptions`;
+  
+  // Cache for inscriptions list
+  private inscriptionsCache$ = new BehaviorSubject<InscriptionResponse[]>([]);
+  private cacheTimestamp: number = 0;
+  private readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
-  constructor(
-    private http: HttpClient,
-    private cacheService: CacheService
-  ) {}
+  constructor(private http: HttpClient) {}
 
-  // ===== INSCRIPTION ENDPOINTS =====
+  // ============================================
+  // CRUD Operations
+  // ============================================
 
   /**
-   * 🔹 Créer une nouvelle demande d'inscription (DOCTORANT)
+   * Créer une nouvelle inscription
    */
-  createInscription(data: InscriptionRequest): Observable<InscriptionResponse> {
-    console.log('📤 [INSCRIPTION SERVICE] Création inscription:', data);
-    this.invalidateCache();
-    return this.http.post<InscriptionResponse>(this.API_URL, data);
+  createInscription(request: InscriptionRequest): Observable<InscriptionResponse> {
+    return this.http.post<InscriptionResponse>(this.apiUrl, request).pipe(
+      tap(() => this.invalidateCache()),
+      catchError(this.handleError)
+    );
   }
 
   /**
-   * 🔹 Soumettre l'inscription pour validation (DOCTORANT)
-   */
-  submitInscription(id: number): Observable<InscriptionResponse> {
-    console.log('📤 [INSCRIPTION SERVICE] Soumission inscription:', id);
-    return this.http.post<InscriptionResponse>(`${this.API_URL}/${id}/soumettre`, {});
-  }
-
-  /**
-   * 🔹 Récupérer une inscription par ID
+   * Récupérer une inscription par ID
    */
   getInscription(id: number): Observable<InscriptionResponse> {
-    console.log('📤 [INSCRIPTION SERVICE] Récupération inscription:', id);
-    return this.http.get<InscriptionResponse>(`${this.API_URL}/${id}`);
+    return this.http.get<InscriptionResponse>(`${this.apiUrl}/${id}`).pipe(
+      catchError(this.handleError)
+    );
   }
 
   /**
-   * 🔹 Récupérer les inscriptions d'un doctorant
+   * Récupérer les inscriptions d'un doctorant
    */
   getInscriptionsDoctorant(doctorantId: number): Observable<InscriptionResponse[]> {
-    console.log('📤 [INSCRIPTION SERVICE] Inscriptions doctorant:', doctorantId);
-    return this.http.get<InscriptionResponse[]>(`${this.API_URL}/doctorant/${doctorantId}`);
-  }
-
-  /**
-   * 🔹 Récupérer mes inscriptions (utilisateur connecté)
-   */
-  getMyInscriptions(): Observable<InscriptionResponse[]> {
-    console.log('📤 [INSCRIPTION SERVICE] Mes inscriptions');
-    const cacheKey = 'my-inscriptions';
-    return this.cacheService.cacheObservable(
-      cacheKey,
-      this.http.get<InscriptionResponse[]>(`${this.API_URL}/me`),
-      2 * 60 * 1000 // 2 minutes cache
+    return this.http.get<InscriptionResponse[]>(`${this.apiUrl}/doctorant/${doctorantId}`).pipe(
+      tap(inscriptions => this.updateCache(inscriptions)),
+      catchError(this.handleError)
     );
   }
 
   /**
-   * 🔹 Récupérer les inscriptions en attente pour un directeur (DIRECTEUR)
+   * Récupérer les inscriptions en attente pour un directeur
    */
   getInscriptionsEnAttenteDirecteur(directeurId: number): Observable<InscriptionResponse[]> {
-    console.log('📤 [INSCRIPTION SERVICE] Inscriptions en attente directeur:', directeurId);
-    return this.http.get<InscriptionResponse[]>(`${this.API_URL}/directeur/${directeurId}/en-attente`);
+    return this.http.get<InscriptionResponse[]>(`${this.apiUrl}/directeur/${directeurId}/en-attente`).pipe(
+      catchError(this.handleError)
+    );
   }
 
   /**
-   * 🔹 Récupérer tous les doctorants encadrés par un directeur (DIRECTEUR)
-   */
-  getDoctorantsByDirecteur(): Observable<any[]> {
-    console.log('📤 [INSCRIPTION SERVICE] Doctorants par directeur');
-    return this.http.get<any[]>(`${this.API_URL}/directeur/doctorants`);
-  }
-
-  /**
-   * 🔹 Valider l'inscription par le directeur (DIRECTEUR)
-   */
-  validerParDirecteur(id: number, validation: ValidationRequest): Observable<InscriptionResponse> {
-    console.log('📤 [INSCRIPTION SERVICE] Validation directeur:', id, validation);
-    return this.http.post<InscriptionResponse>(`${this.API_URL}/${id}/valider-directeur`, validation);
-  }
-
-  /**
-   * 🔹 Récupérer les inscriptions en attente admin (ADMIN)
+   * Récupérer les inscriptions en attente pour l'administration
    */
   getInscriptionsEnAttenteAdmin(): Observable<InscriptionResponse[]> {
-    console.log('📤 [INSCRIPTION SERVICE] Inscriptions en attente admin');
-    return this.http.get<InscriptionResponse[]>(`${this.API_URL}/admin/en-attente`);
+    return this.http.get<InscriptionResponse[]>(`${this.apiUrl}/admin/en-attente`).pipe(
+      catchError(this.handleError)
+    );
   }
 
-  /**
-   * 🔹 Valider l'inscription par l'administration (ADMIN)
-   */
-  validerParAdmin(id: number, validation: ValidationRequest): Observable<InscriptionResponse> {
-    console.log('📤 [INSCRIPTION SERVICE] Validation admin:', id, validation);
-    return this.http.post<InscriptionResponse>(`${this.API_URL}/${id}/valider-admin`, validation);
-  }
-
-  // ===== CAMPAGNE ENDPOINTS =====
+  // ============================================
+  // Workflow Operations
+  // ============================================
 
   /**
-   * 🔹 Créer une nouvelle campagne (ADMIN)
+   * Soumettre une inscription pour validation
    */
-  createCampagne(data: CampagneRequest): Observable<CampagneResponse> {
-    console.log('📤 [INSCRIPTION SERVICE] Création campagne:', data);
-    return this.http.post<CampagneResponse>(this.CAMPAGNE_API_URL, data);
-  }
-
-  /**
-   * 🔹 Récupérer toutes les campagnes
-   */
-  getAllCampagnes(): Observable<CampagneResponse[]> {
-    console.log('📤 [INSCRIPTION SERVICE] Toutes les campagnes');
-    const cacheKey = 'all-campagnes';
-    return this.cacheService.cacheObservable(
-      cacheKey,
-      this.http.get<CampagneResponse[]>(this.CAMPAGNE_API_URL),
-      10 * 60 * 1000 // 10 minutes cache
+  soumettre(id: number, doctorantId: number): Observable<InscriptionResponse> {
+    const params = new HttpParams().set('doctorantId', doctorantId.toString());
+    return this.http.post<InscriptionResponse>(`${this.apiUrl}/${id}/soumettre`, null, { params }).pipe(
+      tap(() => this.invalidateCache()),
+      catchError(this.handleError)
     );
   }
 
   /**
-   * 🔹 Récupérer toutes les campagnes (alias pour compatibilité)
+   * Valider une inscription par le directeur
    */
-  getCampagnes(): Observable<CampagneResponse[]> {
-    return this.getAllCampagnes();
-  }
-
-  /**
-   * 🔹 Récupérer les campagnes actives
-   */
-  getCampagnesActives(): Observable<CampagneResponse[]> {
-    console.log('📤 [INSCRIPTION SERVICE] Campagnes actives');
-    return this.http.get<CampagneResponse[]>(`${this.CAMPAGNE_API_URL}/actives`);
-  }
-
-  /**
-   * 🔹 Récupérer la campagne active pour inscription
-   */
-  getCampagneActive(): Observable<CampagneResponse | null> {
-    console.log('📤 [INSCRIPTION SERVICE] Campagne active');
-    const cacheKey = 'campagne-active';
-    return this.cacheService.cacheObservable(
-      cacheKey,
-      this.http.get<CampagneResponse>(`${this.CAMPAGNE_API_URL}/active`),
-      5 * 60 * 1000 // 5 minutes cache
+  validerParDirecteur(id: number, request: ValidationRequest, directeurId: number): Observable<InscriptionResponse> {
+    const params = new HttpParams().set('directeurId', directeurId.toString());
+    return this.http.post<InscriptionResponse>(`${this.apiUrl}/${id}/valider-directeur`, request, { params }).pipe(
+      tap(() => this.invalidateCache()),
+      catchError(this.handleError)
     );
   }
 
   /**
-   * 🔹 Récupérer une campagne par ID
+   * Valider une inscription par l'administration
    */
-  getCampagne(id: number): Observable<CampagneResponse> {
-    console.log('📤 [INSCRIPTION SERVICE] Campagne:', id);
-    return this.http.get<CampagneResponse>(`${this.CAMPAGNE_API_URL}/${id}`);
+  validerParAdmin(id: number, request: ValidationRequest): Observable<InscriptionResponse> {
+    return this.http.post<InscriptionResponse>(`${this.apiUrl}/${id}/valider-admin`, request).pipe(
+      tap(() => this.invalidateCache()),
+      catchError(this.handleError)
+    );
+  }
+
+  // ============================================
+  // Dashboard & Statistics
+  // ============================================
+
+  /**
+   * Récupérer le dashboard d'un doctorant
+   */
+  getDashboardDoctorant(doctorantId: number, userId: number, role: string): Observable<DashboardResponse> {
+    const params = new HttpParams()
+      .set('userId', userId.toString())
+      .set('role', role);
+    
+    return this.http.get<DashboardResponse>(`${this.apiUrl}/doctorant/${doctorantId}/dashboard`, { params }).pipe(
+      shareReplay(1),
+      catchError(this.handleError)
+    );
   }
 
   /**
-   * 🔹 Fermer une campagne (ADMIN)
+   * Récupérer les statistiques des dossiers
    */
-  fermerCampagne(id: number): Observable<CampagneResponse> {
-    console.log('📤 [INSCRIPTION SERVICE] Fermeture campagne:', id);
-    return this.http.put<CampagneResponse>(`${this.CAMPAGNE_API_URL}/${id}/fermer`, {});
+  getStatistiquesDossier(): Observable<StatistiquesDossier> {
+    return this.http.get<StatistiquesDossier>(`${this.apiUrl}/statistiques`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  // ============================================
+  // Documents
+  // ============================================
+
+  /**
+   * Télécharger l'attestation d'inscription
+   */
+  downloadAttestation(id: number, userId: number, role: string): Observable<Blob> {
+    const params = new HttpParams()
+      .set('userId', userId.toString())
+      .set('role', role);
+    
+    return this.http.get(`${this.apiUrl}/${id}/attestation`, {
+      params,
+      responseType: 'blob'
+    }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  // ============================================
+  // Alerts
+  // ============================================
+
+  /**
+   * Vérifier les alertes de durée (Admin only)
+   */
+  verifierAlertes(): Observable<AlerteVerificationSummary> {
+    return this.http.get<AlerteVerificationSummary>(`${this.apiUrl}/verifier-alertes`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  // ============================================
+  // Filtering & Sorting
+  // ============================================
+
+  /**
+   * Filtrer les inscriptions
+   */
+  filterInscriptions(
+    inscriptions: InscriptionResponse[],
+    filter: InscriptionListFilter
+  ): InscriptionResponse[] {
+    let filtered = [...inscriptions];
+
+    if (filter.statut) {
+      filtered = filtered.filter(i => i.statut === filter.statut);
+    }
+
+    if (filter.annee) {
+      filtered = filtered.filter(i => i.anneeInscription === filter.annee);
+    }
+
+    if (filter.type) {
+      filtered = filtered.filter(i => i.type === filter.type);
+    }
+
+    if (filter.searchTerm) {
+      const term = filter.searchTerm.toLowerCase();
+      filtered = filtered.filter(i =>
+        i.sujetThese.toLowerCase().includes(term) ||
+        i.infosDoctorant.cin.toLowerCase().includes(term) ||
+        i.infosThese.titreThese.toLowerCase().includes(term)
+      );
+    }
+
+    return filtered;
   }
 
   /**
-   * 🔹 Modifier une campagne (ADMIN)
+   * Trier les inscriptions
    */
-  modifierCampagne(id: number, data: CampagneRequest): Observable<CampagneResponse> {
-    console.log('📤 [INSCRIPTION SERVICE] Modification campagne:', id, data);
-    return this.http.put<CampagneResponse>(`${this.CAMPAGNE_API_URL}/${id}`, data);
+  sortInscriptions(
+    inscriptions: InscriptionResponse[],
+    sort: InscriptionListSort
+  ): InscriptionResponse[] {
+    const sorted = [...inscriptions];
+
+    sorted.sort((a, b) => {
+      let comparison = 0;
+
+      switch (sort.field) {
+        case 'dateCreation':
+          comparison = new Date(a.dateCreation).getTime() - new Date(b.dateCreation).getTime();
+          break;
+        case 'anneeInscription':
+          comparison = a.anneeInscription - b.anneeInscription;
+          break;
+        case 'statut':
+          comparison = a.statut.localeCompare(b.statut);
+          break;
+        default:
+          comparison = 0;
+      }
+
+      return sort.direction === 'asc' ? comparison : -comparison;
+    });
+
+    return sorted;
+  }
+
+  // ============================================
+  // Cache Management
+  // ============================================
+
+  /**
+   * Obtenir les inscriptions depuis le cache
+   */
+  getCachedInscriptions(): Observable<InscriptionResponse[]> {
+    return this.inscriptionsCache$.asObservable();
   }
 
   /**
-   * 🔹 Modifier une campagne (alias pour compatibilité)
+   * Mettre à jour le cache
    */
-  updateCampagne(id: number, data: Partial<CampagneRequest>): Observable<CampagneResponse> {
-    return this.modifierCampagne(id, data as CampagneRequest);
+  private updateCache(inscriptions: InscriptionResponse[]): void {
+    this.inscriptionsCache$.next(inscriptions);
+    this.cacheTimestamp = Date.now();
   }
 
   /**
-   * 🔹 Supprimer une campagne (ADMIN)
-   */
-  deleteCampagne(id: number): Observable<void> {
-    console.log('📤 [INSCRIPTION SERVICE] Suppression campagne:', id);
-    return this.http.delete<void>(`${this.CAMPAGNE_API_URL}/${id}`);
-  }
-
-  // ===== UTILITY METHODS =====
-
-  /**
-   * 🔹 Invalider le cache après modification
+   * Invalider le cache
    */
   private invalidateCache(): void {
-    this.cacheService.remove('my-inscriptions');
-    this.cacheService.remove('all-campagnes');
-    this.cacheService.remove('campagne-active');
+    this.cacheTimestamp = 0;
   }
 
   /**
-   * 🔹 Vérifier si une campagne est ouverte
+   * Vérifier si le cache est valide
    */
-  isCampagneOuverte(campagne: CampagneResponse): boolean {
-    const now = new Date();
-    const ouverture = new Date(campagne.dateOuverture);
-    const fermeture = new Date(campagne.dateFermeture);
+  private isCacheValid(): boolean {
+    return Date.now() - this.cacheTimestamp < this.CACHE_DURATION;
+  }
+
+  // ============================================
+  // Helper Methods
+  // ============================================
+
+  /**
+   * Vérifier si un doctorant peut créer une nouvelle inscription
+   */
+  canCreateInscription(inscriptions: InscriptionResponse[]): boolean {
+    // Vérifier s'il n'y a pas d'inscription en cours (brouillon ou en attente)
+    const activeStatuts = [
+      StatutInscription.BROUILLON,
+      StatutInscription.SOUMIS,
+      StatutInscription.EN_ATTENTE_DIRECTEUR,
+      StatutInscription.APPROUVE_DIRECTEUR,
+      StatutInscription.EN_ATTENTE_ADMIN
+    ];
+
+    return !inscriptions.some(i => activeStatuts.includes(i.statut));
+  }
+
+  /**
+   * Obtenir l'inscription courante (la plus récente non rejetée)
+   */
+  getCurrentInscription(inscriptions: InscriptionResponse[]): InscriptionResponse | null {
+    const nonRejected = inscriptions.filter(i => i.statut !== StatutInscription.REJETE);
     
-    return campagne.active && now >= ouverture && now <= fermeture;
+    if (nonRejected.length === 0) {
+      return null;
+    }
+
+    return nonRejected.reduce((latest, current) => {
+      const latestDate = new Date(latest.dateCreation);
+      const currentDate = new Date(current.dateCreation);
+      return currentDate > latestDate ? current : latest;
+    });
   }
 
   /**
-   * 🔹 Obtenir le statut d'une inscription avec libellé
+   * Obtenir les années d'inscription disponibles
    */
-  getStatusLabel(status: InscriptionStatus): string {
-    const labels = {
-      [InscriptionStatus.BROUILLON]: 'Brouillon',
-      [InscriptionStatus.SOUMISE]: 'Soumise',
-      [InscriptionStatus.EN_COURS_VALIDATION]: 'En cours de validation',
-      [InscriptionStatus.VALIDEE]: 'Validée',
-      [InscriptionStatus.REJETEE]: 'Rejetée'
-    };
-    return labels[status] || status;
+  getAvailableYears(inscriptions: InscriptionResponse[]): number[] {
+    const years = inscriptions.map(i => i.anneeInscription);
+    return Array.from(new Set(years)).sort((a, b) => b - a);
   }
 
   /**
-   * 🔹 Obtenir la couleur du statut pour l'affichage
+   * Compter les inscriptions par statut
    */
-  getStatusColor(status: InscriptionStatus): string {
-    const colors = {
-      [InscriptionStatus.BROUILLON]: 'gray',
-      [InscriptionStatus.SOUMISE]: 'blue',
-      [InscriptionStatus.EN_COURS_VALIDATION]: 'orange',
-      [InscriptionStatus.VALIDEE]: 'green',
-      [InscriptionStatus.REJETEE]: 'red'
-    };
-    return colors[status] || 'gray';
+  countByStatut(inscriptions: InscriptionResponse[]): Map<StatutInscription, number> {
+    const counts = new Map<StatutInscription, number>();
+    
+    Object.values(StatutInscription).forEach(statut => {
+      counts.set(statut, 0);
+    });
+
+    inscriptions.forEach(inscription => {
+      const current = counts.get(inscription.statut) || 0;
+      counts.set(inscription.statut, current + 1);
+    });
+
+    return counts;
+  }
+
+  // ============================================
+  // Error Handling
+  // ============================================
+
+  private handleError(error: any): Observable<never> {
+    console.error('InscriptionService Error:', error);
+    
+    let errorMessage = 'Une erreur est survenue';
+    
+    if (error.error?.message) {
+      errorMessage = error.error.message;
+    } else if (error.status === 0) {
+      errorMessage = 'Impossible de contacter le serveur';
+    } else if (error.status === 401) {
+      errorMessage = 'Non autorisé';
+    } else if (error.status === 403) {
+      errorMessage = 'Accès refusé';
+    } else if (error.status === 404) {
+      errorMessage = 'Ressource non trouvée';
+    } else if (error.status === 409) {
+      errorMessage = 'Conflit - Une inscription existe déjà';
+    } else if (error.status >= 500) {
+      errorMessage = 'Erreur serveur';
+    }
+
+    return throwError(() => ({ message: errorMessage, originalError: error }));
   }
 }

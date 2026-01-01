@@ -1,0 +1,162 @@
+<div class="avis-form-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>rate_review</mat-icon>
+        Formulaire d'Avis de Soutenance
+      </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="avisForm" (ngSubmit)="onSubmit()">
+        
+        <!-- Avis Global -->
+        <div class="form-section">
+          <h3>Avis Global</h3>
+          <mat-radio-group formControlName="favorable" class="radio-group">
+            <mat-radio-button value="true">
+              <mat-icon class="favorable-icon">thumb_up</mat-icon>
+              Favorable
+            </mat-radio-button>
+            <mat-radio-button value="false">
+              <mat-icon class="defavorable-icon">thumb_down</mat-icon>
+              Défavorable
+            </mat-radio-button>
+          </mat-radio-group>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Évaluation Détaillée -->
+        <div class="form-section">
+          <h3>Évaluation Détaillée</h3>
+          
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Qualité de la Recherche</mat-label>
+            <mat-select formControlName="qualiteRecherche">
+              <mat-option value="excellent">Excellent</mat-option>
+              <mat-option value="tres_bien">Très Bien</mat-option>
+              <mat-option value="bien">Bien</mat-option>
+              <mat-option value="passable">Passable</mat-option>
+              <mat-option value="insuffisant">Insuffisant</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Originalité</mat-label>
+            <mat-select formControlName="originalite">
+              <mat-option value="excellent">Excellent</mat-option>
+              <mat-option value="tres_bien">Très Bien</mat-option>
+              <mat-option value="bien">Bien</mat-option>
+              <mat-option value="passable">Passable</mat-option>
+              <mat-option value="insuffisant">Insuffisant</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Méthodologie</mat-label>
+            <mat-select formControlName="methodologie">
+              <mat-option value="excellent">Excellent</mat-option>
+              <mat-option value="tres_bien">Très Bien</mat-option>
+              <mat-option value="bien">Bien</mat-option>
+              <mat-option value="passable">Passable</mat-option>
+              <mat-option value="insuffisant">Insuffisant</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Qualité de la Rédaction</mat-label>
+            <mat-select formControlName="redaction">
+              <mat-option value="excellent">Excellent</mat-option>
+              <mat-option value="tres_bien">Très Bien</mat-option>
+              <mat-option value="bien">Bien</mat-option>
+              <mat-option value="passable">Passable</mat-option>
+              <mat-option value="insuffisant">Insuffisant</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Commentaires -->
+        <div class="form-section">
+          <h3>Commentaires et Recommandations</h3>
+          
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Points Forts</mat-label>
+            <textarea matInput formControlName="pointsForts" rows="4" 
+                      placeholder="Décrivez les points forts de la thèse..."></textarea>
+            <mat-error *ngIf="isFieldInvalid('pointsForts')">
+              Ce champ est obligatoire
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Points à Améliorer</mat-label>
+            <textarea matInput formControlName="pointsAmeliorer" rows="4"
+                      placeholder="Décrivez les points à améliorer..."></textarea>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Commentaires Généraux</mat-label>
+            <textarea matInput formControlName="commentaires" rows="6"
+                      placeholder="Vos commentaires détaillés (minimum 50 caractères)..."></textarea>
+            <mat-hint align="end">{{ avisForm.get('commentaires')?.value?.length || 0 }} / 50 min</mat-hint>
+            <mat-error *ngIf="isFieldInvalid('commentaires')">
+              Minimum 50 caractères requis
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Recommandations</mat-label>
+            <textarea matInput formControlName="recommandations" rows="4"
+                      placeholder="Vos recommandations pour la suite..."></textarea>
+          </mat-form-field>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Upload Rapport -->
+        <div class="form-section">
+          <h3>Rapport PDF</h3>
+          
+          <div class="upload-section">
+            <input type="file" #fileInput (change)="onFileSelected($event)" 
+                   accept=".pdf" style="display: none">
+            
+            <button mat-raised-button type="button" color="primary" 
+                    (click)="fileInput.click()" [disabled]="uploadProgress > 0">
+              <mat-icon>upload_file</mat-icon>
+              Uploader le Rapport PDF
+            </button>
+
+            <div *ngIf="uploadProgress > 0 && uploadProgress < 100" class="upload-progress">
+              <mat-progress-bar mode="determinate" [value]="uploadProgress"></mat-progress-bar>
+              <span>{{ uploadProgress }}%</span>
+            </div>
+
+            <div *ngIf="uploadedFile" class="uploaded-file">
+              <mat-icon>picture_as_pdf</mat-icon>
+              <span>Rapport uploadé</span>
+              <button mat-icon-button type="button" color="warn" (click)="removeFile()">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="form-actions">
+          <button mat-button type="button" routerLink="/soutenance">
+            Annuler
+          </button>
+          <button mat-raised-button color="primary" type="submit" 
+                  [disabled]="!avisForm.valid || !uploadedFile || submitting">
+            <mat-spinner *ngIf="submitting" diameter="20"></mat-spinner>
+            <span *ngIf="!submitting">Soumettre l'Avis</span>
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

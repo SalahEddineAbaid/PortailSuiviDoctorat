@@ -1,216 +1,203 @@
-<div class="notification-settings-container">
-  <!-- En-tête -->
-  <div class="settings-header">
-    <div class="header-content">
-      <h2>
-        <i class="material-icons">settings</i>
-        Paramètres des notifications
-      </h2>
-      <p class="header-description">
-        Configurez vos préférences de notification pour rester informé des événements importants.
+<div class="settings-container">
+  <!-- Header -->
+  <div class="page-header">
+    <h1>Paramètres de notifications</h1>
+    <p class="subtitle">Gérez vos préférences de notifications</p>
+  </div>
+
+  <!-- Info Banner -->
+  <div class="info-banner">
+    <mat-icon>info</mat-icon>
+    <div class="banner-content">
+      <h3>À propos des notifications</h3>
+      <p>
+        Configurez comment et quand vous souhaitez recevoir des notifications. 
+        Les notifications temps réel nécessitent une connexion WebSocket active.
       </p>
     </div>
   </div>
 
-  <!-- Chargement -->
-  <div class="loading-container" *ngIf="loading">
-    <div class="loading-spinner">
-      <i class="material-icons spinning">refresh</i>
-      <p>Chargement des paramètres...</p>
-    </div>
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Chargement des paramètres...</p>
   </div>
 
-  <!-- Formulaire de paramètres -->
-  <form [formGroup]="settingsForm" (ngSubmit)="onSaveSettings()" *ngIf="!loading">
+  <!-- Settings Form -->
+  <form *ngIf="!loading" [formGroup]="settingsForm" class="settings-form">
     
-    <!-- État des connexions -->
-    <div class="settings-section">
-      <h3>
-        <i class="material-icons">wifi</i>
-        État des connexions
-      </h3>
-      
-      <div class="connection-status">
-        <!-- État WebSocket -->
-        <div class="status-item">
-          <div class="status-info">
-            <span class="status-label">Notifications temps réel</span>
-            <span 
-              class="status-value"
-              [class]="'status-' + getWebSocketStateColor((webSocketState$ | async)!)"
-            >
-              {{ getWebSocketStateText((webSocketState$ | async)!) }}
-            </span>
-          </div>
-          <div class="status-actions">
-            <button 
-              type="button"
-              class="btn btn-sm btn-outline-primary"
-              (click)="connectWebSocket()"
-              *ngIf="(webSocketState$ | async) === WebSocketState.DISCONNECTED"
-            >
-              <i class="material-icons">wifi</i>
-              Connecter
-            </button>
-            <button 
-              type="button"
-              class="btn btn-sm btn-outline-secondary"
-              (click)="disconnectWebSocket()"
-              *ngIf="(webSocketState$ | async) === WebSocketState.CONNECTED"
-            >
-              <i class="material-icons">wifi_off</i>
-              Déconnecter
-            </button>
-          </div>
-        </div>
-
-        <!-- Permission notifications système -->
-        <div class="status-item">
-          <div class="status-info">
-            <span class="status-label">Permission navigateur</span>
-            <span 
-              class="status-value"
-              [class]="'status-' + getPermissionColor()"
-            >
-              {{ getPermissionText() }}
-            </span>
-          </div>
-          <div class="status-actions">
-            <button 
-              type="button"
-              class="btn btn-sm btn-outline-primary"
-              (click)="requestNotificationPermission()"
-              *ngIf="systemNotificationPermission !== 'granted'"
-            >
-              <i class="material-icons">notifications</i>
-              Autoriser
-            </button>
-            <button 
-              type="button"
-              class="btn btn-sm btn-outline-success"
-              (click)="testNotification()"
-              *ngIf="systemNotificationPermission === 'granted'"
-            >
-              <i class="material-icons">notifications_active</i>
-              Tester
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Canaux de notification -->
-    <div class="settings-section">
-      <h3>
-        <i class="material-icons">send</i>
-        Canaux de notification
-      </h3>
-      
-      <div class="settings-grid">
-        <div 
-          class="setting-item"
-          *ngFor="let channel of notificationChannels"
-        >
-          <div class="setting-content">
-            <div class="setting-icon">
-              <i class="material-icons">{{ channel.icon }}</i>
+    <!-- Connection Status -->
+    <mat-card class="status-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>wifi</mat-icon>
+          État de la connexion
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="status-grid">
+          <!-- WebSocket Status -->
+          <div class="status-item">
+            <div class="status-icon" 
+                 [ngClass]="{
+                   'green': (webSocketState$ | async) === WebSocketState.CONNECTED,
+                   'orange': (webSocketState$ | async) === WebSocketState.CONNECTING || (webSocketState$ | async) === WebSocketState.RECONNECTING,
+                   'red': (webSocketState$ | async) === WebSocketState.ERROR,
+                   'gray': (webSocketState$ | async) === WebSocketState.DISCONNECTED
+                 }">
+              <mat-icon>
+                {{ (webSocketState$ | async) === WebSocketState.CONNECTED ? 'check_circle' : 
+                   (webSocketState$ | async) === WebSocketState.CONNECTING || (webSocketState$ | async) === WebSocketState.RECONNECTING ? 'sync' :
+                   (webSocketState$ | async) === WebSocketState.ERROR ? 'error' : 'cancel' }}
+              </mat-icon>
             </div>
-            <div class="setting-info">
-              <h4>{{ channel.label }}</h4>
-              <p>{{ channel.description }}</p>
+            <div class="status-text">
+              <p class="status-label">WebSocket</p>
+              <p class="status-value">{{ getWebSocketStateText(webSocketState$ | async) }}</p>
+            </div>
+          </div>
+
+          <!-- Browser Notifications -->
+          <div class="status-item">
+            <div class="status-icon"
+                 [ngClass]="{
+                   'green': systemNotificationPermission === 'granted',
+                   'orange': systemNotificationPermission === 'default',
+                   'red': systemNotificationPermission === 'denied'
+                 }">
+              <mat-icon>
+                {{ systemNotificationPermission === 'granted' ? 'notifications_active' :
+                   systemNotificationPermission === 'denied' ? 'notifications_off' : 'notifications_none' }}
+              </mat-icon>
+            </div>
+            <div class="status-text">
+              <p class="status-label">Notifications navigateur</p>
+              <p class="status-value">{{ getPermissionText() }}</p>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Notification Channels -->
+    <mat-card class="settings-section">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>send</mat-icon>
+          Canaux de notification
+        </mat-card-title>
+        <mat-card-subtitle>
+          Choisissez comment vous souhaitez recevoir les notifications
+        </mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="setting-item" *ngFor="let channel of notificationChannels">
+          <div class="setting-info">
+            <mat-icon>{{ channel.icon }}</mat-icon>
+            <div class="setting-text">
+              <p class="setting-label">{{ channel.label }}</p>
+              <p class="setting-description">{{ channel.description }}</p>
             </div>
           </div>
           <div class="setting-control">
-            <label class="toggle-switch">
-              <input 
-                type="checkbox"
-                [formControlName]="channel.key"
-                [disabled]="channel.key === 'pushEnabled' && !isPushNotificationAvailable()"
-              >
-              <span class="toggle-slider"></span>
-            </label>
+            <mat-slide-toggle [formControlName]="channel.key"></mat-slide-toggle>
           </div>
         </div>
-      </div>
+      </mat-card-content>
+    </mat-card>
 
-      <!-- Avertissement notifications push -->
-      <div class="notification-warning" *ngIf="!isPushNotificationAvailable()">
-        <i class="material-icons">warning</i>
-        <span>
-          Les notifications push nécessitent l'autorisation du navigateur.
-          <button 
-            type="button" 
-            class="btn-link"
-            (click)="requestNotificationPermission()"
-          >
-            Cliquez ici pour l'activer
+    <!-- Notification Types -->
+    <mat-card class="settings-section">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>category</mat-icon>
+          Types de notifications
+        </mat-card-title>
+        <mat-card-subtitle>
+          Activez ou désactivez les notifications par catégorie
+        </mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="setting-item" *ngFor="let type of notificationTypes">
+          <div class="setting-info">
+            <mat-icon>{{ type.icon }}</mat-icon>
+            <div class="setting-text">
+              <p class="setting-label">{{ type.label }}</p>
+              <p class="setting-description">{{ type.description }}</p>
+            </div>
+          </div>
+          <div class="setting-control">
+            <mat-slide-toggle [formControlName]="type.key"></mat-slide-toggle>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Quick Actions -->
+    <mat-card class="actions-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>flash_on</mat-icon>
+          Actions rapides
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="actions-grid">
+          <button mat-stroked-button
+                  (click)="requestNotificationPermission()"
+                  [disabled]="systemNotificationPermission === 'granted'">
+            <mat-icon>notifications_active</mat-icon>
+            Autoriser les notifications
           </button>
-        </span>
-      </div>
-    </div>
 
-    <!-- Types de notification -->
-    <div class="settings-section">
-      <h3>
-        <i class="material-icons">category</i>
-        Types de notification
-      </h3>
-      
-      <div class="settings-grid">
-        <div 
-          class="setting-item"
-          *ngFor="let type of notificationTypes"
-        >
-          <div class="setting-content">
-            <div class="setting-icon">
-              <i class="material-icons">{{ type.icon }}</i>
-            </div>
-            <div class="setting-info">
-              <h4>{{ type.label }}</h4>
-              <p>{{ type.description }}</p>
-            </div>
-          </div>
-          <div class="setting-control">
-            <label class="toggle-switch">
-              <input 
-                type="checkbox"
-                [formControlName]="type.key"
-              >
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
+          <button mat-stroked-button
+                  (click)="testNotification()">
+            <mat-icon>science</mat-icon>
+            Tester les notifications
+          </button>
+
+          <button mat-stroked-button
+                  color="primary"
+                  (click)="connectWebSocket()"
+                  [disabled]="(webSocketState$ | async) === WebSocketState.CONNECTED">
+            <mat-icon>wifi</mat-icon>
+            Connecter WebSocket
+          </button>
+
+          <button mat-stroked-button
+                  color="warn"
+                  (click)="disconnectWebSocket()"
+                  [disabled]="(webSocketState$ | async) === WebSocketState.DISCONNECTED">
+            <mat-icon>wifi_off</mat-icon>
+            Déconnecter WebSocket
+          </button>
         </div>
-      </div>
-    </div>
+      </mat-card-content>
+    </mat-card>
 
-    <!-- Actions -->
-    <div class="settings-actions">
-      <button 
-        type="button"
-        class="btn btn-outline-secondary"
-        (click)="onResetForm()"
-        [disabled]="loading || saving || !isFormDirty()"
-      >
-        <i class="material-icons">refresh</i>
-        Réinitialiser
-      </button>
+    <!-- Form Actions -->
+    <mat-card>
+      <mat-card-content>
+        <div class="form-actions">
+          <button mat-button
+                  type="button"
+                  (click)="onResetForm()"
+                  [disabled]="!isFormDirty() || saving">
+            <mat-icon>refresh</mat-icon>
+            Réinitialiser
+          </button>
 
-      <button 
-        type="submit"
-        class="btn btn-primary"
-        [disabled]="loading || saving || settingsForm.invalid"
-      >
-        <i class="material-icons" [class.spinning]="saving">
-          {{ saving ? 'refresh' : 'save' }}
-        </i>
-        {{ saving ? 'Sauvegarde...' : 'Sauvegarder' }}
-      </button>
-    </div>
-
-    <!-- Indicateur de modifications -->
-    <div class="form-status" *ngIf="isFormDirty()">
-      <i class="material-icons">info</i>
-      <span>Vous avez des modifications non sauvegardées</span>
-    </div>
+          <button mat-raised-button
+                  color="primary"
+                  type="button"
+                  (click)="onSaveSettings()"
+                  [disabled]="settingsForm.invalid || saving">
+            <mat-spinner *ngIf="saving" diameter="20" style="display: inline-block; margin-right: 8px;"></mat-spinner>
+            <mat-icon *ngIf="!saving">save</mat-icon>
+            {{ saving ? 'Sauvegarde...' : 'Sauvegarder' }}
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
   </form>
 </div>

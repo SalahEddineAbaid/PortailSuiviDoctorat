@@ -1,146 +1,370 @@
-<div class="admin-dashboard">
-  <!-- Header -->
-  <div class="dashboard-header">
-    <div class="header-content">
-      <h1 class="dashboard-title">
-        <i class="fas fa-tachometer-alt"></i>
-        Tableau de bord Administrateur
-      </h1>
-      <button 
-        type="button" 
-        (click)="onRefresh()" 
-        class="refresh-btn"
-        [disabled]="loading"
-        title="Actualiser les données"
-      >
-        <i class="fas fa-sync-alt" [class.fa-spin]="loading"></i>
-        Actualiser
-      </button>
-    </div>
-  </div>
+<div class="dashboard-layout">
+  <!-- Sidebar -->
+  <app-sidebar [menuItems]="menuItems"></app-sidebar>
 
-  <!-- Loading State -->
-  <div class="loading-container" *ngIf="loading">
-    <div class="loading-spinner">
-      <i class="fas fa-spinner fa-spin"></i>
-    </div>
-    <p>Chargement du tableau de bord...</p>
-  </div>
+  <!-- Main Content -->
+  <div class="dashboard-main">
+    <!-- Navbar -->
+    <app-navbar [user]="dashboard?.userStatistics || null"></app-navbar>
 
-  <!-- Dashboard Content -->
-  <div class="dashboard-content" *ngIf="!loading && (dashboardData$ | async) as dashboardData">
-    
-    <!-- Vue d'ensemble - Statistiques -->
-    <div class="dashboard-section">
-      <app-statistics 
-        [stats]="dashboardData.statistiques"
-        title="Vue d'ensemble des données"
-        [showTrends]="true">
-      </app-statistics>
-    </div>
-
-    <!-- Campagne Active -->
-    <div class="dashboard-section" *ngIf="dashboardData.campagneActive">
-      <div class="section-header">
-        <h2 class="section-title">
-          <i class="fas fa-calendar-alt"></i>
-          Campagne Active
-        </h2>
-      </div>
-      <div class="campagne-card">
-        <div class="campagne-info">
-          <h3 class="campagne-nom">{{ dashboardData.campagneActive.nom }}</h3>
-          <p class="campagne-details">
-            Année universitaire {{ dashboardData.campagneActive.anneeUniversitaire }}
-          </p>
-          <div class="campagne-dates">
-            <span class="date-item">
-              <i class="fas fa-calendar-plus"></i>
-              Ouverture: {{ dashboardData.campagneActive.dateOuverture | date:'dd/MM/yyyy' }}
-            </span>
-            <span class="date-item">
-              <i class="fas fa-calendar-minus"></i>
-              Fermeture: {{ dashboardData.campagneActive.dateFermeture | date:'dd/MM/yyyy' }}
-            </span>
-          </div>
+    <!-- Dashboard Content -->
+    <div class="dashboard-content">
+      <!-- Header -->
+      <div class="dashboard-header">
+        <div class="welcome-section">
+          <h1>{{ getWelcomeMessage() }}, Administrateur 🛠️</h1>
+          <p class="subtitle">Tableau de bord d'administration</p>
         </div>
-        <div class="campagne-status">
-          <span class="status-badge status-active">
-            <i class="fas fa-check-circle"></i>
-            Active
-          </span>
+        <div class="header-actions">
+          <div class="system-health" [class]="'health-' + getSystemHealthClass()">
+            <i [class]="'fas ' + getSystemHealthIcon()"></i>
+            <span>Système {{ getSystemHealthClass() }}</span>
+          </div>
+          <button class="btn-refresh" (click)="refreshDashboard()" [disabled]="isLoading">
+            <i class="fas fa-sync-alt" [class.spinning]="isLoading"></i>
+            Actualiser
+          </button>
         </div>
       </div>
-    </div>
 
-    <!-- Dossiers en attente de validation -->
-    <div class="dashboard-section">
-      <app-dossier-validation-list
-        [dossiers]="dashboardData.dossiersEnAttente"
-        [loading]="false"
-        title="Dossiers en attente de validation"
-        [showFilters]="true"
-        [showActions]="true"
-        (actionClicked)="onValidationAction($event)"
-        (filterChanged)="onFilterChanged($event)">
-      </app-dossier-validation-list>
-    </div>
-
-    <!-- Raccourcis de gestion -->
-    <div class="dashboard-section">
-      <div class="section-header">
-        <h2 class="section-title">
-          <i class="fas fa-tools"></i>
-          Raccourcis de gestion
-        </h2>
+      <!-- Error Message -->
+      <div *ngIf="error" class="error-message">
+        <i class="fas fa-exclamation-triangle"></i>
+        {{ error }}
       </div>
-      <div class="shortcuts-grid">
-        <a 
-          *ngFor="let shortcut of managementShortcuts"
-          [routerLink]="shortcut.route"
-          class="shortcut-card"
-          [ngClass]="'shortcut-' + shortcut.color"
-        >
-          <div class="shortcut-icon">
-            <i [class]="shortcut.icon"></i>
+
+      <!-- Loading State -->
+      <div *ngIf="isLoading" class="loading-state">
+        <div class="spinner"></div>
+        <p>Chargement du dashboard...</p>
+      </div>
+
+      <!-- Dashboard Content -->
+      <div *ngIf="!isLoading && dashboard" class="dashboard-grid">
+        
+        <!-- Row 1: Statistics Cards -->
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-icon primary">
+              <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-content">
+              <h3>{{ dashboard.statistics.totalUsers }}</h3>
+              <p>Utilisateurs totaux</p>
+              <span class="stat-detail">{{ dashboard.statistics.activeUsers }} actifs</span>
+            </div>
           </div>
-          <div class="shortcut-content">
-            <h3 class="shortcut-title">{{ shortcut.title }}</h3>
-            <p class="shortcut-description">{{ shortcut.description }}</p>
+
+          <div class="stat-card">
+            <div class="stat-icon success">
+              <i class="fas fa-file-alt"></i>
+            </div>
+            <div class="stat-content">
+              <h3>{{ dashboard.statistics.totalInscriptions }}</h3>
+              <p>Inscriptions</p>
+              <span class="stat-detail">{{ dashboard.statistics.inscriptionsEnAttente }} en attente</span>
+            </div>
           </div>
-          <div class="shortcut-arrow">
-            <i class="fas fa-chevron-right"></i>
+
+          <div class="stat-card">
+            <div class="stat-icon warning">
+              <i class="fas fa-calendar-check"></i>
+            </div>
+            <div class="stat-content">
+              <h3>{{ dashboard.statistics.activeCampagnes }}</h3>
+              <p>Campagnes actives</p>
+            </div>
           </div>
-        </a>
+
+          <div class="stat-card">
+            <div class="stat-icon danger">
+              <i class="fas fa-tasks"></i>
+            </div>
+            <div class="stat-content">
+              <h3>{{ dashboard.statistics.pendingValidations }}</h3>
+              <p>Validations en attente</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 2: Management Shortcuts -->
+        <div class="shortcuts-section">
+          <h2 class="section-title">
+            <i class="fas fa-bolt"></i>
+            Accès rapides
+          </h2>
+          <div class="shortcuts-grid">
+            <a 
+              *ngFor="let shortcut of managementShortcuts"
+              [routerLink]="shortcut.route"
+              class="shortcut-card"
+              [class]="'color-' + shortcut.color"
+            >
+              <i [class]="shortcut.icon"></i>
+              <h3>{{ shortcut.title }}</h3>
+              <p>{{ shortcut.description }}</p>
+            </a>
+          </div>
+        </div>
+
+        <!-- Row 3: User Statistics & Connection Statistics -->
+        <div class="content-row">
+          <!-- User Statistics Widget -->
+          <div class="widget user-stats-widget">
+            <div class="widget-header">
+              <h2><i class="fas fa-chart-pie"></i> Statistiques utilisateurs</h2>
+            </div>
+            <div class="widget-body">
+              <div class="stats-summary">
+                <div class="summary-item">
+                  <div class="summary-label">Total</div>
+                  <div class="summary-value primary">{{ dashboard.userStatistics.totalUsers }}</div>
+                </div>
+                <div class="summary-item">
+                  <div class="summary-label">Actifs</div>
+                  <div class="summary-value success">{{ dashboard.userStatistics.activeUsers }}</div>
+                </div>
+                <div class="summary-item">
+                  <div class="summary-label">Désactivés</div>
+                  <div class="summary-value danger">{{ dashboard.userStatistics.disabledUsers }}</div>
+                </div>
+              </div>
+
+              <div class="stats-details">
+                <h4>Répartition par rôle</h4>
+                <div class="role-stats">
+                  <div *ngFor="let roleData of dashboard.userStatistics.usersByRole" class="role-item">
+                    <div class="role-info">
+                      <span class="role-name">{{ roleData.role }}</span>
+                      <span class="role-count">{{ roleData.count }}</span>
+                    </div>
+                    <div class="role-bar">
+                      <div 
+                        class="role-bar-fill" 
+                        [style.width.%]="(roleData.count / dashboard.userStatistics.totalUsers) * 100"
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="new-users-stats">
+                  <div class="new-users-item">
+                    <i class="fas fa-user-plus"></i>
+                    <span>{{ dashboard.userStatistics.newUsersLastWeek }} nouveaux cette semaine</span>
+                  </div>
+                  <div class="new-users-item">
+                    <i class="fas fa-calendar-week"></i>
+                    <span>{{ dashboard.userStatistics.newUsersLastMonth }} nouveaux ce mois</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Connection Statistics Widget -->
+          <div class="widget connection-stats-widget">
+            <div class="widget-header">
+              <h2><i class="fas fa-chart-line"></i> Statistiques de connexion</h2>
+            </div>
+            <div class="widget-body">
+              <div class="stats-summary">
+                <div class="summary-item">
+                  <div class="summary-label">Connexions totales</div>
+                  <div class="summary-value primary">{{ dashboard.connectionStatistics.totalConnections }}</div>
+                </div>
+                <div class="summary-item">
+                  <div class="summary-label">Utilisateurs uniques</div>
+                  <div class="summary-value success">{{ dashboard.connectionStatistics.uniqueUsers }}</div>
+                </div>
+                <div class="summary-item">
+                  <div class="summary-label">Durée moyenne</div>
+                  <div class="summary-value info">{{ dashboard.connectionStatistics.averageSessionDuration }} min</div>
+                </div>
+              </div>
+
+              <div class="connection-details">
+                <div class="failed-logins">
+                  <i class="fas fa-exclamation-triangle"></i>
+                  <span>{{ dashboard.connectionStatistics.failedLoginAttempts }} tentatives échouées</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 4: Campagnes & Active Users -->
+        <div class="content-row">
+          <!-- Campagnes Widget -->
+          <div class="widget campagnes-widget">
+            <div class="widget-header">
+              <h2><i class="fas fa-calendar-alt"></i> Campagnes</h2>
+              <a routerLink="/admin/campagnes" class="view-all">Voir tout</a>
+            </div>
+            <div class="widget-body">
+              <div *ngIf="!hasCampagnes()" class="empty-state">
+                <i class="fas fa-calendar-times"></i>
+                <p>Aucune campagne</p>
+                <a routerLink="/admin/campagnes/new" class="btn-primary">Créer une campagne</a>
+              </div>
+
+              <div *ngIf="hasCampagnes()" class="campagnes-list">
+                <div 
+                  *ngFor="let campagne of dashboard.campagnes" 
+                  class="campagne-item"
+                  [class.active]="campagne.statut === 'active'"
+                >
+                  <div class="campagne-header">
+                    <h4>{{ campagne.nom }}</h4>
+                    <span class="badge" [class]="'badge-' + campagne.statut">
+                      {{ campagne.statut }}
+                    </span>
+                  </div>
+                  <p class="campagne-year">{{ campagne.anneeUniversitaire }}</p>
+                  <div class="campagne-dates">
+                    <span><i class="fas fa-calendar-day"></i> {{ campagne.dateDebut | date:'dd/MM/yyyy' }}</span>
+                    <span><i class="fas fa-calendar-check"></i> {{ campagne.dateFin | date:'dd/MM/yyyy' }}</span>
+                  </div>
+                  <div class="campagne-stats">
+                    <div class="campagne-stat">
+                      <span class="label">Total</span>
+                      <span class="value">{{ campagne.totalInscriptions }}</span>
+                    </div>
+                    <div class="campagne-stat">
+                      <span class="label">Validées</span>
+                      <span class="value success">{{ campagne.inscriptionsValidees }}</span>
+                    </div>
+                    <div class="campagne-stat">
+                      <span class="label">En attente</span>
+                      <span class="value warning">{{ campagne.inscriptionsEnAttente }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Active Users Widget -->
+          <div class="widget active-users-widget">
+            <div class="widget-header">
+              <h2><i class="fas fa-user-check"></i> Utilisateurs actifs</h2>
+              <a routerLink="/admin/users" class="view-all">Voir tout</a>
+            </div>
+            <div class="widget-body">
+              <div *ngIf="!hasActiveUsers()" class="empty-state">
+                <i class="fas fa-users-slash"></i>
+                <p>Aucun utilisateur actif</p>
+              </div>
+
+              <div *ngIf="hasActiveUsers()" class="users-table">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Utilisateur</th>
+                      <th>Rôle</th>
+                      <th>Dernière connexion</th>
+                      <th>Statut</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let user of dashboard.activeUsers">
+                      <td>
+                        <div class="user-cell">
+                          <i class="fas fa-user-circle"></i>
+                          <div>
+                            <div class="user-name">{{ user.firstName }} {{ user.lastName }}</div>
+                            <div class="user-email">{{ user.email }}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <span class="role-badge">{{ user.role }}</span>
+                      </td>
+                      <td>{{ user.lastConnection | date:'dd/MM/yyyy HH:mm' }}</td>
+                      <td>
+                        <span class="status-badge" [class.enabled]="user.enabled" [class.disabled]="!user.enabled">
+                          {{ user.enabled ? 'Actif' : 'Désactivé' }}
+                        </span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 5: Audit Logs & System Alerts -->
+        <div class="content-row">
+          <!-- Audit Logs Widget -->
+          <div class="widget audit-logs-widget">
+            <div class="widget-header">
+              <h2><i class="fas fa-history"></i> Logs d'audit récents</h2>
+            </div>
+            <div class="widget-body">
+              <div *ngIf="!hasAuditLogs()" class="empty-state">
+                <i class="fas fa-file-alt"></i>
+                <p>Aucun log disponible</p>
+              </div>
+
+              <div *ngIf="hasAuditLogs()" class="audit-logs-list">
+                <div *ngFor="let audit of dashboard.recentAudits" class="audit-log-item">
+                  <div class="audit-icon">
+                    <i class="fas fa-circle"></i>
+                  </div>
+                  <div class="audit-content">
+                    <div class="audit-header">
+                      <span class="audit-user">{{ audit.userName }}</span>
+                      <span class="audit-action">{{ audit.action }}</span>
+                    </div>
+                    <div class="audit-details">
+                      {{ audit.entityType }} #{{ audit.entityId }}
+                    </div>
+                    <div class="audit-meta">
+                      <span class="audit-time">{{ audit.timestamp | date:'dd/MM/yyyy HH:mm' }}</span>
+                      <span class="audit-ip">{{ audit.ipAddress }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- System Alerts Widget -->
+          <div class="widget system-alerts-widget">
+            <div class="widget-header">
+              <h2><i class="fas fa-exclamation-circle"></i> Alertes système</h2>
+            </div>
+            <div class="widget-body">
+              <div *ngIf="!hasSystemAlerts()" class="empty-state success">
+                <i class="fas fa-check-circle"></i>
+                <p>Aucune alerte système</p>
+              </div>
+
+              <div *ngIf="hasSystemAlerts()" class="system-alerts-list">
+                <div 
+                  *ngFor="let alert of dashboard.systemAlerts" 
+                  class="system-alert-item"
+                  [class]="'alert-' + alert.type"
+                >
+                  <div class="alert-icon">
+                    <i [class]="'fas fa-' + (alert.type === 'error' ? 'times-circle' : alert.type === 'warning' ? 'exclamation-triangle' : 'info-circle')"></i>
+                  </div>
+                  <div class="alert-content">
+                    <div class="alert-message">{{ alert.message }}</div>
+                    <div class="alert-meta">
+                      <span class="alert-severity" [class]="'severity-' + alert.severity">
+                        {{ alert.severity }}
+                      </span>
+                      <span class="alert-time">{{ alert.timestamp | date:'dd/MM/yyyy HH:mm' }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
-
-    <!-- Alertes système (si nécessaire) -->
-    <div class="dashboard-section" *ngIf="false">
-      <div class="section-header">
-        <h2 class="section-title">
-          <i class="fas fa-exclamation-triangle"></i>
-          Alertes système
-        </h2>
-      </div>
-      <div class="alert alert-info">
-        <i class="fas fa-info-circle"></i>
-        Aucune alerte système pour le moment.
-      </div>
-    </div>
-
-  </div>
-
-  <!-- Error State -->
-  <div class="error-container" *ngIf="!loading && !(dashboardData$ | async)">
-    <div class="error-icon">
-      <i class="fas fa-exclamation-triangle"></i>
-    </div>
-    <h3>Erreur de chargement</h3>
-    <p>Impossible de charger les données du tableau de bord.</p>
-    <button type="button" (click)="onRefresh()" class="retry-btn">
-      <i class="fas fa-redo"></i>
-      Réessayer
-    </button>
   </div>
 </div>

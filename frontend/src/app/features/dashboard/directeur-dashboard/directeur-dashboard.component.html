@@ -1,151 +1,313 @@
-<div class="directeur-dashboard" *ngIf="dashboardData$ | async as data">
-  <!-- Header Section -->
-  <div class="dashboard-header">
-    <div class="welcome-section">
-      <h1>Tableau de bord - Directeur de thèse</h1>
-      <p class="welcome-message" *ngIf="currentUser">
-        Bonjour {{ currentUser.FirstName }} {{ currentUser.LastName }}
-      </p>
-    </div>
-    
-    <div class="actions-section">
-      <button 
-        class="btn btn-primary" 
-        (click)="onRefreshData()"
-        title="Actualiser les données">
-        <i class="fas fa-sync-alt"></i>
-        Actualiser
-      </button>
-    </div>
-  </div>
+<div class="dashboard-layout">
+  <!-- Sidebar -->
+  <app-sidebar [menuItems]="menuItems"></app-sidebar>
 
-  <!-- Stats Overview -->
-  <div class="stats-grid">
-    <app-status-widget
-      [data]="{
-        title: 'Doctorants encadrés',
-        value: data.stats.totalDoctorants || 0,
-        icon: 'fas fa-users',
-        color: 'blue'
-      }">
-    </app-status-widget>
+  <!-- Main Content -->
+  <div class="dashboard-main">
+    <!-- Navbar -->
+    <app-navbar [user]="dashboard?.user || null"></app-navbar>
 
-    <app-status-widget
-      [data]="{
-        title: 'Inscriptions en attente',
-        value: data.stats.inscriptionsEnAttente || 0,
-        icon: 'fas fa-clock',
-        color: 'orange'
-      }">
-    </app-status-widget>
-
-    <app-status-widget
-      [data]="{
-        title: 'Demandes de soutenance',
-        value: data.stats.soutenancesEnAttente || 0,
-        icon: 'fas fa-graduation-cap',
-        color: 'blue'
-      }">
-    </app-status-widget>
-
-    <app-status-widget
-      [data]="{
-        title: 'Soutenances validées',
-        value: data.stats.soutenancesValidees || 0,
-        icon: 'fas fa-check-circle',
-        color: 'green'
-      }">
-    </app-status-widget>
-  </div>
-
-  <!-- Alerts Section -->
-  <div class="alerts-section" *ngIf="data.alerts && data.alerts.length > 0">
-    <h2>Alertes et notifications</h2>
-    <div class="alerts-grid">
-      <app-alert
-        *ngFor="let alert of data.alerts"
-        [type]="alert.type"
-        [title]="alert.title"
-        [message]="alert.message"
-        [dismissible]="true">
-      </app-alert>
-    </div>
-  </div>
-
-  <!-- Main Content Grid -->
-  <div class="main-content">
-    <!-- Doctorants List -->
-    <div class="doctorants-section">
-      <div class="section-header">
-        <h2>Mes doctorants</h2>
-        <span class="count-badge">{{ data.doctorants.length }}</span>
-      </div>
-      
-      <app-doctorant-list
-        [doctorants]="data.doctorants"
-        [showActions]="true"
-        (doctorantSelected)="onDoctorantSelected($any($event))">
-      </app-doctorant-list>
-    </div>
-
-    <!-- Recent Activity -->
-    <div class="activity-section">
-      <div class="section-header">
-        <h2>Activité récente</h2>
-      </div>
-      
-      <div class="activity-list">
-        <div 
-          class="activity-item"
-          *ngFor="let activity of data.recentActivity">
-          <div class="activity-icon">
-            <i [class]="activity.type === 'inscription' ? 'fas fa-user-plus' : 'fas fa-graduation-cap'"></i>
-          </div>
-          <div class="activity-content">
-            <p class="activity-message">{{ activity.message }}</p>
-            <span class="activity-date">{{ activity.date | date:'short' }}</span>
-          </div>
+    <!-- Dashboard Content -->
+    <div class="dashboard-content">
+      <!-- Header -->
+      <div class="dashboard-header">
+        <div class="welcome-section">
+          <h1>{{ getWelcomeMessage() }}, {{ getUserName() }} 👨‍🏫</h1>
+          <p class="subtitle">Tableau de bord de supervision</p>
         </div>
+        <button class="btn-refresh" (click)="refreshDashboard()" [disabled]="isLoading">
+          <i class="fas fa-sync-alt" [class.spinning]="isLoading"></i>
+          Actualiser
+        </button>
+      </div>
+
+      <!-- Error Message -->
+      <div *ngIf="error" class="error-message">
+        <i class="fas fa-exclamation-triangle"></i>
+        {{ error }}
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="isLoading" class="loading-state">
+        <div class="spinner"></div>
+        <p>Chargement de votre dashboard...</p>
+      </div>
+
+      <!-- Dashboard Content -->
+      <div *ngIf="!isLoading && dashboard" class="dashboard-grid">
         
-        <div class="no-activity" *ngIf="data.recentActivity.length === 0">
-          <i class="fas fa-info-circle"></i>
-          <p>Aucune activité récente</p>
+        <!-- Row 1: Statistics Cards -->
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-icon primary">
+              <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-content">
+              <h3>{{ dashboard.statistics.totalDoctorants }}</h3>
+              <p>Doctorants supervisés</p>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon warning">
+              <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-content">
+              <h3>{{ dashboard.statistics.demandesEnAttente }}</h3>
+              <p>Demandes en attente</p>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon success">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-content">
+              <h3>{{ dashboard.statistics.tauxValidation }}%</h3>
+              <p>Taux de validation</p>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon info">
+              <i class="fas fa-user-check"></i>
+            </div>
+            <div class="stat-content">
+              <h3>{{ dashboard.statistics.doctorantsActifs }}</h3>
+              <p>Doctorants actifs</p>
+            </div>
+          </div>
         </div>
+
+        <!-- Row 2: Demandes en attente & Doctorants -->
+        <div class="content-row">
+          <!-- Demandes en attente Widget -->
+          <div class="widget demandes-widget">
+            <div class="widget-header">
+              <h2>
+                <i class="fas fa-tasks"></i> 
+                Demandes en attente
+                <span *ngIf="dashboard.statistics.demandesEnAttente > 0" class="badge-count">
+                  {{ dashboard.statistics.demandesEnAttente }}
+                </span>
+              </h2>
+              <a routerLink="/directeur/validations" class="view-all">Voir tout</a>
+            </div>
+            <div class="widget-body">
+              <div *ngIf="!hasDemandesEnAttente()" class="empty-state">
+                <i class="fas fa-check-double"></i>
+                <p>Aucune demande en attente</p>
+              </div>
+
+              <div *ngIf="hasDemandesEnAttente()" class="demandes-list">
+                <div 
+                  *ngFor="let demande of dashboard.demandesEnAttente" 
+                  class="demande-item"
+                  [class.priority-haute]="demande.priorite === 'haute'"
+                >
+                  <div class="demande-header">
+                    <div class="demande-info">
+                      <h4>{{ demande.doctorantPrenom }} {{ demande.doctorantNom }}</h4>
+                      <p class="demande-type">
+                        <i [class]="'fas fa-' + (demande.type === 'inscription' ? 'file-alt' : 'exclamation-circle')"></i>
+                        {{ demande.description }}
+                      </p>
+                      <span class="demande-date">
+                        <i class="fas fa-calendar"></i>
+                        {{ demande.dateCreation | date:'dd/MM/yyyy' }}
+                      </span>
+                    </div>
+                    <div class="demande-priority">
+                      <span class="badge" [class]="'badge-' + demande.priorite">
+                        {{ demande.priorite }}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div class="demande-actions">
+                    <button 
+                      class="btn-action btn-view"
+                      (click)="onViewRequest(demande.id)"
+                      title="Voir les détails"
+                    >
+                      <i class="fas fa-eye"></i>
+                      Voir
+                    </button>
+                    <button 
+                      class="btn-action btn-approve"
+                      (click)="onApproveRequest(demande.id)"
+                      title="Valider"
+                    >
+                      <i class="fas fa-check"></i>
+                      Valider
+                    </button>
+                    <button 
+                      class="btn-action btn-reject"
+                      (click)="onRejectRequest(demande.id)"
+                      title="Rejeter"
+                    >
+                      <i class="fas fa-times"></i>
+                      Rejeter
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Doctorants Widget -->
+          <div class="widget doctorants-widget">
+            <div class="widget-header">
+              <h2><i class="fas fa-graduation-cap"></i> Mes doctorants</h2>
+              <a routerLink="/directeur/doctorants" class="view-all">Voir tout</a>
+            </div>
+            <div class="widget-body">
+              <div *ngIf="!hasDoctorants()" class="empty-state">
+                <i class="fas fa-user-graduate"></i>
+                <p>Aucun doctorant supervisé</p>
+              </div>
+
+              <div *ngIf="hasDoctorants()" class="doctorants-list">
+                <div 
+                  *ngFor="let doctorant of dashboard.doctorants" 
+                  class="doctorant-item"
+                  [routerLink]="['/directeur/doctorants', doctorant.id]"
+                >
+                  <div class="doctorant-avatar">
+                    <i class="fas fa-user-circle"></i>
+                  </div>
+                  <div class="doctorant-info">
+                    <h4>{{ doctorant.prenom }} {{ doctorant.nom }}</h4>
+                    <p class="doctorant-email">{{ doctorant.email }}</p>
+                    <p class="doctorant-sujet">{{ doctorant.sujetThese || 'Sujet non défini' }}</p>
+                    <div class="doctorant-meta">
+                      <span class="meta-item">
+                        <i class="fas fa-calendar"></i>
+                        {{ doctorant.anneesEcoulees }} année(s)
+                      </span>
+                      <span class="badge" [class]="'badge-' + doctorant.statut">
+                        {{ doctorant.statut }}
+                      </span>
+                    </div>
+                    <div *ngIf="doctorant.alertes && doctorant.alertes.length > 0" class="doctorant-alerts">
+                      <span *ngFor="let alerte of doctorant.alertes" class="alert-badge">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        {{ alerte }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 3: Statistiques & Notifications -->
+        <div class="content-row">
+          <!-- Statistiques Widget -->
+          <div class="widget statistics-widget">
+            <div class="widget-header">
+              <h2><i class="fas fa-chart-bar"></i> Statistiques de supervision</h2>
+            </div>
+            <div class="widget-body">
+              <div class="stats-grid">
+                <div class="stat-item">
+                  <div class="stat-label">Total doctorants</div>
+                  <div class="stat-value primary">{{ dashboard.statistics.totalDoctorants }}</div>
+                  <div class="stat-bar">
+                    <div class="stat-bar-fill primary" [style.width.%]="100"></div>
+                  </div>
+                </div>
+
+                <div class="stat-item">
+                  <div class="stat-label">Doctorants actifs</div>
+                  <div class="stat-value success">{{ dashboard.statistics.doctorantsActifs }}</div>
+                  <div class="stat-bar">
+                    <div 
+                      class="stat-bar-fill success" 
+                      [style.width.%]="(dashboard.statistics.doctorantsActifs / dashboard.statistics.totalDoctorants) * 100"
+                    ></div>
+                  </div>
+                </div>
+
+                <div class="stat-item">
+                  <div class="stat-label">Demandes validées</div>
+                  <div class="stat-value info">{{ dashboard.statistics.demandesValidees }}</div>
+                  <div class="stat-bar">
+                    <div 
+                      class="stat-bar-fill info" 
+                      [style.width.%]="dashboard.statistics.tauxValidation"
+                    ></div>
+                  </div>
+                </div>
+
+                <div class="stat-item">
+                  <div class="stat-label">Demandes rejetées</div>
+                  <div class="stat-value danger">{{ dashboard.statistics.demandesRejetees }}</div>
+                  <div class="stat-bar">
+                    <div 
+                      class="stat-bar-fill danger" 
+                      [style.width.%]="(dashboard.statistics.demandesRejetees / (dashboard.statistics.demandesValidees + dashboard.statistics.demandesRejetees || 1)) * 100"
+                    ></div>
+                  </div>
+                </div>
+
+                <div class="stat-item">
+                  <div class="stat-label">Taux de validation</div>
+                  <div class="stat-value warning">{{ dashboard.statistics.tauxValidation }}%</div>
+                  <div class="stat-bar">
+                    <div class="stat-bar-fill warning" [style.width.%]="dashboard.statistics.tauxValidation"></div>
+                  </div>
+                </div>
+
+                <div class="stat-item">
+                  <div class="stat-label">Délai moyen de validation</div>
+                  <div class="stat-value primary">{{ dashboard.statistics.moyenneDelaiValidation }} jours</div>
+                  <div class="stat-bar">
+                    <div class="stat-bar-fill primary" [style.width.%]="50"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Notifications Widget -->
+          <div class="widget notifications-widget">
+            <div class="widget-header">
+              <h2>
+                <i class="fas fa-bell"></i> 
+                Notifications
+                <span *ngIf="getNotificationCount() > 0" class="badge-count">{{ getNotificationCount() }}</span>
+              </h2>
+              <a routerLink="/notifications" class="view-all">Voir tout</a>
+            </div>
+            <div class="widget-body">
+              <div *ngIf="!hasNotifications()" class="empty-state">
+                <i class="fas fa-bell-slash"></i>
+                <p>Aucune notification</p>
+              </div>
+
+              <div *ngIf="hasNotifications()" class="notifications-list">
+                <div 
+                  *ngFor="let notification of dashboard.notifications" 
+                  class="notification-item"
+                  [class.unread]="!notification.lu"
+                >
+                  <div class="notification-icon" [class]="'priority-' + notification.priorite">
+                    <i class="fas fa-info-circle"></i>
+                  </div>
+                  <div class="notification-content">
+                    <h4>{{ notification.titre }}</h4>
+                    <p>{{ notification.message }}</p>
+                    <span class="notification-date">{{ notification.dateCreation | date:'dd/MM/yyyy HH:mm' }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
-  </div>
-
-  <!-- Quick Actions -->
-  <div class="quick-actions">
-    <h2>Actions rapides</h2>
-    <div class="actions-grid">
-      <button class="action-card" routerLink="/inscriptions">
-        <i class="fas fa-file-alt"></i>
-        <span>Gérer les inscriptions</span>
-      </button>
-      
-      <button class="action-card" routerLink="/soutenances">
-        <i class="fas fa-graduation-cap"></i>
-        <span>Gérer les soutenances</span>
-      </button>
-      
-      <button class="action-card" routerLink="/doctorants">
-        <i class="fas fa-users"></i>
-        <span>Voir tous les doctorants</span>
-      </button>
-      
-      <button class="action-card" routerLink="/rapports">
-        <i class="fas fa-chart-bar"></i>
-        <span>Rapports et statistiques</span>
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- Loading State -->
-<div class="loading-container" *ngIf="!(dashboardData$ | async)">
-  <div class="loading-spinner">
-    <i class="fas fa-spinner fa-spin"></i>
-    <p>Chargement du tableau de bord...</p>
   </div>
 </div>
