@@ -1,9 +1,9 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { NavbarComponent } from '../navigation/navbar/navbar.component';
-import { SidebarComponent, MenuItem } from '../navigation/sidebar/sidebar.component';
-import { BreadcrumbComponent } from '../navigation/breadcrumb/breadcrumb.component';
+import { NavbarComponent } from '../../navigation/navbar/navbar.component';
+import { SidebarComponent, MenuItem } from '../../navigation/sidebar/sidebar.component';
+import { BreadcrumbComponent } from '../../navigation/breadcrumb/breadcrumb.component';
 
 /**
  * App Layout Component

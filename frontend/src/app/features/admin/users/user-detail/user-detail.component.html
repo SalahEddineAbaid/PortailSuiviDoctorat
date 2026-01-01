@@ -1,0 +1,78 @@
+<div class="user-detail-container">
+    <!-- Header -->
+    <header class="detail-header">
+        <button class="btn btn-back" (click)="goBack()">
+            ← Retour à la liste
+        </button>
+        <h1>Détails de l'utilisateur</h1>
+    </header>
+
+    <!-- Success/Error Messages -->
+    <div class="alert alert-success" *ngIf="successMessage">
+        ✓ {{ successMessage }}
+    </div>
+    <div class="alert alert-error" *ngIf="errorMessage">
+        ⚠ {{ errorMessage }}
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-container" *ngIf="isLoading">
+        <div class="spinner"></div>
+        <p>Chargement...</p>
+    </div>
+
+    <!-- User Details -->
+    <div class="user-card" *ngIf="!isLoading && user">
+        <div class="user-header">
+            <div class="user-avatar">
+                {{ (user.FirstName || user.firstName || '?')[0] }}{{ (user.LastName || user.lastName || '?')[0] }}
+            </div>
+            <div class="user-info">
+                <h2>{{ getFullName() }}</h2>
+                <span class="status-badge" [class]="'status-' + getStatusColor()">
+                    {{ getUserStatus() }}
+                </span>
+            </div>
+        </div>
+
+        <div class="user-details">
+            <div class="detail-row">
+                <span class="label">Email</span>
+                <span class="value">{{ user.email }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Téléphone</span>
+                <span class="value">{{ user.tel || user.phoneNumber || '-' }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Rôles</span>
+                <span class="value">
+                    <span class="role-badge" *ngFor="let role of user.roles">{{ role }}</span>
+                </span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Statut du compte</span>
+                <span class="value">{{ user.enabled ? 'Activé' : 'Désactivé' }}</span>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn btn-primary" (click)="editUser()">
+                ✏️ Modifier
+            </button>
+            <button class="btn" [class.btn-warning]="isUserEnabled()" [class.btn-success]="!isUserEnabled()"
+                (click)="toggleUserStatus()">
+                {{ isUserEnabled() ? '🚫 Désactiver' : '✓ Activer' }}
+            </button>
+            <button class="btn btn-danger" (click)="deleteUser()">
+                🗑️ Supprimer
+            </button>
+        </div>
+    </div>
+
+    <!-- Error State -->
+    <div class="error-state" *ngIf="!isLoading && !user && errorMessage">
+        <p>{{ errorMessage }}</p>
+        <button class="btn btn-primary" (click)="goBack()">Retour à la liste</button>
+    </div>
+</div>

@@ -81,7 +81,9 @@ import { ToastService, ToastMessage } from '../../../../core/services/toast.serv
 export class ToastContainerComponent {
     @Input() position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' = 'top-right';
 
-    toasts$ = this.toastService.toasts$;
+    toasts$;
 
-    constructor(public toastService: ToastService) { }
+    constructor(public toastService: ToastService) {
+        this.toasts$ = this.toastService.toasts$;
+    }
 }

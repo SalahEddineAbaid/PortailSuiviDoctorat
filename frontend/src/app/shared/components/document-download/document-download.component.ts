@@ -8,7 +8,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
 
 import { DocumentService } from '../../../core/services/document.service';
-import { DocumentResponse, DocumentType } from '../../../core/models/document.model';
+import { DocumentResponse, TypeDocument } from '../../../core/models/document.model';
 
 export interface DownloadProgress {
   documentId: number;
@@ -83,7 +83,7 @@ export class DocumentDownloadComponent {
     const link = document.createElement('a');
     
     link.href = url;
-    link.download = this.document.nom;
+    link.download = this.document.nomFichier;
     link.style.display = 'none';
     
     document.body.appendChild(link);
@@ -115,15 +115,24 @@ export class DocumentDownloadComponent {
 
   // Helper methods for template
   get documentIcon(): string {
-    return this.documentService.getDocumentTypeIcon(this.document.type);
+    return this.documentService.getDocumentTypeIcon(this.document.typeDocument);
   }
 
   get documentTypeLabel(): string {
-    return this.documentService.getDocumentTypeLabel(this.document.type);
+    const labels: { [key: string]: string } = {
+      'DIPLOME_MASTER': 'Diplôme de Master',
+      'CV': 'CV',
+      'LETTRE_MOTIVATION': 'Lettre de motivation',
+      'RELEVE_NOTES': 'Relevé de notes',
+      'PROJET_THESE': 'Projet de thèse',
+      'AUTORISATION_DIRECTEUR': 'Autorisation du directeur',
+      'AUTRE': 'Autre document'
+    };
+    return labels[this.document.typeDocument] || this.document.typeDocument;
   }
 
   get formattedFileSize(): string {
-    return this.documentService.formatFileSize(this.document.taille);
+    return this.documentService.formatFileSize(this.document.tailleFichier);
   }
 
   get formattedDate(): string {
@@ -131,7 +140,7 @@ export class DocumentDownloadComponent {
   }
 
   get downloadLabel(): string {
-    return this.showLabel ? this.document.nom : 'Télécharger';
+    return this.showLabel ? this.document.nomFichier : 'Télécharger';
   }
 
   get isButtonStyle(): boolean {

@@ -15,8 +15,9 @@ export const doctorantDashboardResolver: ResolveFn<DoctorantDashboard | null> = 
 
   console.log('🔄 [RESOLVER] Préchargement dashboard doctorant...');
 
-  // Récupérer l'utilisateur connecté
-  const user = authService.currentUser$.value;
+  // Récupérer l'utilisateur connecté via pipe
+  let user: any = null;
+  authService.currentUser$.subscribe(u => user = u).unsubscribe();
 
   if (!user || !user.id) {
     console.error('❌ [RESOLVER] Utilisateur non connecté');

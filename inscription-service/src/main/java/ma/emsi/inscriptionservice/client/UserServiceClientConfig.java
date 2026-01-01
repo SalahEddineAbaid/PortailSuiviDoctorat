@@ -23,8 +23,8 @@ public class UserServiceClientConfig {
     @Bean
     public Request.Options requestOptions() {
         return new Request.Options(
-            5000,  // Connect timeout in milliseconds
-            5000   // Read timeout in milliseconds
+                5000, // Connect timeout in milliseconds
+                5000 // Read timeout in milliseconds
         );
     }
 
@@ -35,9 +35,9 @@ public class UserServiceClientConfig {
     @Bean
     public Retryer retryer() {
         return new Retryer.Default(
-            1000,  // Initial interval (1 second)
-            3000,  // Max interval (3 seconds)
-            3      // Max attempts
+                1000, // Initial interval (1 second)
+                3000, // Max interval (3 seconds)
+                3 // Max attempts
         );
     }
 
@@ -56,13 +56,13 @@ public class UserServiceClientConfig {
     public UserDTO getUserByIdFallback(Long userId, Throwable ex) {
         log.error("Failed to fetch user {}: {}. Using fallback.", userId, ex.getMessage());
         return UserDTO.builder()
-            .id(userId)
-            .firstName("Unknown")
-            .lastName("User")
-            .email("unknown@emsi.ma")
-            .role("UNKNOWN")
-            .active(false)
-            .build();
+                .id(userId)
+                .firstName("Unknown")
+                .lastName("User")
+                .email("unknown@emsi.ma")
+                .roles(java.util.Set.of("UNKNOWN"))
+                .active(false)
+                .build();
     }
 
     /**
@@ -72,13 +72,13 @@ public class UserServiceClientConfig {
     public UserDTO getDirectorInfoFallback(Long directeurId, Throwable ex) {
         log.error("Failed to fetch director {}: {}. Using fallback.", directeurId, ex.getMessage());
         return UserDTO.builder()
-            .id(directeurId)
-            .firstName("Directeur")
-            .lastName("Non disponible")
-            .email("directeur@emsi.ma")
-            .role("DIRECTEUR")
-            .active(false)
-            .build();
+                .id(directeurId)
+                .firstName("Directeur")
+                .lastName("Non disponible")
+                .email("directeur@emsi.ma")
+                .roles(java.util.Set.of("ROLE_DIRECTEUR"))
+                .active(false)
+                .build();
     }
 
     /**
@@ -88,12 +88,12 @@ public class UserServiceClientConfig {
     public UserDTO getStudentInfoFallback(Long doctorantId, Throwable ex) {
         log.error("Failed to fetch student {}: {}. Using fallback.", doctorantId, ex.getMessage());
         return UserDTO.builder()
-            .id(doctorantId)
-            .firstName("Étudiant")
-            .lastName("Non disponible")
-            .email("etudiant@emsi.ma")
-            .role("DOCTORANT")
-            .active(false)
-            .build();
+                .id(doctorantId)
+                .firstName("Étudiant")
+                .lastName("Non disponible")
+                .email("etudiant@emsi.ma")
+                .roles(java.util.Set.of("ROLE_DOCTORANT"))
+                .active(false)
+                .build();
     }
 }

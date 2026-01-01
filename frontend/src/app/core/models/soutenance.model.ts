@@ -1,5 +1,5 @@
 import { User } from './user.model';
-import { Document } from './document.model';
+import { DocumentResponse } from './document.model';
 
 /**
  * Soutenance (Defense) models aligned with backend DTOs
@@ -18,7 +18,7 @@ export interface Soutenance {
   statut: SoutenanceStatus;
   prerequis: PrerequisStatus;
   jury: JuryMember[];
-  documents: Document[];
+  documents: DocumentResponse[];
   rapporteurs: User[];
 }
 

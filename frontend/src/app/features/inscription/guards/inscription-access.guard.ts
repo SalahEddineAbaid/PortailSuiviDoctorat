@@ -27,7 +27,11 @@ export const inscriptionAccessGuard: CanActivateFn = (route: ActivatedRouteSnaps
     return false;
   }
 
-  const currentUser = authService.getCurrentUser();
+  const currentUserSubject = authService.currentUser$;
+  
+  // Get current user synchronously from BehaviorSubject
+  let currentUser: any = null;
+  currentUserSubject.subscribe(u => currentUser = u).unsubscribe();
   
   if (!currentUser) {
     console.error('InscriptionAccessGuard: No current user');
@@ -35,7 +39,7 @@ export const inscriptionAccessGuard: CanActivateFn = (route: ActivatedRouteSnaps
     return false;
   }
 
-  const userRole = currentUser.role?.name;
+  const userRole = currentUser.roles?.[0];
   const userId = currentUser.id;
 
   // Admin a accès à tout

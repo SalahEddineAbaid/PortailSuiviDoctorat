@@ -5,13 +5,13 @@ import { BehaviorSubject } from 'rxjs';
 
 import { DocumentService } from '../../../core/services/document.service';
 import { 
-  DocumentType, 
+  TypeDocument, 
   DocumentResponse, 
   DocumentUploadRequest 
 } from '../../../core/models/document.model';
 
 export interface DocumentUploadConfig {
-  type: DocumentType;
+  type: TypeDocument;
   label: string;
   required: boolean;
   maxSizeMB?: number;
@@ -155,11 +155,11 @@ export class DocumentUpload implements OnInit {
 
     const uploadRequest: DocumentUploadRequest = {
       file: this.selectedFile,
-      type: this.config.type,
-      obligatoire: this.config.required
+      typeDocument: this.config.type,
+      inscriptionId: this.inscriptionId
     };
 
-    this.documentService.uploadDocument(uploadRequest, this.inscriptionId).subscribe({
+    this.documentService.uploadDocumentSimple(this.inscriptionId!, this.selectedFile!, this.config.type).subscribe({
       next: (response) => {
         this.success = 'Document uploadé avec succès';
         this.documentsSubject.next([response]);

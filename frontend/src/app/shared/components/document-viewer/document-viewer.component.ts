@@ -9,7 +9,7 @@ import { Observable, BehaviorSubject, Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
 
 import { DocumentService } from '../../../core/services/document.service';
-import { DocumentResponse, DocumentType } from '../../../core/models/document.model';
+import { DocumentResponse, TypeDocument } from '../../../core/models/document.model';
 
 export interface DocumentViewerConfig {
   showToolbar?: boolean;
@@ -127,7 +127,7 @@ export class DocumentViewerComponent implements OnInit, OnDestroy {
           const url = window.URL.createObjectURL(blob);
           const link = document.createElement('a');
           link.href = url;
-          link.download = this.document.nom;
+          link.download = this.document.nomFichier;
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
@@ -161,15 +161,24 @@ export class DocumentViewerComponent implements OnInit, OnDestroy {
 
   // Helper methods for template
   get documentIcon(): string {
-    return this.documentService.getDocumentTypeIcon(this.document.type);
+    return this.documentService.getDocumentTypeIcon(this.document.typeDocument);
   }
 
   get documentTypeLabel(): string {
-    return this.documentService.getDocumentTypeLabel(this.document.type);
+    const labels: { [key: string]: string } = {
+      'DIPLOME_MASTER': 'Diplôme de Master',
+      'CV': 'CV',
+      'LETTRE_MOTIVATION': 'Lettre de motivation',
+      'RELEVE_NOTES': 'Relevé de notes',
+      'PROJET_THESE': 'Projet de thèse',
+      'AUTORISATION_DIRECTEUR': 'Autorisation du directeur',
+      'AUTRE': 'Autre document'
+    };
+    return labels[this.document.typeDocument] || this.document.typeDocument;
   }
 
   get formattedFileSize(): string {
-    return this.documentService.formatFileSize(this.document.taille);
+    return this.documentService.formatFileSize(this.document.tailleFichier);
   }
 
   get formattedDate(): string {

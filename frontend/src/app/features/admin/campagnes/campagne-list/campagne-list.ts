@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
-import { CampagneService, CampagneResponse, StatutCampagne } from '../../../core/services/campagne.service';
+import { CampagneService } from '../../../../core/services/campagne.service';
+import { CampagneResponse } from '../../../../core/models/campagne.model';
 
 interface FilterCriteria {
     searchTerm: string;
-    status: 'ALL' | StatutCampagne;
+    status: 'ALL' | string;
     year?: number;
 }
 
@@ -93,14 +94,14 @@ export class CampagneList implements OnInit {
         if (this.filters.searchTerm) {
             const term = this.filters.searchTerm.toLowerCase();
             filtered = filtered.filter(c =>
-                c.nom.toLowerCase().includes(term) ||
+                c.libelle.toLowerCase().includes(term) ||
                 (c.description && c.description.toLowerCase().includes(term))
             );
         }
 
-        // Status filter
+        // Status filter - simplified
         if (this.filters.status && this.filters.status !== 'ALL') {
-            filtered = filtered.filter(c => c.statut === this.filters.status);
+            filtered = filtered.filter(c => c.active === (this.filters.status === 'OUVERTE'));
         }
 
         // Year filter
@@ -152,17 +153,17 @@ export class CampagneList implements OnInit {
 
     // Actions
     closeCampagne(campagne: CampagneResponse): void {
-        if (!confirm(`Êtes-vous sûr de vouloir fermer la campagne "${campagne.nom}" ?`)) {
+        if (!confirm(`Êtes-vous sûr de vouloir fermer la campagne "${campagne.libelle}" ?`)) {
             return;
         }
 
         this.campagneService.fermerCampagne(campagne.id).subscribe({
             next: () => {
-                this.successMessage = `Campagne "${campagne.nom}" fermée avec succès`;
+                this.successMessage = `Campagne "${campagne.libelle}" fermée avec succès`;
                 this.loadCampagnes();
                 setTimeout(() => this.successMessage = '', 3000);
             },
-            error: (error) => {
+            error: (error: any) => {
                 console.error('Error closing campagne:', error);
                 this.errorMessage = 'Erreur lors de la fermeture de la campagne';
                 setTimeout(() => this.errorMessage = '', 3000);
@@ -185,15 +186,26 @@ export class CampagneList implements OnInit {
 
     // Helper methods
     formatDate(date: Date | string): string {
-        return this.campagneService.formatDate(date);
+        if (!date) return 'N/A';
+        return new Date(date).toLocaleDateString('fr-FR');
     }
 
-    getStatusLabel(statut: StatutCampagne): string {
-        return this.campagneService.getStatusLabel(statut);
+    getStatusLabel(statut: string): string {
+        const labels: { [key: string]: string } = {
+            'OUVERTE': 'Ouverte',
+            'FERMEE': 'Fermée',
+            'BROUILLON': 'Brouillon'
+        };
+        return labels[statut] || statut;
     }
 
-    getStatusColor(statut: StatutCampagne): string {
-        return this.campagneService.getStatusColor(statut);
+    getStatusColor(statut: string): string {
+        const colors: { [key: string]: string } = {
+            'OUVERTE': 'green',
+            'FERMEE': 'gray',
+            'BROUILLON': 'orange'
+        };
+        return colors[statut] || 'gray';
     }
 
     getDaysRemaining(campagne: CampagneResponse): number {
@@ -201,10 +213,10 @@ export class CampagneList implements OnInit {
     }
 
     isEndingSoon(campagne: CampagneResponse): boolean {
-        return this.campagneService.isEndingSoon(campagne);
+        return this.getDaysRemaining(campagne) <= 7 && this.getDaysRemaining(campagne) > 0;
     }
 
     isCurrentlyOpen(campagne: CampagneResponse): boolean {
-        return this.campagneService.isCurrentlyOpen(campagne);
+        return campagne.active && campagne.ouverte;
     }
 }

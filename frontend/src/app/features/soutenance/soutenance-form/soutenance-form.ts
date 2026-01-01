@@ -7,7 +7,7 @@ import { SoutenanceService } from '../../../core/services/soutenance.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { SoutenanceRequest, SoutenanceResponse, PrerequisStatus, JuryMemberRequest, JuryMember } from '../../../core/models/soutenance.model';
 import { DocumentUpload, DocumentUploadConfig } from '../../inscription/document-upload/document-upload';
-import { DocumentType, DocumentResponse } from '../../../core/models/document.model';
+import { TypeDocument, DocumentResponse } from '../../../core/models/document.model';
 import { CustomValidators } from '../../../core/validators/custom-validators';
 import { PrerequisCheckComponent } from '../../../shared/components/prerequis-check/prerequis-check.component';
 import { JuryProposalComponent } from '../jury-proposal/jury-proposal.component';
@@ -157,8 +157,8 @@ import { JuryProposalComponent } from '../jury-proposal/jury-proposal.component'
             <div class="document-list">
               <div class="document-item" *ngFor="let doc of uploadedDocuments">
                 <i class="icon-file-text"></i>
-                <span class="document-name">{{ getDocumentTypeLabel(doc.type) }}</span>
-                <span class="document-size">{{ formatFileSize(doc.taille) }}</span>
+                <span class="document-name">{{ getDocumentTypeLabel(doc.typeDocument) }}</span>
+                <span class="document-size">{{ formatFileSize(doc.tailleFichier) }}</span>
                 <span class="document-status" [class]="doc.valide ? 'valid' : 'pending'">
                   {{ doc.valide ? 'Validé' : 'En attente' }}
                 </span>
@@ -233,6 +233,14 @@ export class SoutenanceForm implements OnInit {
   directeurInfo?: { nom: string; prenom: string; etablissement: string; grade: string };
   juryData: JuryMemberRequest[] = [];
 
+  // Document type enum for local use
+  readonly DocumentType = {
+    MANUSCRIT_THESE: 'MANUSCRIT_THESE' as TypeDocument,
+    RESUME_THESE: 'RESUME_THESE' as TypeDocument,
+    PUBLICATIONS: 'PUBLICATIONS' as TypeDocument,
+    ATTESTATION_FORMATION: 'ATTESTATION_FORMATION' as TypeDocument
+  };
+
   constructor(
     private fb: FormBuilder,
     private soutenanceService: SoutenanceService,
@@ -245,7 +253,7 @@ export class SoutenanceForm implements OnInit {
     this.initializeDocumentConfigs();
     
     // Get current user ID
-    this.authService.getCurrentUser().subscribe(currentUser => {
+    this.authService.currentUser$.subscribe(currentUser => {
       if (currentUser) {
         this.currentUserId = currentUser.id;
       }
@@ -308,7 +316,7 @@ export class SoutenanceForm implements OnInit {
         
         // Load existing documents
         if (soutenance.documents) {
-          this.uploadedDocuments = soutenance.documents;
+          this.uploadedDocuments = (soutenance.documents as unknown as DocumentResponse[]);
         }
 
         // Load existing jury
@@ -329,7 +337,7 @@ export class SoutenanceForm implements OnInit {
   private initializeDocumentConfigs(): void {
     this.documentConfigs = [
       {
-        type: DocumentType.MANUSCRIT_THESE,
+        type: this.DocumentType.MANUSCRIT_THESE,
         label: 'Manuscrit de thèse',
         required: true,
         maxSizeMB: 50,
@@ -337,7 +345,7 @@ export class SoutenanceForm implements OnInit {
         description: 'Version finale du manuscrit de thèse au format PDF'
       },
       {
-        type: DocumentType.RESUME_THESE,
+        type: this.DocumentType.RESUME_THESE,
         label: 'Résumé de thèse',
         required: true,
         maxSizeMB: 5,
@@ -345,7 +353,7 @@ export class SoutenanceForm implements OnInit {
         description: 'Résumé détaillé de la thèse (2-4 pages)'
       },
       {
-        type: DocumentType.PUBLICATIONS,
+        type: this.DocumentType.PUBLICATIONS,
         label: 'Liste des publications',
         required: true,
         maxSizeMB: 10,
@@ -353,7 +361,7 @@ export class SoutenanceForm implements OnInit {
         description: 'Liste complète des publications scientifiques'
       },
       {
-        type: DocumentType.ATTESTATION_FORMATION,
+        type: this.DocumentType.ATTESTATION_FORMATION,
         label: 'Attestation de formation',
         required: true,
         maxSizeMB: 5,
@@ -486,7 +494,7 @@ export class SoutenanceForm implements OnInit {
 
   // Document handling methods
   onDocumentUploaded(document: DocumentResponse): void {
-    const existingIndex = this.uploadedDocuments.findIndex(doc => doc.type === document.type);
+    const existingIndex = this.uploadedDocuments.findIndex(doc => doc.typeDocument === document.typeDocument);
     if (existingIndex >= 0) {
       this.uploadedDocuments[existingIndex] = document;
     } else {
@@ -508,7 +516,7 @@ export class SoutenanceForm implements OnInit {
   }
 
   // Helper methods for template
-  getDocumentTypeLabel(type: DocumentType): string {
+  getDocumentTypeLabel(type: TypeDocument): string {
     const config = this.documentConfigs.find(c => c.type === type);
     return config?.label || type;
   }
@@ -541,17 +549,18 @@ export class SoutenanceForm implements OnInit {
    * Initialize director information for jury management
    */
   private initializeDirecteurInfo(): void {
-    const currentUser = this.authService.getCurrentUser();
-    if (currentUser) {
-      // In a real application, you would fetch the director info from the backend
-      // For now, we'll use placeholder data
-      this.directeurInfo = {
-        nom: 'Directeur', // This should come from the backend
-        prenom: 'Nom', // This should come from the backend
-        etablissement: 'Université', // This should come from the backend
-        grade: 'Professeur' // This should come from the backend
-      };
-    }
+    this.authService.currentUser$.subscribe(currentUser => {
+      if (currentUser) {
+        // In a real application, you would fetch the director info from the backend
+        // For now, we'll use placeholder data
+        this.directeurInfo = {
+          nom: 'Directeur', // This should come from the backend
+          prenom: 'Nom', // This should come from the backend
+          etablissement: 'Université', // This should come from the backend
+          grade: 'Professeur' // This should come from the backend
+        };
+      }
+    });
   }
 
   /**

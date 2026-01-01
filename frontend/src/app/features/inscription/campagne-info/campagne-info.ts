@@ -2,8 +2,9 @@ import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
 
-import { InscriptionService } from '../../../core/services/inscription.service';
-import { CampagneResponse, TypeInscription } from '../../../core/models/inscription.model';
+import { CampagneService } from '../../../core/services/campagne.service';
+import { CampagneResponse, TypeCampagne, isCampagneActive } from '../../../core/models/campagne.model';
+import { TypeInscription } from '../../../core/models/inscription.model';
 
 @Component({
   selector: 'app-campagne-info',
@@ -23,7 +24,7 @@ export class CampagneInfo implements OnInit {
   loading = false;
   error: string | null = null;
 
-  constructor(private inscriptionService: InscriptionService) {}
+  constructor(private campagneService: CampagneService) {}
 
   ngOnInit(): void {
     this.loadCampagnes();
@@ -35,7 +36,7 @@ export class CampagneInfo implements OnInit {
 
     if (this.compact) {
       // Load only active campaign for compact view
-      this.campagneActive$ = this.inscriptionService.getCampagneActive();
+      this.campagneActive$ = this.campagneService.getCampagneActive();
       this.campagneActive$.subscribe({
         next: () => {
           this.loading = false;
@@ -48,7 +49,7 @@ export class CampagneInfo implements OnInit {
       });
     } else {
       // Load all campaigns for full view
-      this.campagnes$ = this.inscriptionService.getAllCampagnes();
+      this.campagnes$ = this.campagneService.getAllCampagnes();
       this.campagnes$.subscribe({
         next: () => {
           this.loading = false;
@@ -67,7 +68,7 @@ export class CampagneInfo implements OnInit {
   }
 
   isCampagneOpen(campagne: CampagneResponse): boolean {
-    return this.inscriptionService.isCampagneOuverte(campagne);
+    return isCampagneActive(campagne);
   }
 
   getCampagneStatusClass(campagne: CampagneResponse): string {
@@ -88,28 +89,26 @@ export class CampagneInfo implements OnInit {
     return 'schedule';
   }
 
-  getTypeLabel(type: TypeInscription): string {
-    const labels = {
-      [TypeInscription.PREMIERE]: 'Première inscription',
-      [TypeInscription.REINSCRIPTION]: 'Réinscription'
+  getTypeLabel(type: TypeCampagne | string): string {
+    const labels: { [key: string]: string } = {
+      'INSCRIPTION': 'Première inscription',
+      'REINSCRIPTION': 'Réinscription',
+      'MIXTE': 'Mixte'
     };
     return labels[type] || type;
   }
 
-  getTypeIcon(type: TypeInscription): string {
-    const icons = {
-      [TypeInscription.PREMIERE]: 'person_add',
-      [TypeInscription.REINSCRIPTION]: 'refresh'
+  getTypeIcon(type: TypeCampagne | string): string {
+    const icons: { [key: string]: string } = {
+      'INSCRIPTION': 'person_add',
+      'REINSCRIPTION': 'refresh',
+      'MIXTE': 'swap_horiz'
     };
     return icons[type] || 'help';
   }
 
   getDaysRemaining(campagne: CampagneResponse): number {
-    const now = new Date();
-    const fermeture = new Date(campagne.dateFermeture);
-    const diffTime = fermeture.getTime() - now.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
+    return this.campagneService.getDaysRemaining(campagne);
   }
 
   getDaysRemainingLabel(campagne: CampagneResponse): string {

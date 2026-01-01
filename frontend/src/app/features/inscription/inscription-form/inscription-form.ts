@@ -23,7 +23,7 @@ import { map, startWith, takeUntil, debounceTime } from 'rxjs/operators';
 import { InscriptionService } from '../../../core/services/inscription.service';
 import { CampagneService } from '../../../core/services/campagne.service';
 import { DocumentService } from '../../../core/services/document.service';
-import { AuthService } from '../../../core/services/auth.service';
+import { AuthService, UserInfo } from '../../../core/services/auth.service';
 import { UserService } from '../../../core/services/user.service';
 
 import { 
@@ -76,7 +76,7 @@ export class InscriptionForm implements OnInit, OnDestroy {
   campagneActive$!: Observable<CampagneResponse | null>;
   directeurs: UserResponse[] = [];
   filteredDirecteurs$!: Observable<UserResponse[]>;
-  currentUser: any;
+  currentUser: UserInfo | null = null;
   
   // State
   loading = false;
@@ -144,10 +144,14 @@ export class InscriptionForm implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.currentUser = this.authService.getCurrentUser();
-    this.loadData();
-    this.setupAutoSave();
-    this.checkEditMode();
+    this.authService.currentUser$.subscribe(user => {
+      this.currentUser = user;
+      if (user) {
+        this.loadData();
+        this.setupAutoSave();
+        this.checkEditMode();
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -464,6 +468,10 @@ export class InscriptionForm implements OnInit, OnDestroy {
   }
 
   private prepareInscriptionData(): InscriptionRequest {
+    if (!this.currentUser) {
+      throw new Error('Utilisateur non connecté');
+    }
+    
     const formData = {
       ...this.infoGeneralesForm.value,
       ...this.infosPersonnellesForm.value,
@@ -533,11 +541,17 @@ export class InscriptionForm implements OnInit, OnDestroy {
   }
 
   private submitInscription(): void {
+    if (!this.currentUser) {
+      this.showError('Utilisateur non connecté');
+      return;
+    }
+    
     this.submitting = true;
+    const userId = this.currentUser.id;
     
     if (this.draftId) {
       // Submit existing draft
-      this.inscriptionService.soumettre(this.draftId, this.currentUser.id).subscribe({
+      this.inscriptionService.soumettre(this.draftId, userId).subscribe({
         next: (response) => {
           this.submitting = false;
           this.showSuccess('Inscription soumise avec succès !');
@@ -555,7 +569,7 @@ export class InscriptionForm implements OnInit, OnDestroy {
       const data = this.prepareInscriptionData();
       this.inscriptionService.createInscription(data).subscribe({
         next: (response) => {
-          this.inscriptionService.soumettre(response.id, this.currentUser.id).subscribe({
+          this.inscriptionService.soumettre(response.id, userId).subscribe({
             next: (finalResponse) => {
               this.submitting = false;
               this.showSuccess('Inscription soumise avec succès !');

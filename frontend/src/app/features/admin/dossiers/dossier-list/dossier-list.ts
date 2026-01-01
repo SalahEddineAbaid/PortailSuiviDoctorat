@@ -3,8 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
-import { DossierValidationService, InscriptionResponse, StatutInscription } from '../../../core/services/dossier-validation.service';
-import { CampagneService, CampagneResponse } from '../../../core/services/campagne.service';
+import { DossierValidationService, InscriptionResponse, StatutInscription } from '../../../../core/services/dossier-validation.service';
+import { CampagneService } from '../../../../core/services/campagne.service';
+import { CampagneResponse } from '../../../../core/models/campagne.model';
 
 interface FilterCriteria {
     searchTerm: string;
@@ -175,7 +176,7 @@ export class DossierList implements OnInit {
     getCampagneName(dossier: InscriptionResponse): string {
         if (dossier.campagne) return dossier.campagne.nom;
         const campagne = this.campagnes.find(c => c.id === dossier.campagneId);
-        return campagne ? campagne.nom : 'N/A';
+        return campagne?.libelle || campagne?.nom || 'N/A';
     }
 
     formatDate(date: Date | string): string {

@@ -30,19 +30,36 @@ export class DashboardService {
 
     return forkJoin({
       // Endpoint principal qui retourne toutes les données
-      dashboardData: this.http.get<any>(`${this.API_URL}/inscriptions/doctorant/${userId}/dashboard`),
+      dashboardData: this.http.get<any>(`${this.API_URL}/inscriptions/doctorant/${userId}/dashboard`).pipe(
+        catchError(error => {
+          console.warn('⚠️ [DASHBOARD SERVICE] Erreur endpoint dashboard, utilisation données par défaut:', error);
+          return of({
+            totalInscriptions: 0,
+            inscriptionsEnCours: 0,
+            inscriptionsValidees: 0,
+            inscriptionsEnAttente: 0,
+            documentsManquants: 0,
+            progressionThese: 0,
+            anneesEcoulees: 0,
+            anneesRestantes: 3,
+            inscriptions: []
+          });
+        })
+      ),
       // Notifications non lues
       notifications: this.http.get<NotificationSummary[]>(`${this.API_URL}/notifications/user/${userId}/unread`).pipe(
         catchError(() => of([]))
       ),
       // Profil utilisateur
-      user: this.authService.getCurrentUser()
+      user: this.authService.getCurrentUser().pipe(
+        catchError(() => of(null))
+      )
     }).pipe(
       map(({ dashboardData, notifications, user }) => {
         console.log('✅ [DASHBOARD SERVICE] Données chargées:', dashboardData);
 
         return {
-          user: user as UserInfo,
+          user: (user || {}) as UserInfo,
           statistics: {
             totalInscriptions: dashboardData.totalInscriptions || 0,
             inscriptionsEnCours: dashboardData.inscriptionsEnCours || 0,
@@ -91,7 +108,9 @@ export class DashboardService {
         catchError(() => of([]))
       ),
       // Profil utilisateur
-      user: this.authService.getCurrentUser()
+      user: this.authService.getCurrentUser().pipe(
+        catchError(() => of(null))
+      )
     }).pipe(
       map(({ demandesEnAttente, notifications, user }) => {
         console.log('✅ [DASHBOARD SERVICE] Données directeur chargées');
@@ -118,7 +137,7 @@ export class DashboardService {
         const doctorants = Array.from(doctorantsMap.values());
 
         return {
-          user: user as UserInfo,
+          user: (user || {}) as UserInfo,
           statistics: {
             totalDoctorants: doctorants.length,
             doctorantsActifs: doctorants.length,

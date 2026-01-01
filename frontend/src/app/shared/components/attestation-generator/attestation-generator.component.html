@@ -20,7 +20,7 @@
         [class.invalid]="isFieldInvalid('inscriptionId')">
         <option value="">Sélectionnez une inscription</option>
         <option *ngFor="let inscription of inscriptions" [value]="inscription.id">
-          {{ inscription.campagne.anneeUniversitaire }} - {{ inscription.sujetThese }}
+          {{ inscription.anneeInscription }} - {{ inscription.sujetThese }}
         </option>
       </select>
       <div class="field-error" *ngIf="isFieldInvalid('inscriptionId')">
@@ -110,12 +110,12 @@
         <div class="preview-item">
           <span class="preview-label">Étudiant:</span>
           <span class="preview-value">
-            {{ selectedInscription.doctorant.FirstName }} {{ selectedInscription.doctorant.LastName }}
+            Doctorant #{{ selectedInscription.doctorantId }}
           </span>
         </div>
         <div class="preview-item">
-          <span class="preview-label">Année universitaire:</span>
-          <span class="preview-value">{{ selectedInscription.campagne.anneeUniversitaire }}</span>
+          <span class="preview-label">Année d'inscription:</span>
+          <span class="preview-value">{{ selectedInscription.anneeInscription }}</span>
         </div>
         <div class="preview-item">
           <span class="preview-label">Sujet de thèse:</span>

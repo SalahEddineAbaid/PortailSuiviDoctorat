@@ -22,7 +22,7 @@
   mat-icon-button
   [disabled]="!canDownload"
   (click)="onDownload()"
-  [matTooltip]="'Télécharger ' + document.nom"
+  [matTooltip]="'Télécharger ' + document.nomFichier"
   class="download-icon-button">
   
   <mat-spinner *ngIf="downloading$ | async" diameter="20"></mat-spinner>

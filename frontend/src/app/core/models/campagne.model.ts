@@ -33,12 +33,15 @@ export interface CloneCampagneRequest {
 export interface CampagneResponse {
   id: number;
   libelle: string;
+  nom?: string; // Alias for libelle
   type: TypeCampagne;
   dateDebut: string;
   dateFin: string;
   active: boolean;
   anneeUniversitaire: number;
   ouverte: boolean;
+  statut?: string;
+  description?: string;
 }
 
 export interface StatistiquesCampagne {

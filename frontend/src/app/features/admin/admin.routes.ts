@@ -9,6 +9,9 @@ import { CampagneManagementComponent } from './campagne-management/campagne-mana
 import { UserManagementComponent } from './user-management/user-management.component';
 import { DossierValidationComponent } from './dossier-validation/dossier-validation.component';
 import { ParametrageComponent } from './parametrage/parametrage.component';
+import { UserList } from './users/user-list/user-list';
+import { UserDetailComponent } from './users/user-detail/user-detail.component';
+import { UserEditComponent } from './users/user-edit/user-edit.component';
 
 const routes: Routes = [
   {
@@ -20,9 +23,15 @@ const routes: Routes = [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', redirectTo: '/dashboard/admin', pathMatch: 'full' },
       { path: 'campagnes', component: CampagneManagementComponent },
-      { path: 'utilisateurs', component: UserManagementComponent },
+      { path: 'users', component: UserList },
+      { path: 'users/:id', component: UserDetailComponent },
+      { path: 'users/:id/edit', component: UserEditComponent },
+      { path: 'utilisateurs', redirectTo: 'users', pathMatch: 'full' },
       { path: 'validations', component: DossierValidationComponent },
-      { path: 'parametrage', component: ParametrageComponent }
+      { path: 'dossiers', component: DossierValidationComponent },
+      { path: 'parametrage', component: ParametrageComponent },
+      { path: 'configuration', redirectTo: 'parametrage', pathMatch: 'full' },
+      { path: 'statistics', redirectTo: '/dashboard/admin', pathMatch: 'full' }
     ]
   }
 ];

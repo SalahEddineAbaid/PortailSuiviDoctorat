@@ -32,6 +32,9 @@ public class JwtProvider {
     @Value("${jwt.refresh-expiration}") // 7 jours par défaut
     private long refreshExpirationMs;
 
+    @Value("${jwt.issuer:user-service}")
+    private String issuer;
+
     /**
      * Génère un Access Token depuis une Authentication (Spring Security)
      */
@@ -85,6 +88,7 @@ public class JwtProvider {
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(subject)
+                .setIssuer(issuer)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + validity))
                 .signWith(Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8)), SignatureAlgorithm.HS256)

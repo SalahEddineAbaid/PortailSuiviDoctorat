@@ -56,10 +56,9 @@ public class InscriptionService {
         inscriptionRepository.findInscriptionByDoctorantAndAnnee(
                 request.getDoctorantId(),
                 request.getType(),
-                request.getAnneeInscription()
-        ).ifPresent(i -> {
-            throw new RuntimeException("Une inscription existe déjà pour cette année");
-        });
+                request.getAnneeInscription()).ifPresent(i -> {
+                    throw new RuntimeException("Une inscription existe déjà pour cette année");
+                });
 
         // Récupérer la première inscription si c'est une réinscription
         LocalDateTime datePremiereInscription = null;
@@ -71,8 +70,7 @@ public class InscriptionService {
 
             // Vérifier la durée
             long duree = java.time.temporal.ChronoUnit.YEARS.between(
-                    datePremiereInscription, LocalDateTime.now()
-            );
+                    datePremiereInscription, LocalDateTime.now());
 
             if (duree >= 6) {
                 throw new RuntimeException("Durée maximale de 6 ans dépassée");
@@ -82,32 +80,30 @@ public class InscriptionService {
             if (duree >= 3) {
                 log.warn("Dépassement de 3 ans pour le doctorant {}, vérification de la dérogation",
                         request.getDoctorantId());
-                
+
                 // Calculate precise duration in years (including fractional years)
                 double dureeExacte = java.time.temporal.ChronoUnit.DAYS.between(
-                        datePremiereInscription, LocalDateTime.now()
-                ) / 365.25;
-                
+                        datePremiereInscription, LocalDateTime.now()) / 365.25;
+
                 // Check if approved derogation exists
                 Inscription premiereInscription = inscriptionRepository
                         .findPremiereInscriptionByDoctorant(request.getDoctorantId())
                         .orElseThrow(() -> new RuntimeException("Première inscription introuvable"));
-                
+
                 boolean hasApprovedDerogation = derogationService
                         .getDerogation(premiereInscription.getId())
                         .map(d -> d.getStatut() == ma.emsi.inscriptionservice.enums.StatutDerogation.APPROUVE_PED)
                         .orElse(false);
-                
+
                 if (!hasApprovedDerogation) {
                     log.error("Tentative de réinscription sans dérogation approuvée pour le doctorant {} " +
                             "(durée: {} ans)", request.getDoctorantId(), dureeExacte);
                     throw new DerogationRequiredException(
                             premiereInscription.getId(),
                             request.getDoctorantId(),
-                            dureeExacte
-                    );
+                            dureeExacte);
                 }
-                
+
                 log.info("Dérogation approuvée trouvée pour le doctorant {}, réinscription autorisée",
                         request.getDoctorantId());
             }
@@ -194,7 +190,7 @@ public class InscriptionService {
 
         // Requirement 4.6: Verify and generate alerts when submitting re-registration
         if (inscription.getType() == TypeInscription.REINSCRIPTION) {
-            log.info("Vérification des alertes de durée lors de la soumission de l'inscription {}", 
+            log.info("Vérification des alertes de durée lors de la soumission de l'inscription {}",
                     inscriptionId);
             alerteService.verifierEtGenererAlertes(inscription);
         }
@@ -216,15 +212,13 @@ public class InscriptionService {
         // Envoyer notification au directeur
         notificationService.notifierDirecteurNouvelleDemande(
                 inscription.getDirecteurTheseId(),
-                inscriptionId
-        );
+                inscriptionId);
 
         // Requirement 7.1: Publish INSCRIPTION_SOUMISE event
         notificationService.publierEvenementInscriptionSoumise(
                 inscriptionId,
                 inscription.getDoctorantId(),
-                inscription.getDirecteurTheseId()
-        );
+                inscription.getDirecteurTheseId());
 
         log.info("Inscription {} soumise avec succès", inscriptionId);
 
@@ -236,7 +230,7 @@ public class InscriptionService {
      */
     @Transactional
     public InscriptionResponse validerParDirecteur(Long inscriptionId, ValidationRequest request,
-                                                   Long directeurId) {
+            Long directeurId) {
         log.info("Validation de l'inscription {} par le directeur {}", inscriptionId, directeurId);
 
         Inscription inscription = inscriptionRepository.findById(inscriptionId)
@@ -258,8 +252,8 @@ public class InscriptionService {
                 .orElseThrow(() -> new RuntimeException("Validation introuvable"));
 
         // Déterminer le statut basé sur approuve
-        StatutValidation statutValidation = Boolean.TRUE.equals(request.getApprouve()) 
-                ? StatutValidation.APPROUVE 
+        StatutValidation statutValidation = Boolean.TRUE.equals(request.getApprouve())
+                ? StatutValidation.APPROUVE
                 : StatutValidation.REJETE;
 
         // Mettre à jour la validation
@@ -290,8 +284,7 @@ public class InscriptionService {
             // Requirement 7.2: Publish INSCRIPTION_VALIDEE_DIRECTEUR event
             notificationService.publierEvenementInscriptionValideeDirecteur(
                     inscriptionId,
-                    directeurId
-            );
+                    directeurId);
         } else {
             inscription.setStatut(StatutInscription.REJETE);
 
@@ -302,8 +295,7 @@ public class InscriptionService {
             notificationService.publierEvenementInscriptionRejeteeDirecteur(
                     inscriptionId,
                     directeurId,
-                    request.getCommentaire()
-            );
+                    request.getCommentaire());
         }
 
         inscription = inscriptionRepository.save(inscription);
@@ -348,8 +340,8 @@ public class InscriptionService {
         }
 
         // Déterminer le statut basé sur approuve
-        StatutValidation statutValidation = Boolean.TRUE.equals(request.getApprouve()) 
-                ? StatutValidation.APPROUVE 
+        StatutValidation statutValidation = Boolean.TRUE.equals(request.getApprouve())
+                ? StatutValidation.APPROUVE
                 : StatutValidation.REJETE;
 
         // Mettre à jour la validation
@@ -377,8 +369,7 @@ public class InscriptionService {
             notificationService.notifierValidationDefinitive(
                     inscription.getDoctorantId(),
                     inscription.getDirecteurTheseId(),
-                    inscriptionId
-            );
+                    inscriptionId);
 
             // Requirement 7.4: Publish INSCRIPTION_VALIDEE_ADMIN event
             notificationService.publierEvenementInscriptionValideeAdmin(inscriptionId);
@@ -391,8 +382,7 @@ public class InscriptionService {
             // Requirement 7.5: Publish INSCRIPTION_REJETEE_ADMIN event
             notificationService.publierEvenementInscriptionRejeteeAdmin(
                     inscriptionId,
-                    request.getCommentaire()
-            );
+                    request.getCommentaire());
         }
 
         inscription = inscriptionRepository.save(inscription);
@@ -446,8 +436,11 @@ public class InscriptionService {
      * Requirements: 2.6, 2.7
      */
     public byte[] getAttestation(Long inscriptionId, Long userId, String role) {
-        log.info("Récupération de l'attestation pour l'inscription {} par l'utilisateur {} (role: {})", 
+        log.info("Récupération de l'attestation pour l'inscription {} par l'utilisateur {} (role: {})",
                 inscriptionId, userId, role);
+
+        // Normalize role (handle both "DOCTORANT" and "ROLE_DOCTORANT" formats)
+        String normalizedRole = role != null ? role.replace("ROLE_", "") : "";
 
         // Récupérer l'inscription
         Inscription inscription = inscriptionRepository.findById(inscriptionId)
@@ -455,12 +448,12 @@ public class InscriptionService {
 
         // Vérifier l'autorisation (Requirements 2.6)
         boolean isAuthorized = false;
-        
-        if ("DOCTORANT".equals(role) && inscription.getDoctorantId().equals(userId)) {
+
+        if ("DOCTORANT".equals(normalizedRole) && inscription.getDoctorantId().equals(userId)) {
             isAuthorized = true;
-        } else if ("DIRECTEUR".equals(role) && inscription.getDirecteurTheseId().equals(userId)) {
+        } else if ("DIRECTEUR".equals(normalizedRole) && inscription.getDirecteurTheseId().equals(userId)) {
             isAuthorized = true;
-        } else if ("ADMIN".equals(role)) {
+        } else if ("ADMIN".equals(normalizedRole)) {
             isAuthorized = true;
         }
 
@@ -476,15 +469,15 @@ public class InscriptionService {
         // Lire le fichier depuis le système de fichiers
         try {
             Path filePath = Paths.get(documentGenere.getCheminFichier());
-            
+
             if (!Files.exists(filePath)) {
                 throw new RuntimeException("Le fichier d'attestation n'existe pas sur le disque");
             }
 
             byte[] pdfContent = Files.readAllBytes(filePath);
-            
+
             log.info("Attestation récupérée avec succès pour l'inscription {}", inscriptionId);
-            
+
             return pdfContent;
         } catch (IOException e) {
             log.error("Erreur lors de la lecture du fichier d'attestation: {}", e.getMessage());
@@ -540,12 +533,12 @@ public class InscriptionService {
      * @return true si le directeur est le directeur de thèse du doctorant
      */
     public boolean isDirecteurOfDoctorant(Long directeurId, Long doctorantId) {
-        log.debug("Vérification si le directeur {} est le directeur du doctorant {}", 
+        log.debug("Vérification si le directeur {} est le directeur du doctorant {}",
                 directeurId, doctorantId);
-        
+
         // Check if there's any inscription where this director is the thesis director
         List<Inscription> inscriptions = inscriptionRepository.findByDoctorantId(doctorantId);
-        
+
         return inscriptions.stream()
                 .anyMatch(inscription -> inscription.getDirecteurTheseId().equals(directeurId));
     }
@@ -555,8 +548,7 @@ public class InscriptionService {
                 TypeDocument.DIPLOME_MASTER,
                 TypeDocument.CV,
                 TypeDocument.LETTRE_MOTIVATION,
-                TypeDocument.RELEVE_NOTES
-        );
+                TypeDocument.RELEVE_NOTES);
 
         for (TypeDocument type : documentsObligatoires) {
             if (!documentRepository.existsByInscriptionIdAndTypeDocument(inscriptionId, type)) {
@@ -589,7 +581,8 @@ public class InscriptionService {
     }
 
     private InfosDoctorantResponse mapInfosDoctorant(InfosDoctorant infos) {
-        if (infos == null) return null;
+        if (infos == null)
+            return null;
         return InfosDoctorantResponse.builder()
                 .id(infos.getId())
                 .cin(infos.getCin())
@@ -605,7 +598,8 @@ public class InscriptionService {
     }
 
     private InfosTheseResponse mapInfosThese(InfosThese infos) {
-        if (infos == null) return null;
+        if (infos == null)
+            return null;
         return InfosTheseResponse.builder()
                 .id(infos.getId())
                 .titreThese(infos.getTitreThese())
@@ -620,7 +614,8 @@ public class InscriptionService {
     }
 
     private List<DocumentResponse> mapDocuments(List<DocumentInscription> documents) {
-        if (documents == null) return List.of();
+        if (documents == null)
+            return List.of();
         return documents.stream()
                 .map(doc -> DocumentResponse.builder()
                         .id(doc.getId())
@@ -636,7 +631,8 @@ public class InscriptionService {
     }
 
     private List<ValidationResponse> mapValidations(List<ValidationInscription> validations) {
-        if (validations == null) return List.of();
+        if (validations == null)
+            return List.of();
         return validations.stream()
                 .map(val -> ValidationResponse.builder()
                         .id(val.getId())

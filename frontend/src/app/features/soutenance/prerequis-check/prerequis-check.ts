@@ -8,7 +8,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatChipsModule } from '@angular/material/chips';
 import { Router } from '@angular/router';
 
-import { DefenseService } from '../../../core/services/defense.service';
+import { SoutenanceService } from '../../../core/services/soutenance.service';
 
 interface PrerequisitesCheck {
   id: number;
@@ -53,7 +53,7 @@ export class PrerequisCheckComponent implements OnInit {
   readonly REQUIRED_TRAINING_HOURS = 60;
 
   constructor(
-    private defenseService: DefenseService,
+    private soutenanceService: SoutenanceService,
     private router: Router
   ) {}
 
@@ -65,8 +65,8 @@ export class PrerequisCheckComponent implements OnInit {
     if (!this.defenseRequestId) return;
 
     this.loading = true;
-    this.defenseService.getPrerequisites(this.defenseRequestId).subscribe({
-      next: (data) => {
+    this.soutenanceService.getPrerequisitesByDoctorant(this.defenseRequestId).subscribe({
+      next: (data: any) => {
         this.prerequisites = data;
         this.loading = false;
       },

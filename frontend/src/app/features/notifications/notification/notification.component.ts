@@ -1,9 +1,14 @@
 import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { NotificationResponse, NotificationType } from '../../../core/models/notification.model';
 import { NotificationService } from '../../../core/services/notification.service';
 
 @Component({
   selector: 'app-notification',
+  standalone: true,
+  imports: [CommonModule, MatIconModule, MatTooltipModule],
   templateUrl: './notification.component.html',
   styleUrls: ['./notification.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

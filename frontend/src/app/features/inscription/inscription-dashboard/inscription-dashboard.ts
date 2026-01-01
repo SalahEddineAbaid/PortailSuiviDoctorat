@@ -13,7 +13,7 @@ import { MatBadgeModule } from '@angular/material/badge';
 
 import { InscriptionService } from '../../../core/services/inscription.service';
 import { CampagneService } from '../../../core/services/campagne.service';
-import { AuthService } from '../../../core/services/auth.service';
+import { AuthService, UserInfo } from '../../../core/services/auth.service';
 
 import { 
   DashboardResponse,
@@ -46,7 +46,7 @@ export class InscriptionDashboard implements OnInit {
   inscriptions: InscriptionResponse[] = [];
   loading = false;
   error: string | null = null;
-  currentUser: any;
+  currentUser: UserInfo | null = null;
 
   // Statistics
   totalInscriptions = 0;
@@ -62,14 +62,24 @@ export class InscriptionDashboard implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.currentUser = this.authService.getCurrentUser();
-    this.loadDashboard();
+    // Subscribe to current user observable
+    this.authService.currentUser$.subscribe(user => {
+      this.currentUser = user;
+      if (user) {
+        this.loadDashboard();
+      }
+    });
   }
 
-  private loadDashboard(): void {
+  loadDashboard(): void {
+    if (!this.currentUser) {
+      this.error = 'Utilisateur non connecté';
+      return;
+    }
+    
     this.loading = true;
     const userId = this.currentUser.id;
-    const role = this.currentUser.role?.name;
+    const role = this.currentUser.roles?.[0] || 'ROLE_DOCTORANT';
 
     // Load dashboard data
     this.inscriptionService.getDashboardDoctorant(userId, userId, role).subscribe({

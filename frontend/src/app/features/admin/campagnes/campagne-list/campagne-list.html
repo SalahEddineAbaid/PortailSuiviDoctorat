@@ -1,0 +1,73 @@
+<div class="campagne-list-container">
+  <div class="page-header">
+    <h1>Gestion des Campagnes</h1>
+    <button class="btn btn-primary" routerLink="/admin/campagnes/new">
+      Nouvelle Campagne
+    </button>
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+  <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+
+  <div class="filters-section">
+    <input type="text" 
+           placeholder="Rechercher..." 
+           [ngModel]="filters.searchTerm"
+           (ngModelChange)="onSearchChange($event)">
+    
+    <select [(ngModel)]="filters.status" (change)="onFilterChange()">
+      <option value="ALL">Tous les statuts</option>
+      <option value="OUVERTE">Ouverte</option>
+      <option value="FERMEE">Fermée</option>
+      <option value="BROUILLON">Brouillon</option>
+    </select>
+
+    <select [(ngModel)]="filters.year" (change)="onFilterChange()">
+      <option [ngValue]="undefined">Toutes les années</option>
+      <option *ngFor="let year of availableYears" [ngValue]="year">{{ year }}</option>
+    </select>
+
+    <button class="btn btn-secondary" (click)="clearFilters()">Réinitialiser</button>
+  </div>
+
+  <div *ngIf="isLoading" class="loading">Chargement...</div>
+
+  <div *ngIf="!isLoading && filteredCampagnes.length === 0" class="empty-state">
+    Aucune campagne trouvée
+  </div>
+
+  <table *ngIf="!isLoading && filteredCampagnes.length > 0" class="data-table">
+    <thead>
+      <tr>
+        <th>Nom</th>
+        <th>Année</th>
+        <th>Dates</th>
+        <th>Statut</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let campagne of getPaginatedCampagnes()">
+        <td>{{ campagne.libelle }}</td>
+        <td>{{ campagne.anneeUniversitaire }}</td>
+        <td>{{ formatDate(campagne.dateDebut) }} - {{ formatDate(campagne.dateFin) }}</td>
+        <td>
+          <span class="status-badge" [class]="campagne.active ? 'active' : 'inactive'">
+            {{ campagne.active ? 'Active' : 'Inactive' }}
+          </span>
+        </td>
+        <td class="actions">
+          <button (click)="viewCampagne(campagne.id)">Voir</button>
+          <button (click)="editCampagne(campagne.id)">Modifier</button>
+          <button *ngIf="campagne.active" (click)="closeCampagne(campagne)">Fermer</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="totalPages > 1" class="pagination">
+    <button [disabled]="currentPage === 0" (click)="onPageChange(currentPage - 1)">Précédent</button>
+    <span>Page {{ currentPage + 1 }} sur {{ totalPages }}</span>
+    <button [disabled]="currentPage >= totalPages - 1" (click)="onPageChange(currentPage + 1)">Suivant</button>
+  </div>
+</div>

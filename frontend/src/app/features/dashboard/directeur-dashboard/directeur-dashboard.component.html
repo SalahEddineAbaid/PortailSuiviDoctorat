@@ -1,11 +1,11 @@
 <div class="dashboard-layout">
   <!-- Sidebar -->
-  <app-sidebar [menuItems]="menuItems"></app-sidebar>
+  <app-sidebar [customMenuItems]="menuItems"></app-sidebar>
 
   <!-- Main Content -->
   <div class="dashboard-main">
     <!-- Navbar -->
-    <app-navbar [user]="dashboard?.user || null"></app-navbar>
+    <app-navbar></app-navbar>
 
     <!-- Dashboard Content -->
     <div class="dashboard-content">

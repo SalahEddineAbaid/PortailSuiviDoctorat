@@ -78,6 +78,14 @@ export class AdminMenuComponent implements OnInit {
 
   menuItems: AdminMenuItem[] = [
     {
+      id: 'accueil',
+      title: 'Accueil',
+      description: 'Tableau de bord administrateur',
+      icon: 'fas fa-home',
+      route: '/dashboard/admin',
+      color: 'gray'
+    },
+    {
       id: 'campagnes',
       title: 'Gestion des Campagnes',
       description: 'Créer et gérer les campagnes d\'inscription',
@@ -106,7 +114,7 @@ export class AdminMenuComponent implements OnInit {
       title: 'Gestion des Utilisateurs',
       description: 'Administrer les comptes utilisateurs',
       icon: 'fas fa-users',
-      route: '/admin/utilisateurs',
+      route: '/admin/users',
       color: 'purple'
     },
     {
@@ -116,6 +124,22 @@ export class AdminMenuComponent implements OnInit {
       icon: 'fas fa-cogs',
       route: '/admin/parametrage',
       color: 'orange'
+    },
+    {
+      id: 'notifications',
+      title: 'Notifications',
+      description: 'Gérer les notifications',
+      icon: 'fas fa-bell',
+      route: '/notifications',
+      color: 'yellow'
+    },
+    {
+      id: 'profil',
+      title: 'Mon profil',
+      description: 'Voir et modifier mon profil',
+      icon: 'fas fa-user',
+      route: '/profile',
+      color: 'teal'
     }
   ];
 

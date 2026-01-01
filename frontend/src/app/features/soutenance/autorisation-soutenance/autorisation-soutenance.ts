@@ -15,7 +15,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { Router } from '@angular/router';
 
-import { DefenseService } from '../../../core/services/defense.service';
+import { SoutenanceService } from '../../../core/services/soutenance.service';
 
 @Component({
   selector: 'app-autorisation-soutenance',
@@ -49,7 +49,7 @@ export class AutorisationSoutenanceComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private defenseService: DefenseService,
+    private soutenanceService: SoutenanceService,
     private router: Router,
     private snackBar: MatSnackBar
   ) {}
@@ -108,8 +108,8 @@ export class AutorisationSoutenanceComponent implements OnInit {
     if (!this.defenseRequestId) return;
 
     this.loading = true;
-    this.defenseService.getDefenseRequest(this.defenseRequestId).subscribe({
-      next: (data) => {
+    this.soutenanceService.getDefenseRequestById(this.defenseRequestId).subscribe({
+      next: (data: any) => {
         this.defenseRequest = data;
         this.checkPrerequisites();
         this.loading = false;
@@ -176,12 +176,10 @@ export class AutorisationSoutenanceComponent implements OnInit {
   private submitAutorisation(): void {
     this.submitting = true;
     
-    const autorisationData = {
-      defenseRequestId: this.defenseRequestId,
-      ...this.autorisationForm.value
-    };
+    const statut = this.autorisationForm.value.statut;
+    const status = statut === 'AUTORISE' ? 'AUTORISEE' : 'REJETEE';
 
-    this.defenseService.submitAutorisation(autorisationData).subscribe({
+    this.soutenanceService.updateDefenseRequestStatus(this.defenseRequestId, status).subscribe({
       next: () => {
         this.submitting = false;
         this.showSuccess('Autorisation enregistrée avec succès');

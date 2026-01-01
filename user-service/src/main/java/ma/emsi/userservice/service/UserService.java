@@ -297,4 +297,67 @@ public class UserService {
                         .map(role -> role.getName().name())
                         .collect(Collectors.toSet())));
     }
+
+    /**
+     * Sauvegarder un utilisateur
+     */
+    public User save(User user) {
+        return userRepository.save(user);
+    }
+
+    /**
+     * Convertir un User en UserResponse
+     */
+    public ma.emsi.userservice.dto.response.UserResponse toUserResponse(User user) {
+        return new ma.emsi.userservice.dto.response.UserResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getPhoneNumber(),
+                user.getAdresse(),
+                user.getVille(),
+                user.getPays(),
+                user.getRoles().stream()
+                        .map(role -> role.getName().name())
+                        .collect(Collectors.toSet()));
+    }
+
+    /**
+     * Créer un utilisateur avec un rôle spécifique
+     * Utilisé par l'admin pour créer des comptes Directeur
+     */
+    @Transactional
+    public User createUserWithRole(String email, String password, String firstName,
+            String lastName, String phoneNumber, String roleName) {
+        // Normaliser le nom du rôle
+        String normalizedRoleName = roleName.startsWith("ROLE_") ? roleName : "ROLE_" + roleName;
+
+        // Convertir en RoleName enum et récupérer le rôle
+        RoleName roleNameEnum;
+        try {
+            roleNameEnum = RoleName.valueOf(normalizedRoleName);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Rôle invalide: " + normalizedRoleName);
+        }
+
+        Role role = roleRepository.findByName(roleNameEnum)
+                .orElseThrow(() -> new RuntimeException("Rôle introuvable: " + normalizedRoleName));
+
+        // Créer l'utilisateur
+        User user = new User();
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setPhoneNumber(phoneNumber != null ? phoneNumber : "");
+        user.setAdresse("");
+        user.setVille("");
+        user.setPays("Maroc");
+        user.setEnabled(true);
+        user.setAccountStatus(ma.emsi.userservice.enums.AccountStatus.ACTIVE);
+        user.setRoles(java.util.Set.of(role));
+
+        return userRepository.save(user);
+    }
 }

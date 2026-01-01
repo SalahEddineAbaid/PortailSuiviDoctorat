@@ -119,17 +119,30 @@ export class AuthService {
     return this.http.post<TokenResponse>(`${this.API_URL}/login`, credentials).pipe(
       tap((response: TokenResponse) => {
         console.log('✅ [AUTH SERVICE] Tokens reçus');
-        console.log('🔑 Access Token:', response.accessToken.substring(0, 20) + '...');
+        console.log('🔑 Access Token:', response.accessToken.substring(0, 50) + '...');
         console.log('🔄 Refresh Token:', response.refreshToken.substring(0, 20) + '...');
         
-        // ✅ Stocker les tokens
-        this.setTokens(response.accessToken, response.refreshToken);
-        console.log('💾 [AUTH SERVICE] Tokens stockés dans localStorage');
+        // ✅ Stocker les tokens de manière synchrone
+        localStorage.setItem(environment.tokenKey, response.accessToken);
+        localStorage.setItem(environment.refreshTokenKey, response.refreshToken);
+        
+        // Vérifier que le token est bien stocké
+        const storedToken = localStorage.getItem(environment.tokenKey);
+        console.log('💾 [AUTH SERVICE] Token stocké:', !!storedToken);
+        console.log('💾 [AUTH SERVICE] Token vérifié:', storedToken?.substring(0, 50) + '...');
       }),
       // ✅ Après stockage des tokens, charger l'utilisateur
       switchMap(() => {
         console.log('👤 [AUTH SERVICE] Chargement des infos utilisateur...');
-        return this.http.get<UserInfo>(`${this.USER_API_URL}/profile`);
+        const token = localStorage.getItem(environment.tokenKey);
+        console.log('🔑 [AUTH SERVICE] Token pour requête profile:', token?.substring(0, 50) + '...');
+        
+        // Faire la requête avec le token explicitement dans les headers
+        return this.http.get<UserInfo>(`${this.USER_API_URL}/profile`, {
+          headers: new HttpHeaders({
+            'Authorization': `Bearer ${token}`
+          })
+        });
       }),
       tap((user: UserInfo) => {
         console.log('✅ [AUTH SERVICE] Utilisateur chargé:', user);

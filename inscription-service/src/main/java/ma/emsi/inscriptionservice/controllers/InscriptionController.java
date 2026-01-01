@@ -131,7 +131,7 @@ public class InscriptionController {
             @RequestParam String role) {
         try {
             byte[] attestationPdf = inscriptionService.getAttestation(id, userId, role);
-            
+
             return ResponseEntity.ok()
                     .contentType(org.springframework.http.MediaType.APPLICATION_PDF)
                     .header("Content-Disposition", "attachment; filename=attestation_" + id + ".pdf")
@@ -163,10 +163,9 @@ public class InscriptionController {
             }
 
             DerogationRequest derogation = derogationService.creerDerogation(
-                    id, 
-                    request.getMotif(), 
-                    documentsBytes
-            );
+                    id,
+                    request.getMotif(),
+                    documentsBytes);
 
             DerogationResponse response = mapToDerogationResponse(derogation);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -184,7 +183,7 @@ public class InscriptionController {
             @PathVariable Long id,
             @Valid @RequestBody DerogationValidationDTO request,
             @RequestParam Long directeurId) {
-        
+
         // Get the derogation for this inscription
         Optional<DerogationRequest> derogationOpt = derogationService.getDerogation(id);
         if (derogationOpt.isEmpty()) {
@@ -194,8 +193,7 @@ public class InscriptionController {
         DerogationRequest derogation = derogationService.validerParDirecteur(
                 derogationOpt.get().getId(),
                 request.getApprouve(),
-                request.getCommentaire()
-        );
+                request.getCommentaire());
 
         DerogationResponse response = mapToDerogationResponse(derogation);
         return ResponseEntity.ok(response);
@@ -209,7 +207,7 @@ public class InscriptionController {
     public ResponseEntity<DerogationResponse> validerDerogationParPED(
             @PathVariable Long id,
             @Valid @RequestBody DerogationValidationDTO request) {
-        
+
         // Get the derogation for this inscription
         Optional<DerogationRequest> derogationOpt = derogationService.getDerogation(id);
         if (derogationOpt.isEmpty()) {
@@ -219,8 +217,7 @@ public class InscriptionController {
         DerogationRequest derogation = derogationService.validerParPED(
                 derogationOpt.get().getId(),
                 request.getApprouve(),
-                request.getCommentaire()
-        );
+                request.getCommentaire());
 
         DerogationResponse response = mapToDerogationResponse(derogation);
         return ResponseEntity.ok(response);
@@ -233,7 +230,7 @@ public class InscriptionController {
     @PreAuthorize("hasAnyRole('DOCTORANT', 'DIRECTEUR', 'ADMIN')")
     public ResponseEntity<DerogationResponse> getDerogation(@PathVariable Long id) {
         Optional<DerogationRequest> derogationOpt = derogationService.getDerogation(id);
-        
+
         if (derogationOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
@@ -255,8 +252,8 @@ public class InscriptionController {
                 .validateurId(derogation.getValidateurId())
                 .commentaireValidation(derogation.getCommentaireValidation())
                 .dateValidation(derogation.getDateValidation())
-                .hasDocuments(derogation.getDocumentsJustificatifs() != null && 
-                             derogation.getDocumentsJustificatifs().length > 0)
+                .hasDocuments(derogation.getDocumentsJustificatifs() != null &&
+                        derogation.getDocumentsJustificatifs().length > 0)
                 .build();
     }
 
@@ -274,38 +271,41 @@ public class InscriptionController {
             @PathVariable Long id,
             @RequestParam Long userId,
             @RequestParam String role) {
-        
+
         log.info("Fetching dashboard for doctorant: {} by user: {} with role: {}", id, userId, role);
-        
+
         try {
+            // Normalize role (handle both "DOCTORANT" and "ROLE_DOCTORANT" formats)
+            String normalizedRole = role.replace("ROLE_", "");
+
             // Authorization check: verify the user has access to this dashboard
             // - DOCTORANT can only access their own dashboard
             // - DIRECTEUR can access their students' dashboards
             // - ADMIN can access any dashboard
-            
-            if ("DOCTORANT".equals(role) && !id.equals(userId)) {
+
+            if ("DOCTORANT".equals(normalizedRole) && !id.equals(userId)) {
                 log.warn("Unauthorized access attempt: doctorant {} trying to access dashboard of {}", userId, id);
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .body(null);
             }
-            
-            if ("DIRECTEUR".equals(role)) {
+
+            if ("DIRECTEUR".equals(normalizedRole)) {
                 // Verify the director is actually the thesis director for this student
                 // This is checked by verifying if there's an inscription with this director
                 boolean isDirector = inscriptionService.isDirecteurOfDoctorant(userId, id);
                 if (!isDirector) {
-                    log.warn("Unauthorized access attempt: directeur {} trying to access dashboard of non-student {}", userId, id);
+                    log.warn("Unauthorized access attempt: directeur {} trying to access dashboard of non-student {}",
+                            userId, id);
                     return ResponseEntity.status(HttpStatus.FORBIDDEN)
                             .body(null);
                 }
             }
-            
+
             // Fetch the dashboard data
-            ma.emsi.inscriptionservice.DTOs.DashboardResponse dashboard = 
-                    inscriptionService.getDashboardDoctorant(id);
-            
+            ma.emsi.inscriptionservice.DTOs.DashboardResponse dashboard = inscriptionService.getDashboardDoctorant(id);
+
             return ResponseEntity.ok(dashboard);
-            
+
         } catch (RuntimeException e) {
             log.error("Error fetching dashboard for doctorant {}: {}", id, e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -320,8 +320,10 @@ public class InscriptionController {
     // ==================== ALERT VERIFICATION ENDPOINT ====================
 
     /**
-     * Vérifier les alertes de durée pour toutes les inscriptions actives (batch processing)
-     * Cet endpoint est destiné à être appelé par un service batch ou un administrateur
+     * Vérifier les alertes de durée pour toutes les inscriptions actives (batch
+     * processing)
+     * Cet endpoint est destiné à être appelé par un service batch ou un
+     * administrateur
      * 
      * Requirements: 4.1, 4.2, 4.3
      */
@@ -329,29 +331,28 @@ public class InscriptionController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ma.emsi.inscriptionservice.DTOs.AlerteVerificationSummary> verifierAlertes() {
         log.info("Démarrage de la vérification des alertes en batch");
-        
+
         try {
             // Récupérer toutes les inscriptions actives (non rejetées et non brouillon)
             List<ma.emsi.inscriptionservice.enums.StatutInscription> statutsActifs = List.of(
                     ma.emsi.inscriptionservice.enums.StatutInscription.EN_ATTENTE_DIRECTEUR,
                     ma.emsi.inscriptionservice.enums.StatutInscription.EN_ATTENTE_ADMIN,
-                    ma.emsi.inscriptionservice.enums.StatutInscription.VALIDE
-            );
-            
-            List<ma.emsi.inscriptionservice.entities.Inscription> inscriptionsActives = 
-                    inscriptionService.getInscriptionsByStatuts(statutsActifs);
-            
+                    ma.emsi.inscriptionservice.enums.StatutInscription.VALIDE);
+
+            List<ma.emsi.inscriptionservice.entities.Inscription> inscriptionsActives = inscriptionService
+                    .getInscriptionsByStatuts(statutsActifs);
+
             log.info("Nombre d'inscriptions actives à vérifier: {}", inscriptionsActives.size());
-            
+
             // Effectuer la vérification en batch
-            ma.emsi.inscriptionservice.DTOs.AlerteVerificationSummary summary = 
-                    inscriptionService.verifierAlertesEnBatch(inscriptionsActives);
-            
+            ma.emsi.inscriptionservice.DTOs.AlerteVerificationSummary summary = inscriptionService
+                    .verifierAlertesEnBatch(inscriptionsActives);
+
             return ResponseEntity.ok(summary);
-            
+
         } catch (Exception e) {
             log.error("Erreur lors de la vérification des alertes en batch: {}", e.getMessage());
-            
+
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ma.emsi.inscriptionservice.DTOs.AlerteVerificationSummary.builder()
                             .totalInscriptionsVerifiees(0)

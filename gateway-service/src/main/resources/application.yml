@@ -1,10 +1,10 @@
 server:
-  port: 8888
+  port: 8080
 
 spring:
   application:
-    name: gateway-service
-  
+    name: GATEWAY-SERVICE
+
   # Redis Configuration for Rate Limiting
   data:
     redis:
@@ -16,14 +16,14 @@ spring:
           max-active: 8
           max-idle: 8
           min-idle: 0
-  
+
   # Cloud Gateway Configuration
   cloud:
     gateway:
       # Global CORS Configuration
       globalcors:
         cors-configurations:
-          '[/**]':
+          "[/**]":
             allowed-origins:
               - "http://localhost:3000"
               - "http://localhost:4200"
@@ -44,7 +44,7 @@ spring:
               - X-Request-Id
             allow-credentials: true
             max-age: 3600
-      
+
       # Route Definitions
       routes:
         # User Service - Authentication (Public)
@@ -69,7 +69,7 @@ spring:
           metadata:
             public: true
             rateLimit: 20
-        
+
         # User Service - Users (Protected)
         - id: user-service-users
           uri: lb://USER-SERVICE
@@ -87,7 +87,7 @@ spring:
           metadata:
             requiresAuth: true
             rateLimit: 100
-        
+
         # Defense Service (Protected)
         - id: defense-service
           uri: lb://DEFENSE-SERVICE
@@ -102,7 +102,7 @@ spring:
           metadata:
             requiresAuth: true
             rateLimit: 100
-        
+
         # Inscription Service (Protected)
         - id: inscription-service
           uri: lb://INSCRIPTION-SERVICE
@@ -116,7 +116,7 @@ spring:
           metadata:
             requiresAuth: true
             rateLimit: 100
-        
+
         # Notification Service (Protected)
         - id: notification-service
           uri: lb://NOTIFICATION-SERVICE
@@ -130,7 +130,7 @@ spring:
           metadata:
             requiresAuth: true
             rateLimit: 200
-        
+
         # Batch Service (Protected - Admin Only)
         - id: batch-service
           uri: lb://BATCH-SERVICE
@@ -145,11 +145,11 @@ spring:
             requiresAuth: true
             requiresRole: ADMIN
             rateLimit: 50
-      
+
       # Default Filters (Applied to all routes)
       default-filters:
         - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
-      
+
       # HTTP Client Configuration
       httpclient:
         connect-timeout: 5000
@@ -158,28 +158,39 @@ spring:
           type: ELASTIC
           max-connections: 100
           max-idle-time: 10s
-    
+
     # Eureka Configuration
-    eureka:
-      client:
-        defaultZone: http://eureka:eureka123@localhost:8761/eureka/,http://eureka:eureka123@localhost:8762/eureka/
-      instance:
-        prefer-ip-address: true
-        instance-id: ${spring.application.name}:${random.value}
+    discovery:
+      locator:
+        enabled: true
+        lower-case-service-id: true
+
+# Eureka Client Configuration
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://eureka:eureka123@localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30
 
 # JWT Configuration
 jwt:
   secret: ${JWT_SECRET:s3cR3tK3y!#2025@JWT_Sign4tur3!!VeryLongSecretKeyForHS512Algorithm2025!!}
-  expiration: 3600000  # 1 hour in milliseconds
+  expiration: 3600000 # 1 hour in milliseconds
   issuer: user-service
 
 # Rate Limiting Configuration
 rate-limit:
   enabled: true
-  default-limit: 100          # requests per minute for authenticated users
-  unauthenticated-limit: 50   # requests per minute for unauthenticated
-  admin-limit: 500            # requests per minute for admin users
-  window-size: 60             # sliding window in seconds
+  default-limit: 100 # requests per minute for authenticated users
+  unauthenticated-limit: 50 # requests per minute for unauthenticated
+  admin-limit: 500 # requests per minute for admin users
+  window-size: 60 # sliding window in seconds
 
 # Resilience4j Configuration
 resilience4j:
@@ -209,7 +220,7 @@ resilience4j:
         base-config: default
       batchService:
         base-config: default
-  
+
   timelimiter:
     configs:
       default:
@@ -251,7 +262,7 @@ management:
         enabled: true
     tags:
       application: ${spring.application.name}
-  
+
   info:
     env:
       enabled: true

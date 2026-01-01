@@ -16,7 +16,7 @@
           
           <div class="checks-grid">
             <div class="check-item" [class.valid]="autorisationForm.value.prerequisValides">
-              <mat-checkbox formControlName="prerequisValides" disabled>
+              <mat-checkbox formControlName="prerequisValides" [disabled]="true">
                 Prérequis Validés
               </mat-checkbox>
               <mat-icon [class.valid]="autorisationForm.value.prerequisValides">
@@ -25,7 +25,7 @@
             </div>
 
             <div class="check-item" [class.valid]="autorisationForm.value.juryComplet">
-              <mat-checkbox formControlName="juryComplet" disabled>
+              <mat-checkbox formControlName="juryComplet" [disabled]="true">
                 Jury Complet (min. 3 membres)
               </mat-checkbox>
               <mat-icon [class.valid]="autorisationForm.value.juryComplet">
@@ -34,7 +34,7 @@
             </div>
 
             <div class="check-item" [class.valid]="autorisationForm.value.rapportsFavorables">
-              <mat-checkbox formControlName="rapportsFavorables" disabled>
+              <mat-checkbox formControlName="rapportsFavorables" [disabled]="true">
                 Rapports Favorables
               </mat-checkbox>
               <mat-icon [class.valid]="autorisationForm.value.rapportsFavorables">
@@ -43,7 +43,7 @@
             </div>
 
             <div class="check-item" [class.valid]="autorisationForm.value.documentsComplets">
-              <mat-checkbox formControlName="documentsComplets" disabled>
+              <mat-checkbox formControlName="documentsComplets" [disabled]="true">
                 Documents Complets
               </mat-checkbox>
               <mat-icon [class.valid]="autorisationForm.value.documentsComplets">

@@ -21,7 +21,7 @@ export class SoutenanceDetail implements OnInit {
   isProcessing = false;
 
   // Current user info
-  currentUser Role = '';
+  currentUserRole = '';
   canEdit = false;
   canValidate = false;
   canAuthorize = false;
@@ -34,7 +34,7 @@ export class SoutenanceDetail implements OnInit {
     private router: Router,
     private soutenanceService: SoutenanceService,
     private juryService: JuryService,
-    private authService: AuthService
+    public authService: AuthService
   ) { }
 
   ngOnInit(): void {
@@ -225,5 +225,20 @@ export class SoutenanceDetail implements OnInit {
 
   goBack(): void {
     this.router.navigate(['/soutenance/liste']);
+  }
+
+  // Document helper methods
+  getDocumentName(doc: any): string {
+    return doc.nomFichier || doc.typeDocument || doc.name || 'Document';
+  }
+
+  getDocumentSize(doc: any): string {
+    const size = doc.tailleFichier || doc.size;
+    if (!size) return '';
+    return (size / 1024 / 1024).toFixed(2) + ' MB';
+  }
+
+  getDocumentDate(doc: any): Date | undefined {
+    return doc.dateUpload || doc.createdAt || doc.date;
   }
 }

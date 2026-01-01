@@ -7,7 +7,7 @@ import { BehaviorSubject, Subject, Observable } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { DocumentService } from '../../../core/services/document.service';
-import { DocumentResponse, DocumentType } from '../../../core/models/document.model';
+import { DocumentResponse, TypeDocument } from '../../../core/models/document.model';
 
 export interface ValidationResult {
   isValid: boolean;
@@ -56,7 +56,7 @@ export interface ValidationConfig {
 export class DocumentValidatorComponent implements OnInit {
   @Input() file: File | null = null;
   @Input() document: DocumentResponse | null = null;
-  @Input() documentType: DocumentType | null = null;
+  @Input() documentType: TypeDocument | null = null;
   @Input() config: ValidationConfig | null = null;
   @Input() autoValidate = true;
   
@@ -71,15 +71,15 @@ export class DocumentValidatorComponent implements OnInit {
   result$ = this.resultSubject.asObservable();
 
   // Default validation configurations by document type
-  private defaultConfigs: { [key in DocumentType]: ValidationConfig } = {
-    [DocumentType.CARTE_IDENTITE]: {
+  private defaultConfigs: { [key: string]: ValidationConfig } = {
+    'CARTE_IDENTITE': {
       allowedTypes: ['application/pdf', 'image/jpeg', 'image/png'],
       maxSizeMB: 5,
       minSizeMB: 0.01,
       allowedExtensions: ['.pdf', '.jpg', '.jpeg', '.png'],
       checkIntegrity: true
     },
-    [DocumentType.DIPLOME_MASTER]: {
+    'DIPLOME_MASTER': {
       allowedTypes: ['application/pdf'],
       maxSizeMB: 10,
       minSizeMB: 0.1,
@@ -87,28 +87,28 @@ export class DocumentValidatorComponent implements OnInit {
       checkIntegrity: true,
       requireSignature: false
     },
-    [DocumentType.RELEVES_NOTES]: {
+    'RELEVE_NOTES': {
       allowedTypes: ['application/pdf'],
       maxSizeMB: 10,
       minSizeMB: 0.1,
       allowedExtensions: ['.pdf'],
       checkIntegrity: true
     },
-    [DocumentType.CV]: {
+    'CV': {
       allowedTypes: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
       maxSizeMB: 5,
       minSizeMB: 0.01,
       allowedExtensions: ['.pdf', '.doc', '.docx'],
       checkIntegrity: true
     },
-    [DocumentType.LETTRE_MOTIVATION]: {
+    'LETTRE_MOTIVATION': {
       allowedTypes: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
       maxSizeMB: 5,
       minSizeMB: 0.01,
       allowedExtensions: ['.pdf', '.doc', '.docx'],
       checkIntegrity: true
     },
-    [DocumentType.MANUSCRIT_THESE]: {
+    'PROJET_THESE': {
       allowedTypes: ['application/pdf'],
       maxSizeMB: 50,
       minSizeMB: 1,
@@ -116,34 +116,19 @@ export class DocumentValidatorComponent implements OnInit {
       checkIntegrity: true,
       requireSignature: false
     },
-    [DocumentType.RESUME_THESE]: {
+    'AUTORISATION_DIRECTEUR': {
       allowedTypes: ['application/pdf'],
       maxSizeMB: 5,
       minSizeMB: 0.1,
       allowedExtensions: ['.pdf'],
       checkIntegrity: true
     },
-    [DocumentType.PUBLICATIONS]: {
-      allowedTypes: ['application/pdf'],
-      maxSizeMB: 20,
-      minSizeMB: 0.1,
-      allowedExtensions: ['.pdf'],
-      checkIntegrity: true
-    },
-    [DocumentType.ATTESTATION_FORMATION]: {
-      allowedTypes: ['application/pdf'],
+    'AUTRE': {
+      allowedTypes: ['application/pdf', 'image/jpeg', 'image/png'],
       maxSizeMB: 10,
-      minSizeMB: 0.1,
-      allowedExtensions: ['.pdf'],
+      minSizeMB: 0.01,
+      allowedExtensions: ['.pdf', '.jpg', '.jpeg', '.png'],
       checkIntegrity: true
-    },
-    [DocumentType.AUTORISATION_SOUTENANCE]: {
-      allowedTypes: ['application/pdf'],
-      maxSizeMB: 10,
-      minSizeMB: 0.1,
-      allowedExtensions: ['.pdf'],
-      checkIntegrity: true,
-      requireSignature: true
     }
   };
 
@@ -275,9 +260,9 @@ export class DocumentValidatorComponent implements OnInit {
 
     if (this.document) {
       return {
-        name: this.document.nom,
-        size: this.document.taille,
-        type: this.getDocumentMimeType(this.document.nom),
+        name: this.document.nomFichier,
+        size: this.document.tailleFichier,
+        type: this.getDocumentMimeType(this.document.nomFichier),
         lastModified: new Date(this.document.dateUpload)
       };
     }

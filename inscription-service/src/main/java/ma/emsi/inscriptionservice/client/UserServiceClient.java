@@ -9,11 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
  * Feign client for communicating with the User Service
  * Includes circuit breaker and retry mechanisms for resilience
  */
-@FeignClient(
-    name = "USER-SERVICE", 
-    path = "/api/users",
-    configuration = UserServiceClientConfig.class
-)
+@FeignClient(name = "USER-SERVICE", path = "/api/users", configuration = UserServiceClientConfig.class)
 public interface UserServiceClient {
 
     /**
@@ -44,7 +40,7 @@ public interface UserServiceClient {
      * @param directeurId Director's user ID
      * @return Director details including name and contact information
      */
-    @GetMapping("/director/{directeurId}")
+    @GetMapping("/{directeurId}")
     UserDTO getDirectorInfo(@PathVariable("directeurId") Long directeurId);
 
     /**
@@ -55,6 +51,6 @@ public interface UserServiceClient {
      * @param doctorantId Student's user ID
      * @return Student details including name, email, and enrollment information
      */
-    @GetMapping("/student/{doctorantId}")
+    @GetMapping("/{doctorantId}")
     UserDTO getStudentInfo(@PathVariable("doctorantId") Long doctorantId);
 }

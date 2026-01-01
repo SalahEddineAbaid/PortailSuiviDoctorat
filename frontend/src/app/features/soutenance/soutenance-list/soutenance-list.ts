@@ -57,7 +57,7 @@ export class SoutenanceList implements OnInit {
 
   constructor(
     private soutenanceService: SoutenanceService,
-    private authService: AuthService,
+    public authService: AuthService,
     private router: Router
   ) {
     // Setup search debouncing

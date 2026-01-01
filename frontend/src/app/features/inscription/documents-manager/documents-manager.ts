@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 
 import { DocumentUpload, DocumentUploadConfig } from '../document-upload/document-upload';
 import { DocumentService } from '../../../core/services/document.service';
-import { DocumentType, DocumentResponse } from '../../../core/models/document.model';
+import { TypeDocument, DocumentResponse } from '../../../core/models/document.model';
 
 @Component({
   selector: 'app-documents-manager',
@@ -25,15 +25,7 @@ export class DocumentsManager implements OnInit {
   // Configuration des documents requis pour une inscription
   documentConfigs: DocumentUploadConfig[] = [
     {
-      type: DocumentType.CARTE_IDENTITE,
-      label: 'Carte d\'identité',
-      required: true,
-      maxSizeMB: 5,
-      allowedTypes: ['image/jpeg', 'image/png', 'application/pdf'],
-      description: 'Copie recto-verso de votre carte d\'identité en cours de validité'
-    },
-    {
-      type: DocumentType.DIPLOME_MASTER,
+      type: TypeDocument.DIPLOME_MASTER,
       label: 'Diplôme de Master',
       required: true,
       maxSizeMB: 10,
@@ -41,7 +33,7 @@ export class DocumentsManager implements OnInit {
       description: 'Copie de votre diplôme de Master ou équivalent'
     },
     {
-      type: DocumentType.RELEVES_NOTES,
+      type: TypeDocument.RELEVE_NOTES,
       label: 'Relevés de notes',
       required: true,
       maxSizeMB: 10,
@@ -49,7 +41,7 @@ export class DocumentsManager implements OnInit {
       description: 'Relevés de notes du Master (toutes les années)'
     },
     {
-      type: DocumentType.CV,
+      type: TypeDocument.CV,
       label: 'Curriculum Vitae',
       required: true,
       maxSizeMB: 5,
@@ -57,12 +49,20 @@ export class DocumentsManager implements OnInit {
       description: 'CV détaillé incluant votre parcours académique et professionnel'
     },
     {
-      type: DocumentType.LETTRE_MOTIVATION,
+      type: TypeDocument.LETTRE_MOTIVATION,
       label: 'Lettre de motivation',
       required: true,
       maxSizeMB: 5,
       allowedTypes: ['application/pdf'],
       description: 'Lettre de motivation pour votre projet de thèse'
+    },
+    {
+      type: TypeDocument.PROJET_THESE,
+      label: 'Projet de thèse',
+      required: true,
+      maxSizeMB: 10,
+      allowedTypes: ['application/pdf'],
+      description: 'Description détaillée de votre projet de recherche'
     }
   ];
 
@@ -82,13 +82,13 @@ export class DocumentsManager implements OnInit {
     this.loading = true;
     this.error = null;
 
-    this.documents$ = this.documentService.getDocumentsInscription(this.inscriptionId);
+    this.documents$ = this.documentService.getDocuments(this.inscriptionId);
     
     this.documents$.subscribe({
       next: (documents) => {
         this.existingDocuments = {};
         documents.forEach(doc => {
-          this.existingDocuments[doc.type] = doc;
+          this.existingDocuments[doc.typeDocument] = doc;
         });
         this.loading = false;
       },
@@ -101,7 +101,7 @@ export class DocumentsManager implements OnInit {
   }
 
   onDocumentUploaded(document: DocumentResponse): void {
-    this.existingDocuments[document.type] = document;
+    this.existingDocuments[document.typeDocument] = document;
     // Optionally emit event to parent component
   }
 
@@ -118,7 +118,7 @@ export class DocumentsManager implements OnInit {
     this.error = error;
   }
 
-  getExistingDocument(type: DocumentType): DocumentResponse | undefined {
+  getExistingDocument(type: TypeDocument): DocumentResponse | undefined {
     return this.existingDocuments[type];
   }
 

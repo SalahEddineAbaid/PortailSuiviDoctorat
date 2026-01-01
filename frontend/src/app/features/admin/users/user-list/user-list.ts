@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { RouterModule, Router } from '@angular/router';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
-import { UserManagementService, UserResponse, Page } from '../../../core/services/user-management.service';
+import { UserManagementService, UserResponse, Page } from '../../../../core/services/user-management.service';
 
 interface FilterCriteria {
     searchTerm: string;
@@ -14,9 +14,9 @@ interface FilterCriteria {
 @Component({
     selector: 'app-user-list',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterModule],
+    imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule],
     templateUrl: './user-list.html',
-    styleUrls: ['./user-list.scss']
+    styleUrls: ['./user-list.css']
 })
 export class UserList implements OnInit {
     users: UserResponse[] = [];
@@ -43,9 +43,18 @@ export class UserList implements OnInit {
     // Available roles for filter
     availableRoles = ['ALL', 'ADMIN', 'DIRECTEUR', 'DOCTORANT', 'PED'];
 
+    // Modal state
+    showCreateModal = false;
+    showEditModal = false;
+    isSaving = false;
+    selectedUser: UserResponse | null = null;
+    userForm: FormGroup;
+
     constructor(
         private userManagementService: UserManagementService,
-        private router: Router
+        private router: Router,
+        private route: ActivatedRoute,
+        private fb: FormBuilder
     ) {
         // Setup search debouncing
         this.searchSubject.pipe(
@@ -55,10 +64,71 @@ export class UserList implements OnInit {
             this.filters.searchTerm = searchTerm;
             this.applyFilters();
         });
+
+        // Initialize form
+        this.userForm = this.createUserForm();
     }
 
     ngOnInit(): void {
         this.loadUsers();
+        
+        // Check for action query param to auto-open create modal
+        this.route.queryParams.subscribe(params => {
+            if (params['action'] === 'create') {
+                setTimeout(() => this.openCreateModal(), 500);
+            }
+        });
+    }
+
+    private createUserForm(): FormGroup {
+        return this.fb.group({
+            email: ['', [Validators.required, Validators.email]],
+            firstName: ['', [Validators.required, Validators.minLength(2)]],
+            lastName: ['', [Validators.required, Validators.minLength(2)]],
+            tel: [''],
+            password: ['', [Validators.required, Validators.minLength(6)]],
+            role: ['DOCTORANT', Validators.required]
+        });
+    }
+
+    openCreateModal(): void {
+        this.showCreateModal = true;
+        this.userForm.reset({
+            role: 'DOCTORANT'
+        });
+        this.userForm.get('password')?.setValidators([Validators.required, Validators.minLength(6)]);
+        this.userForm.get('password')?.updateValueAndValidity();
+    }
+
+    closeCreateModal(): void {
+        this.showCreateModal = false;
+        this.userForm.reset();
+    }
+
+    createUser(): void {
+        if (this.userForm.invalid) {
+            this.userForm.markAllAsTouched();
+            return;
+        }
+
+        this.isSaving = true;
+        const userData = this.userForm.value;
+
+        this.userManagementService.createUser(userData).subscribe({
+            next: () => {
+                this.successMessage = 'Utilisateur créé avec succès';
+                this.closeCreateModal();
+                this.loadUsers();
+                this.isSaving = false;
+                setTimeout(() => this.successMessage = '', 3000);
+            },
+            error: (error: any) => {
+                console.error('Error creating user:', error);
+                this.errorMessage = error.error?.message || 'Erreur lors de la création de l\'utilisateur';
+                this.isSaving = false;
+                setTimeout(() => this.errorMessage = '', 5000);
+            }
+        });
     }
 
     loadUsers(): void {
@@ -96,8 +166,8 @@ export class UserList implements OnInit {
             const term = this.filters.searchTerm.toLowerCase();
             filtered = filtered.filter(u =>
                 u.email.toLowerCase().includes(term) ||
-                u.firstName.toLowerCase().includes(term) ||
-                u.lastName.toLowerCase().includes(term) ||
+                (u.firstName || u.FirstName || '').toLowerCase().includes(term) ||
+                (u.lastName || u.LastName || '').toLowerCase().includes(term) ||
                 (u.tel && u.tel.includes(term))
             );
         }
@@ -240,5 +310,9 @@ export class UserList implements OnInit {
             month: 'short',
             day: 'numeric'
         });
+    }
+
+    isUserEnabled(user: UserResponse): boolean {
+        return this.userManagementService.isUserEnabled(user);
     }
 }

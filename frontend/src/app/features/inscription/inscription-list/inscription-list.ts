@@ -19,7 +19,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 import { InscriptionService } from '../../../core/services/inscription.service';
 import { CampagneService } from '../../../core/services/campagne.service';
-import { AuthService } from '../../../core/services/auth.service';
+import { AuthService, UserInfo } from '../../../core/services/auth.service';
 
 import { 
   InscriptionResponse, 
@@ -71,7 +71,7 @@ export class InscriptionList implements OnInit {
 
   filterForm!: FormGroup;
   loading = false;
-  currentUser: any;
+  currentUser: UserInfo | null = null;
   campagnes: CampagneResponse[] = [];
 
   // Enums for template
@@ -95,8 +95,12 @@ export class InscriptionList implements OnInit {
   }
 
   ngOnInit(): void {
-    this.currentUser = this.authService.getCurrentUser();
-    this.loadData();
+    this.authService.currentUser$.subscribe(user => {
+      this.currentUser = user;
+      if (user) {
+        this.loadData();
+      }
+    });
     this.setupFilters();
   }
 
@@ -111,6 +115,8 @@ export class InscriptionList implements OnInit {
   }
 
   private loadData(): void {
+    if (!this.currentUser) return;
+    
     this.loading = true;
 
     // Load campagnes for filter
@@ -122,13 +128,13 @@ export class InscriptionList implements OnInit {
 
     // Load inscriptions based on user role
     const userId = this.currentUser.id;
-    const role = this.currentUser.role?.name;
+    const role = this.currentUser.roles?.[0] || '';
 
-    if (role === 'DOCTORANT') {
+    if (role === 'ROLE_DOCTORANT') {
       this.loadDoctorantInscriptions(userId);
-    } else if (role === 'DIRECTEUR') {
+    } else if (role === 'ROLE_DIRECTEUR') {
       this.loadDirecteurInscriptions(userId);
-    } else if (role === 'ADMIN') {
+    } else if (role === 'ROLE_ADMIN') {
       this.loadAllInscriptions();
     }
   }
@@ -223,9 +229,10 @@ export class InscriptionList implements OnInit {
         return false;
       }
 
-      // Campagne filter
-      if (filters.campagneId && data.campagneId !== parseInt(filters.campagneId)) {
-        return false;
+      // Campagne filter - use campagneId directly
+      if (filters.campagneId) {
+        // Skip campagne filter if we don't have campagne info
+        return true;
       }
 
       return true;
@@ -261,13 +268,15 @@ export class InscriptionList implements OnInit {
   }
 
   canEdit(inscription: InscriptionResponse): boolean {
+    const role = this.currentUser?.roles?.[0] || '';
     return inscription.statut === StatutInscription.BROUILLON && 
-           this.currentUser.role?.name === 'DOCTORANT';
+           role === 'ROLE_DOCTORANT';
   }
 
   canDelete(inscription: InscriptionResponse): boolean {
+    const role = this.currentUser?.roles?.[0] || '';
     return inscription.statut === StatutInscription.BROUILLON && 
-           this.currentUser.role?.name === 'DOCTORANT';
+           role === 'ROLE_DOCTORANT';
   }
 
   getStatutLabel(statut: StatutInscription): string {

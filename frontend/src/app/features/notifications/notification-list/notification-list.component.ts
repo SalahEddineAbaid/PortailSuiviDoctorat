@@ -3,6 +3,13 @@ import { CommonModule, AsyncPipe } from '@angular/common';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { Observable, Subject, combineLatest } from 'rxjs';
 import { takeUntil, map, startWith } from 'rxjs/operators';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { NotificationService } from '../../../core/services/notification.service';
 import { NotificationResponse, NotificationType } from '../../../core/models/notification.model';
@@ -17,7 +24,19 @@ interface FilterOptions {
 @Component({
   selector: 'app-notification-list',
   standalone: true,
-  imports: [CommonModule, AsyncPipe, ReactiveFormsModule, NotificationComponent],
+  imports: [
+    CommonModule, 
+    AsyncPipe, 
+    ReactiveFormsModule, 
+    NotificationComponent,
+    MatIconModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatProgressSpinnerModule
+  ],
   templateUrl: './notification-list.component.html',
   styleUrls: ['./notification-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

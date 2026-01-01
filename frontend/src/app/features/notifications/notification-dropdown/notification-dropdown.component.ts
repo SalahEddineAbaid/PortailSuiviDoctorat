@@ -1,4 +1,5 @@
 import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -7,6 +8,8 @@ import { NotificationResponse, NotificationType } from '../../../core/models/not
 
 @Component({
   selector: 'app-notification-dropdown',
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './notification-dropdown.component.html',
   styleUrls: ['./notification-dropdown.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, Subject, Observable } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
 
 import { DocumentService } from '../../../core/services/document.service';
@@ -195,9 +195,10 @@ export class AutorisationSoutenanceComponent implements OnInit {
   }
 
   private generateAutorisation(request: AutorisationRequest) {
-    // This would be a call to the backend API
-    // For now, we'll simulate the API call
-    return this.documentService.generateAutorisationSoutenance(request);
+    // TODO: Implement autorisation generation via backend API
+    return new Observable<AutorisationResponse>(observer => {
+      observer.error({ status: 501, message: 'Fonctionnalité non implémentée' });
+    });
   }
 
   private downloadAutorisation(autorisation: AutorisationResponse): void {

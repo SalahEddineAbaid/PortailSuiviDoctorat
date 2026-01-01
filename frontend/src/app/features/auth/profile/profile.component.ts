@@ -5,6 +5,18 @@ import { AuthService, ChangePasswordRequest, UserInfo } from '../../../core/serv
 import { CustomValidators } from '../../../core/validators/custom-validators';
 import { Router } from '@angular/router';
 
+interface ProfileUser {
+  id: number;
+  FirstName?: string;
+  LastName?: string;
+  email?: string;
+  phoneNumber?: string;
+  adresse?: string;
+  ville?: string;
+  pays?: string;
+  roles?: string[];
+}
+
 @Component({
   selector: 'app-profile',
   standalone: true,
@@ -15,7 +27,7 @@ import { Router } from '@angular/router';
 export class ProfileComponent implements OnInit {
   profileForm: FormGroup;
   passwordForm: FormGroup;
-  currentUser: UserInfo | null = null;
+  currentUser: ProfileUser | null = null;
 
   isLoadingProfile = false;
   isLoadingPassword = false;
@@ -52,8 +64,18 @@ export class ProfileComponent implements OnInit {
   private loadUserProfile(): void {
     this.authService.getCurrentUser().subscribe({
       next: (user) => {
-        this.currentUser = user;
-        if (this.currentUser) {
+        if (user) {
+          this.currentUser = {
+            id: user.id,
+            FirstName: user.FirstName,
+            LastName: user.LastName,
+            email: user.email,
+            phoneNumber: user.phoneNumber,
+            adresse: (user as any).adresse || '',
+            ville: (user as any).ville || '',
+            pays: (user as any).pays || '',
+            roles: user.roles
+          };
           this.profileForm.patchValue({
             FirstName: this.currentUser.FirstName,
             LastName: this.currentUser.LastName,

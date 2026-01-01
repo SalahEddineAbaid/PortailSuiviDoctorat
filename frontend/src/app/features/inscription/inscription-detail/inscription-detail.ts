@@ -14,7 +14,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { InscriptionService } from '../../../core/services/inscription.service';
 import { DocumentService } from '../../../core/services/document.service';
-import { AuthService } from '../../../core/services/auth.service';
+import { AuthService, UserInfo } from '../../../core/services/auth.service';
 
 import { 
   InscriptionResponse,
@@ -47,7 +47,7 @@ export class InscriptionDetail implements OnInit {
   inscription: InscriptionResponse | null = null;
   loading = false;
   error: string | null = null;
-  currentUser: any;
+  currentUser: UserInfo | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -58,8 +58,12 @@ export class InscriptionDetail implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.currentUser = this.authService.getCurrentUser();
-    this.loadInscription();
+    this.authService.currentUser$.subscribe(user => {
+      this.currentUser = user;
+      if (user) {
+        this.loadInscription();
+      }
+    });
   }
 
   private loadInscription(): void {
@@ -90,12 +94,13 @@ export class InscriptionDetail implements OnInit {
   }
 
   onDownloadAttestation(): void {
-    if (!this.inscription) return;
+    if (!this.inscription || !this.currentUser) return;
 
+    const role = this.currentUser.roles?.[0] || 'ROLE_DOCTORANT';
     this.inscriptionService.downloadAttestation(
       this.inscription.id,
       this.currentUser.id,
-      this.currentUser.role?.name
+      role
     ).subscribe({
       next: (blob) => {
         const url = window.URL.createObjectURL(blob);

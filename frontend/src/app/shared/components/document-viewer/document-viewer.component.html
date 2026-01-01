@@ -4,7 +4,7 @@
     <div class="document-info">
       <mat-icon class="document-icon">{{ documentIcon }}</mat-icon>
       <div class="document-details">
-        <h4 class="document-name">{{ document.nom }}</h4>
+        <h4 class="document-name">{{ document.nomFichier }}</h4>
         <div class="document-meta">
           <span class="document-type">{{ documentTypeLabel }}</span>
           <span class="separator">•</span>
@@ -78,7 +78,7 @@
 
     <!-- Image Viewer -->
     <div *ngIf="isImage" class="image-viewer">
-      <img [src]="documentUrl" [alt]="document.nom" class="document-image">
+      <img [src]="documentUrl" [alt]="document.nomFichier" class="document-image">
     </div>
 
     <!-- Unsupported Format -->

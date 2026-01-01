@@ -333,10 +333,10 @@ export class NavbarComponent implements OnInit {
             if (user) {
                 this.currentUser = {
                     id: user.id,
-                    firstName: user.firstName,
-                    lastName: user.lastName,
+                    firstName: user.FirstName,
+                    lastName: user.LastName,
                     email: user.email,
-                    roles: user.roles.map(r => r.name)
+                    roles: user.roles
                 };
             }
         });

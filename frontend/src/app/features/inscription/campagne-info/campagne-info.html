@@ -29,7 +29,7 @@
     <div *ngIf="campagneActive$ | async as campagne; else noCampagneActive" class="campagne-card compact">
       <div class="card-header">
         <div class="campagne-title">
-          <h3>{{ campagne.nom }}</h3>
+          <h3>{{ campagne.libelle }}</h3>
           <span class="campagne-year">{{ campagne.anneeUniversitaire }}</span>
         </div>
         <div class="status-badge" [class]="getCampagneStatusClass(campagne)">
@@ -41,13 +41,13 @@
       <div class="card-body">
         <div class="campagne-details">
           <div class="detail-item">
-            <i class="material-icons">{{ getTypeIcon(campagne.typeInscription) }}</i>
-            <span>{{ getTypeLabel(campagne.typeInscription) }}</span>
+            <i class="material-icons">{{ getTypeIcon(campagne.type) }}</i>
+            <span>{{ getTypeLabel(campagne.type) }}</span>
           </div>
           
           <div class="detail-item">
             <i class="material-icons">event</i>
-            <span>{{ campagne.dateOuverture | date:'dd/MM/yyyy' }} - {{ campagne.dateFermeture | date:'dd/MM/yyyy' }}</span>
+            <span>{{ campagne.dateDebut | date:'dd/MM/yyyy' }} - {{ campagne.dateFin | date:'dd/MM/yyyy' }}</span>
           </div>
 
           <div class="detail-item urgency" [class]="getUrgencyClass(campagne)" *ngIf="isCampagneOpen(campagne)">
@@ -82,7 +82,7 @@
           <!-- Card Header -->
           <div class="card-header">
             <div class="campagne-title">
-              <h3>{{ campagne.nom }}</h3>
+              <h3>{{ campagne.libelle }}</h3>
               <span class="campagne-year">{{ campagne.anneeUniversitaire }}</span>
             </div>
             <div class="status-badge" [class]="getCampagneStatusClass(campagne)">
@@ -97,8 +97,8 @@
               <div class="info-item">
                 <strong>Type:</strong>
                 <div class="type-info">
-                  <i class="material-icons">{{ getTypeIcon(campagne.typeInscription) }}</i>
-                  <span>{{ getTypeLabel(campagne.typeInscription) }}</span>
+                  <i class="material-icons">{{ getTypeIcon(campagne.type) }}</i>
+                  <span>{{ getTypeLabel(campagne.type) }}</span>
                 </div>
               </div>
 
@@ -106,7 +106,7 @@
                 <strong>Période:</strong>
                 <div class="period-info">
                   <span class="date-range">
-                    {{ campagne.dateOuverture | date:'dd/MM/yyyy' }} - {{ campagne.dateFermeture | date:'dd/MM/yyyy' }}
+                    {{ campagne.dateDebut | date:'dd/MM/yyyy' }} - {{ campagne.dateFin | date:'dd/MM/yyyy' }}
                   </span>
                 </div>
               </div>
@@ -121,7 +121,7 @@
 
               <div class="info-item">
                 <strong>Créée le:</strong>
-                <span>{{ campagne.dateCreation | date:'dd/MM/yyyy' }}</span>
+                <span>{{ campagne.dateDebut | date:'dd/MM/yyyy' }}</span>
               </div>
             </div>
 
@@ -147,7 +147,7 @@
               <button 
                 class="btn btn-primary" 
                 routerLink="/inscription/nouvelle"
-                *ngIf="campagne.typeInscription === 'PREMIERE'"
+                *ngIf="campagne.type === 'INSCRIPTION'"
               >
                 <i class="fas fa-plus"></i>
                 Nouvelle inscription
@@ -156,7 +156,7 @@
               <button 
                 class="btn btn-primary" 
                 routerLink="/inscription/reinscription"
-                *ngIf="campagne.typeInscription === 'REINSCRIPTION'"
+                *ngIf="campagne.type === 'REINSCRIPTION'"
               >
                 <i class="fas fa-refresh"></i>
                 Réinscription

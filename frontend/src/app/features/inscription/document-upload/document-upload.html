@@ -36,9 +36,9 @@
         <i class="material-icons">{{ getDocumentIcon() }}</i>
       </div>
       <div class="document-info">
-        <h5>{{ currentDocument?.nom }}</h5>
+        <h5>{{ currentDocument?.nomFichier }}</h5>
         <p class="document-meta">
-          Taille: {{ formatFileSize(currentDocument?.taille || 0) }} | 
+          Taille: {{ formatFileSize(currentDocument?.tailleFichier || 0) }} | 
           Uploadé le: {{ currentDocument?.dateUpload | date:'dd/MM/yyyy HH:mm' }}
         </p>
         <div class="document-status" *ngIf="currentDocument?.valide !== undefined">
@@ -59,7 +59,7 @@
         <button 
           type="button" 
           class="btn btn-sm btn-outline-success" 
-          (click)="onDownload(currentDocument!.id, currentDocument!.nom)"
+          (click)="onDownload(currentDocument!.id, currentDocument!.nomFichier)"
           title="Télécharger"
         >
           <i class="fas fa-download"></i>

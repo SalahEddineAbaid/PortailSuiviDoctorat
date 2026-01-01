@@ -5,7 +5,7 @@
             <h1>Gestion des Utilisateurs</h1>
             <p class="subtitle">{{ totalElements }} utilisateur(s)</p>
         </div>
-        <button class="btn btn-primary" routerLink="/admin/users/new">
+        <button class="btn btn-primary" (click)="openCreateModal()">
             <i class="icon-user-plus"></i>
             Nouvel utilisateur
         </button>
@@ -97,7 +97,7 @@
                     <td>
                         <div class="roles-badges">
                             <span class="role-badge" *ngFor="let role of user.roles">
-                                {{ role.name }}
+                                {{ role }}
                             </span>
                         </div>
                     </td>
@@ -107,7 +107,7 @@
                             {{ getUserStatus(user) }}
                         </span>
                     </td>
-                    <td>{{ formatDate(user.createdAt) }}</td>
+                    <td>-</td>
                     <td class="actions-cell">
                         <div class="action-buttons">
                             <!-- View -->
@@ -121,12 +121,12 @@
                             </button>
 
                             <!-- Enable/Disable -->
-                            <button class="btn-icon" [class.btn-success]="!userManagementService.isUserEnabled(user)"
-                                [class.btn-warning]="userManagementService.isUserEnabled(user)"
-                                (click)="userManagementService.isUserEnabled(user) ? disableUser(user) : enableUser(user)"
-                                [title]="userManagementService.isUserEnabled(user) ? 'Désactiver' : 'Activer'">
+                            <button class="btn-icon" [class.btn-success]="!isUserEnabled(user)"
+                                [class.btn-warning]="isUserEnabled(user)"
+                                (click)="isUserEnabled(user) ? disableUser(user) : enableUser(user)"
+                                [title]="isUserEnabled(user) ? 'Désactiver' : 'Activer'">
                                 <i
-                                    [class]="userManagementService.isUserEnabled(user) ? 'icon-x-circle' : 'icon-check-circle'"></i>
+                                    [class]="isUserEnabled(user) ? 'icon-x-circle' : 'icon-check-circle'"></i>
                             </button>
 
                             <!-- Delete -->
@@ -173,5 +173,79 @@
         <span class="pagination-info">
             Page {{ currentPage + 1 }} sur {{ totalPages }} ({{ totalElements }} utilisateur(s))
         </span>
+    </div>
+</div>
+
+<!-- Create User Modal -->
+<div class="modal-overlay" *ngIf="showCreateModal" (click)="closeCreateModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2>Nouvel utilisateur</h2>
+            <button class="close-btn" (click)="closeCreateModal()">&times;</button>
+        </div>
+        
+        <form [formGroup]="userForm" (ngSubmit)="createUser()" class="modal-body">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="firstName">Prénom *</label>
+                    <input type="text" id="firstName" formControlName="firstName" placeholder="Prénom" />
+                    <span class="error-text" *ngIf="userForm.get('firstName')?.touched && userForm.get('firstName')?.errors?.['required']">
+                        Le prénom est requis
+                    </span>
+                </div>
+
+                <div class="form-group">
+                    <label for="lastName">Nom *</label>
+                    <input type="text" id="lastName" formControlName="lastName" placeholder="Nom" />
+                    <span class="error-text" *ngIf="userForm.get('lastName')?.touched && userForm.get('lastName')?.errors?.['required']">
+                        Le nom est requis
+                    </span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email *</label>
+                <input type="email" id="email" formControlName="email" placeholder="email@exemple.com" />
+                <span class="error-text" *ngIf="userForm.get('email')?.touched && userForm.get('email')?.errors?.['required']">
+                    L'email est requis
+                </span>
+                <span class="error-text" *ngIf="userForm.get('email')?.touched && userForm.get('email')?.errors?.['email']">
+                    Format d'email invalide
+                </span>
+            </div>
+
+            <div class="form-group">
+                <label for="tel">Téléphone</label>
+                <input type="tel" id="tel" formControlName="tel" placeholder="0600000000" />
+            </div>
+
+            <div class="form-group">
+                <label for="password">Mot de passe *</label>
+                <input type="password" id="password" formControlName="password" placeholder="Minimum 6 caractères" />
+                <span class="error-text" *ngIf="userForm.get('password')?.touched && userForm.get('password')?.errors?.['required']">
+                    Le mot de passe est requis
+                </span>
+                <span class="error-text" *ngIf="userForm.get('password')?.touched && userForm.get('password')?.errors?.['minlength']">
+                    Le mot de passe doit contenir au moins 6 caractères
+                </span>
+            </div>
+
+            <div class="form-group">
+                <label for="role">Rôle *</label>
+                <select id="role" formControlName="role">
+                    <option value="DOCTORANT">Doctorant</option>
+                    <option value="DIRECTEUR">Directeur</option>
+                    <option value="PED">PED</option>
+                    <option value="ADMIN">Administrateur</option>
+                </select>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="closeCreateModal()">Annuler</button>
+                <button type="submit" class="btn btn-primary" [disabled]="isSaving || userForm.invalid">
+                    {{ isSaving ? 'Création...' : 'Créer l\'utilisateur' }}
+                </button>
+            </div>
+        </form>
     </div>
 </div>

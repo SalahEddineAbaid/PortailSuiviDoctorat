@@ -1,0 +1,71 @@
+<div class="dossier-list-container">
+  <div class="page-header">
+    <h1>Dossiers en attente de validation</h1>
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+  <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+
+  <div class="filters-section">
+    <input type="text" 
+           placeholder="Rechercher par nom, prénom ou email..." 
+           [ngModel]="filters.searchTerm"
+           (ngModelChange)="onSearchChange($event)">
+    
+    <select [(ngModel)]="filters.campagneId" (change)="onFilterChange()">
+      <option [ngValue]="undefined">Toutes les campagnes</option>
+      <option *ngFor="let campagne of campagnes" [ngValue]="campagne.id">{{ campagne.libelle }}</option>
+    </select>
+
+    <select [(ngModel)]="filters.status" (change)="onFilterChange()">
+      <option value="ALL">Tous les statuts</option>
+      <option value="EN_ATTENTE_ADMIN">En attente admin</option>
+      <option value="APPROUVE_DIRECTEUR">Approuvé directeur</option>
+    </select>
+
+    <button class="btn btn-secondary" (click)="clearFilters()">Réinitialiser</button>
+  </div>
+
+  <div *ngIf="isLoading" class="loading">Chargement...</div>
+
+  <div *ngIf="!isLoading && filteredDossiers.length === 0" class="empty-state">
+    Aucun dossier en attente
+  </div>
+
+  <table *ngIf="!isLoading && filteredDossiers.length > 0" class="data-table">
+    <thead>
+      <tr>
+        <th>Doctorant</th>
+        <th>Campagne</th>
+        <th>Date soumission</th>
+        <th>Statut</th>
+        <th>Urgence</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let dossier of getPaginatedDossiers()" [class.urgent]="isUrgent(dossier)">
+        <td>{{ getDoctorantFullName(dossier) }}</td>
+        <td>{{ getCampagneName(dossier) }}</td>
+        <td>{{ dossier.createdAt ? formatDate(dossier.createdAt) : 'N/A' }}</td>
+        <td>
+          <span class="status-badge">{{ dossier.statut }}</span>
+        </td>
+        <td>
+          <span *ngIf="isUrgent(dossier)" class="urgent-badge">Urgent</span>
+          <span *ngIf="!isUrgent(dossier)">{{ getDaysSinceSubmission(dossier) }} jours</span>
+        </td>
+        <td class="actions">
+          <button (click)="viewDossier(dossier.id)">Voir</button>
+          <button *ngIf="isPending(dossier)" (click)="validateDossier(dossier)" class="btn-primary">Valider</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="totalPages > 1" class="pagination">
+    <button [disabled]="currentPage === 0" (click)="onPageChange(currentPage - 1)">Précédent</button>
+    <span>Page {{ currentPage + 1 }} sur {{ totalPages }}</span>
+    <button [disabled]="currentPage >= totalPages - 1" (click)="onPageChange(currentPage + 1)">Suivant</button>
+  </div>
+</div>

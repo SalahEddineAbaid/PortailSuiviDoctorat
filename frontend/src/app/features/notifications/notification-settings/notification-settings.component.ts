@@ -3,6 +3,12 @@ import { CommonModule, AsyncPipe } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatDividerModule } from '@angular/material/divider';
 
 import { NotificationService } from '../../../core/services/notification.service';
 import { WebSocketService, WebSocketState } from '../../../core/services/websocket.service';
@@ -11,7 +17,17 @@ import { NotificationSettings } from '../../../core/models/notification.model';
 @Component({
   selector: 'app-notification-settings',
   standalone: true,
-  imports: [CommonModule, AsyncPipe, ReactiveFormsModule],
+  imports: [
+    CommonModule, 
+    AsyncPipe, 
+    ReactiveFormsModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    MatButtonModule,
+    MatCardModule,
+    MatSlideToggleModule,
+    MatDividerModule
+  ],
   templateUrl: './notification-settings.component.html',
   styleUrls: ['./notification-settings.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -251,7 +267,8 @@ export class NotificationSettingsComponent implements OnInit, OnDestroy {
   /**
    * 🔹 Obtenir le texte d'état WebSocket
    */
-  getWebSocketStateText(state: WebSocketState): string {
+  getWebSocketStateText(state: WebSocketState | null): string {
+    if (state === null) return 'État inconnu';
     const stateTexts = {
       [WebSocketState.CONNECTING]: 'Connexion en cours...',
       [WebSocketState.CONNECTED]: 'Connecté',

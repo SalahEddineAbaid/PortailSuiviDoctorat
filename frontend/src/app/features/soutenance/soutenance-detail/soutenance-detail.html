@@ -209,10 +209,10 @@
                     <div class="document-item" *ngFor="let doc of soutenance.documents">
                         <i class="icon-file-text"></i>
                         <div class="document-info">
-                            <span class="document-name">{{ doc.nomFichier || doc.type }}</span>
+                            <span class="document-name">{{ getDocumentName(doc) }}</span>
                             <span class="document-meta">
-                                {{ doc.taille ? (doc.taille / 1024 / 1024).toFixed(2) + ' MB' : '' }}
-                                <span *ngIf="doc.dateUpload"> • {{ formatDate(doc.dateUpload) }}</span>
+                                {{ getDocumentSize(doc) }}
+                                <span *ngIf="getDocumentDate(doc)"> • {{ formatDate(getDocumentDate(doc)) }}</span>
                             </span>
                         </div>
                         <div class="document-actions">

@@ -14,7 +14,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { Router } from '@angular/router';
 
-import { DefenseService } from '../../../core/services/defense.service';
+import { SoutenanceService } from '../../../core/services/soutenance.service';
 
 @Component({
   selector: 'app-attestation-generator',
@@ -54,7 +54,7 @@ export class AttestationGeneratorComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private defenseService: DefenseService,
+    private soutenanceService: SoutenanceService,
     private router: Router,
     private snackBar: MatSnackBar
   ) {}
@@ -98,8 +98,8 @@ export class AttestationGeneratorComponent implements OnInit {
     if (!this.defenseId) return;
 
     this.loading = true;
-    this.defenseService.getDefense(this.defenseId).subscribe({
-      next: (data) => {
+    this.soutenanceService.getDefenseRequestById(this.defenseId).subscribe({
+      next: (data: any) => {
         this.defense = data;
         this.populateForm();
         this.loading = false;
@@ -139,17 +139,10 @@ export class AttestationGeneratorComponent implements OnInit {
       ...this.attestationForm.value
     };
 
-    this.defenseService.generateAttestation(attestationData).subscribe({
-      next: (blob) => {
-        this.generating = false;
-        this.downloadPDF(blob);
-        this.showSuccess('Attestation générée avec succès');
-      },
-      error: () => {
-        this.generating = false;
-        this.showError('Erreur lors de la génération de l\'attestation');
-      }
-    });
+    // TODO: Implement attestation generation via backend API
+    // For now, show a message that this feature is not yet implemented
+    this.generating = false;
+    this.showError('La génération d\'attestation sera disponible prochainement');
   }
 
   private downloadPDF(blob: Blob): void {
@@ -168,21 +161,8 @@ export class AttestationGeneratorComponent implements OnInit {
       return;
     }
 
-    // Open preview in new window
-    const attestationData = {
-      defenseId: this.defenseId,
-      ...this.attestationForm.value
-    };
-
-    this.defenseService.previewAttestation(attestationData).subscribe({
-      next: (blob) => {
-        const url = window.URL.createObjectURL(blob);
-        window.open(url, '_blank');
-      },
-      error: () => {
-        this.showError('Erreur lors de la prévisualisation');
-      }
-    });
+    // TODO: Implement attestation preview via backend API
+    this.showError('La prévisualisation sera disponible prochainement');
   }
 
   isFieldInvalid(fieldName: string): boolean {

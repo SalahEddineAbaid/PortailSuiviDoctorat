@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { UserManagementService, UserStatisticsResponse, ConnectionStatisticsResponse } from '../../../core/services/user-management.service';
-import { CampagneService, CampagneResponse } from '../../../core/services/campagne.service';
+import { CampagneService } from '../../../core/services/campagne.service';
+import { CampagneResponse } from '../../../core/models/campagne.model';
 import { DossierValidationService, InscriptionResponse } from '../../../core/services/dossier-validation.service';
 import { AuthService } from '../../../core/services/auth.service';
 
@@ -54,7 +55,7 @@ export class AdminDashboard implements OnInit {
             userStats: this.userManagementService.getUserStatistics(),
             connectionStats: this.userManagementService.getConnectionStatistics(),
             campagnes: this.campagneService.getAllCampagnes(),
-            activeCampagnes: this.campagneService.getActiveCampagnes(),
+            activeCampagnes: this.campagneService.getCampagnesActives(),
             pendingDossiers: this.dossierService.getPendingForAdmin()
         }).subscribe({
             next: (data) => {
@@ -72,7 +73,7 @@ export class AdminDashboard implements OnInit {
                 };
 
                 this.recentCampagnes = data.campagnes
-                    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                    .sort((a, b) => new Date(b.dateDebut).getTime() - new Date(a.dateDebut).getTime())
                     .slice(0, 5);
 
                 this.pendingDossiers = data.pendingDossiers.slice(0, 10);
@@ -102,5 +103,13 @@ export class AdminDashboard implements OnInit {
             month: 'short',
             day: 'numeric'
         });
+    }
+
+    getStatusLabel(statut: any): string {
+        return this.dossierService.getStatusLabel(statut);
+    }
+
+    getStatusColor(statut: any): string {
+        return this.dossierService.getStatusColor(statut);
     }
 }

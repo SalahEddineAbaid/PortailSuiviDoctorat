@@ -1,6 +1,13 @@
+server:
+  port: 8081
+
 spring:
   application:
     name: USER-SERVICE
+  cloud:
+    config:
+      enabled: false
+      fail-fast: false
   config:
     import: optional:configserver:http://localhost:8889
 
@@ -73,6 +80,9 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-      default-zone: http://eureka:eureka123@localhost:8761/eureka/,http://eureka:eureka123@localhost:8762/eureka/
+      defaultZone: http://eureka:eureka123@localhost:8761/eureka/
   instance:
     prefer-ip-address: true
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30

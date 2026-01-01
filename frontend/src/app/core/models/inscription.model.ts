@@ -12,6 +12,10 @@ export enum StatutInscription {
   REJETE = 'REJETE'
 }
 
+// Alias for backward compatibility
+export const InscriptionStatus = StatutInscription;
+export type InscriptionStatus = StatutInscription;
+
 export enum TypeInscription {
   PREMIERE_INSCRIPTION = 'PREMIERE_INSCRIPTION',
   REINSCRIPTION = 'REINSCRIPTION'

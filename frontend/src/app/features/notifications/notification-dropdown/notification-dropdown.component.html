@@ -12,7 +12,7 @@
       <button 
         class="btn-icon"
         (click)="onMarkAllAsRead()"
-        *ngIf="(unreadCount$ | async) > 0"
+        *ngIf="(unreadCount$ | async) ?? 0 > 0"
         title="Marquer toutes comme lues"
       >
         <i class="material-icons">done_all</i>

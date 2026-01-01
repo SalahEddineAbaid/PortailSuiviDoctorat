@@ -128,11 +128,11 @@
         <div class="quick-actions">
             <h2>Actions rapides</h2>
             <div class="actions-grid">
-                <a routerLink="/admin/users/new" class="action-card">
+                <a [routerLink]="['/admin/users']" [queryParams]="{action: 'create'}" class="action-card">
                     <i class="icon-user-plus"></i>
                     <span>Créer un utilisateur</span>
                 </a>
-                <a routerLink="/admin/campagnes/new" class="action-card">
+                <a [routerLink]="['/admin/campagnes']" [queryParams]="{action: 'create'}" class="action-card">
                     <i class="icon-plus-circle"></i>
                     <span>Créer une campagne</span>
                 </a>
@@ -140,7 +140,7 @@
                     <i class="icon-check-square"></i>
                     <span>Valider les dossiers</span>
                 </a>
-                <a routerLink="/admin/configuration" class="action-card">
+                <a routerLink="/admin/parametrage" class="action-card">
                     <i class="icon-settings"></i>
                     <span>Configuration</span>
                 </a>
@@ -195,11 +195,11 @@
                             </h4>
                             <p class="dossier-meta">
                                 <span *ngIf="dossier.campagne">{{ dossier.campagne.nom }}</span>
-                                <span class="date">{{ formatDate(dossier.createdAt) }}</span>
+                                <span class="date" *ngIf="dossier.createdAt">{{ formatDate(dossier.createdAt) }}</span>
                             </p>
                         </div>
-                        <span class="status-badge" [class]="'status-' + dossierService.getStatusColor(dossier.statut)">
-                            {{ dossierService.getStatusLabel(dossier.statut) }}
+                        <span class="status-badge" [class]="'status-' + getStatusColor(dossier.statut)">
+                            {{ getStatusLabel(dossier.statut) }}
                         </span>
                         <button class="btn btn-sm btn-primary" [routerLink]="['/admin/dossiers', dossier.id]">
                             <i class="icon-check"></i>

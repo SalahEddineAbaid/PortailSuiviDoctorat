@@ -49,7 +49,7 @@ export class DocumentService {
     formData.append('file', file);
     formData.append('typeDocument', typeDocument);
 
-    const req = new HttpRequest<DocumentResponse>(
+    const req = new HttpRequest(
       'POST',
       `${this.apiUrl}/${inscriptionId}/upload`,
       formData,

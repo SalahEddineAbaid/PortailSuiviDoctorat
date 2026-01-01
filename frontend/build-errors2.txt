@@ -1,0 +1,3202 @@
+﻿node.exe : 
+[1m[33m[baseline-browser-mapping] 
+The data in this module is over two 
+months old.  To ensure accurate 
+Baseline data, please update: `npm i 
+baseline-browser-mapping@latest 
+-D`[39m[22m
+Au caractère Ligne:1 : 1
++ & "C:\Program Files\nodejs/node.exe" 
+"C:\Users\hp\AppData\Roaming\npm ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpeci 
+   fied: ([1m[33m[basel...t -D`[39  
+  m[22m:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCo 
+   mmandError
+ 
+[33m>[39m Building...
+[32mÔêÜ[39m Building...
+Application bundle generation failed. [45.526 seconds] - 2026-01-01T15:25:11.150Z
+
+[1m[33m[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mNG8113: TimelineComponent is not 
+used within the template of 
+DoctorantDashboard[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/doctoran
+t-dashboard/doctorant-dashboard.ts:23:4
+:
+[37m      23 Ôöé     
+[32mTimelineComponent[37m,
+         ÔòÁ     
+[32m~~~~~~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mNG8113: AlertComponent is not used 
+within the template of 
+DoctorantDashboard[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/doctoran
+t-dashboard/doctorant-dashboard.ts:24:4
+:
+[37m      24 Ôöé     
+[32mAlertComponent[37m,
+         ÔòÁ     
+[32m~~~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mNG8113: ProgressWidgetComponent is 
+not used within the template of 
+DoctorantDashboard[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/doctoran
+t-dashboard/doctorant-dashboard.ts:25:4
+:
+[37m      25 Ôöé     
+[32mProgressWidgetComponent[37m,
+         ÔòÁ     
+[32m~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mNG8113: StatusWidgetComponent is 
+not used within the template of 
+DoctorantDashboard[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/doctoran
+t-dashboard/doctorant-dashboard.ts:26:4
+:
+[37m      26 Ôöé     
+[32mStatusWidgetComponent[37m
+         ÔòÁ     
+[32m~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mNG8103: The `*ngIf` directive was 
+used in the template, but neither the 
+`NgIf` directive nor the 
+`CommonModule` was imported. Use 
+Angular's built-in control flow @if or 
+make sure that either the `NgIf` 
+directive or the `CommonModule` is 
+included in the `@Component.imports` 
+array of this component.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/notifications/noti
+fication-dropdown/notification-dropdown
+.component.html:3:32:
+[37m      3 Ôöé   <div 
+class="dropdown-header" 
+*[32mngIf[37m="showHeader">
+        ÔòÁ                            
+     [32m~~~~[0m
+
+  Warning occurs in the template of 
+component 
+NotificationDropdownComponent.
+
+    src/app/features/notifications/noti
+fication-dropdown/notification-dropdown
+.component.ts:10:15:
+[37m      10 Ôöé   templateUrl: [32m'
+./notification-dropdown.component.html'
+[37m,
+         ÔòÁ                [32m~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mNG8103: The `*ngIf` directive was 
+used in the template, but neither the 
+`NgIf` directive nor the 
+`CommonModule` was imported. Use 
+Angular's built-in control flow @if or 
+make sure that either the `NgIf` 
+directive or the `CommonModule` is 
+included in the `@Component.imports` 
+array of this component.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/notifications/noti
+fication-dropdown/notification-dropdown
+.component.html:6:34:
+[37m      6 Ôöé ...  <span 
+class="unread-count" 
+*[32mngIf[37m="(unreadCount$ | 
+async) as un...
+        ÔòÁ                            
+      [32m~~~~[0m
+
+  Warning occurs in the template of 
+component 
+NotificationDropdownComponent.
+
+    src/app/features/notifications/noti
+fication-dropdown/notification-dropdown
+.component.ts:10:15:
+[37m      10 Ôöé   templateUrl: [32m'
+./notification-dropdown.component.html'
+[37m,
+         ÔòÁ                [32m~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mNG8103: The `*ngIf` directive was 
+used in the template, but neither the 
+`NgIf` directive nor the 
+`CommonModule` was imported. Use 
+Angular's built-in control flow @if or 
+make sure that either the `NgIf` 
+directive or the `CommonModule` is 
+included in the `@Component.imports` 
+array of this component.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/notifications/noti
+fication-dropdown/notification-dropdown
+.component.html:11:33:
+[37m      11 Ôöé     <div 
+class="header-actions" 
+*[32mngIf[37m="showActions">
+         ÔòÁ                           
+       [32m~~~~[0m
+
+  Warning occurs in the template of 
+component 
+NotificationDropdownComponent.
+
+    src/app/features/notifications/noti
+fication-dropdown/notification-dropdown
+.component.ts:10:15:
+[37m      10 Ôöé   templateUrl: [32m'
+./notification-dropdown.component.html'
+[37m,
+         ÔòÁ                [32m~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mNG8103: The `*ngIf` directive was 
+used in the template, but neither the 
+`NgIf` directive nor the 
+`CommonModule` was imported. Use 
+Angular's built-in control flow @if or 
+make sure that either the `NgIf` 
+directive or the `CommonModule` is 
+included in the `@Component.imports` 
+array of this component.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/notifications/noti
+fication-dropdown/notification-dropdown
+.component.html:15:9:
+[37m      15 Ôöé         
+*[32mngIf[37m="(unreadCount$ | 
+async) > 0"
+         ÔòÁ          [32m~~~~[0m
+
+  Warning occurs in the template of 
+component 
+NotificationDropdownComponent.
+
+    src/app/features/notifications/noti
+fication-dropdown/notification-dropdown
+.component.ts:10:15:
+[37m      10 Ôöé   templateUrl: [32m'
+./notification-dropdown.component.html'
+[37m,
+         ÔòÁ                [32m~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mNG8103: The `*ngIf` directive was 
+used in the template, but neither the 
+`NgIf` directive nor the 
+`CommonModule` was imported. Use 
+Angular's built-in control flow @if or 
+make sure that either the `NgIf` 
+directive or the `CommonModule` is 
+included in the `@Component.imports` 
+array of this component.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/notifications/noti
+fication-dropdown/notification-dropdown
+.component.html:33:19:
+[37m      33 Ôöé     <ng-container 
+*[32mngIf[37m="(recentNotifications$ 
+| async) as notific...
+         ÔòÁ                    
+[32m~~~~[0m
+
+  Warning occurs in the template of 
+component 
+NotificationDropdownComponent.
+
+    src/app/features/notifications/noti
+fication-dropdown/notification-dropdown
+.component.ts:10:15:
+[37m      10 Ôöé   templateUrl: [32m'
+./notification-dropdown.component.html'
+[37m,
+         ÔòÁ                [32m~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mNG8103: The `*ngIf` directive was 
+used in the template, but neither the 
+`NgIf` directive nor the 
+`CommonModule` was imported. Use 
+Angular's built-in control flow @if or 
+make sure that either the `NgIf` 
+directive or the `CommonModule` is 
+included in the `@Component.imports` 
+array of this component.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/notifications/noti
+fication-dropdown/notification-dropdown
+.component.html:35:39:
+[37m      35 Ôöé ... <div 
+class="notifications-list" 
+*[32mngIf[37m="notifications.length 
+> 0">
+         ÔòÁ                           
+           [32m~~~~[0m
+
+  Warning occurs in the template of 
+component 
+NotificationDropdownComponent.
+
+    src/app/features/notifications/noti
+fication-dropdown/notification-dropdown
+.component.ts:10:15:
+[37m      10 Ôöé   templateUrl: [32m'
+./notification-dropdown.component.html'
+[37m,
+         ÔòÁ                [32m~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mNG8103: The `*ngFor` directive was 
+used in the template, but neither the 
+`NgFor` directive nor the 
+`CommonModule` was imported. Use 
+Angular's built-in control flow @for 
+or make sure that either the `NgFor` 
+directive or the `CommonModule` is 
+included in the `@Component.imports` 
+array of this component.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/notifications/noti
+fication-dropdown/notification-dropdown
+.component.html:38:11:
+[37m      38 Ôöé           
+*[32mngFor[37m="let notification of 
+notifications; trackBy: trac...
+         ÔòÁ            [32m~~~~~[0m
+
+  Warning occurs in the template of 
+component 
+NotificationDropdownComponent.
+
+    src/app/features/notifications/noti
+fication-dropdown/notification-dropdown
+.component.ts:10:15:
+[37m      10 Ôöé   templateUrl: [32m'
+./notification-dropdown.component.html'
+[37m,
+         ÔòÁ                [32m~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mNG8103: The `*ngIf` directive was 
+used in the template, but neither the 
+`NgIf` directive nor the 
+`CommonModule` was imported. Use 
+Angular's built-in control flow @if or 
+make sure that either the `NgIf` 
+directive or the `CommonModule` is 
+included in the `@Component.imports` 
+array of this component.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/notifications/noti
+fication-dropdown/notification-dropdown
+.component.html:59:41:
+[37m      59 Ôöé ...    <div 
+class="unread-indicator" *[32mngIf[37
+m="!notification.lue"></div>
+         ÔòÁ                           
+            [32m~~~~[0m
+
+  Warning occurs in the template of 
+component 
+NotificationDropdownComponent.
+
+    src/app/features/notifications/noti
+fication-dropdown/notification-dropdown
+.component.ts:10:15:
+[37m      10 Ôöé   templateUrl: [32m'
+./notification-dropdown.component.html'
+[37m,
+         ÔòÁ                [32m~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mNG8103: The `*ngIf` directive was 
+used in the template, but neither the 
+`NgIf` directive nor the 
+`CommonModule` was imported. Use 
+Angular's built-in control flow @if or 
+make sure that either the `NgIf` 
+directive or the `CommonModule` is 
+included in the `@Component.imports` 
+array of this component.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/notifications/noti
+fication-dropdown/notification-dropdown
+.component.html:64:37:
+[37m      64 Ôöé ... <div 
+class="no-notifications" 
+*[32mngIf[37m="notifications.length 
+=== 0">
+         ÔòÁ                           
+         [32m~~~~[0m
+
+  Warning occurs in the template of 
+component 
+NotificationDropdownComponent.
+
+    src/app/features/notifications/noti
+fication-dropdown/notification-dropdown
+.component.ts:10:15:
+[37m      10 Ôöé   templateUrl: [32m'
+./notification-dropdown.component.html'
+[37m,
+         ÔòÁ                [32m~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mNG8103: The `*ngIf` directive was 
+used in the template, but neither the 
+`NgIf` directive nor the 
+`CommonModule` was imported. Use 
+Angular's built-in control flow @if or 
+make sure that either the `NgIf` 
+directive or the `CommonModule` is 
+included in the `@Component.imports` 
+array of this component.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/notifications/noti
+fication-dropdown/notification-dropdown
+.component.html:75:32:
+[37m      75 Ôöé   <div 
+class="dropdown-footer" 
+*[32mngIf[37m="showFooter">
+         ÔòÁ                           
+      [32m~~~~[0m
+
+  Warning occurs in the template of 
+component 
+NotificationDropdownComponent.
+
+    src/app/features/notifications/noti
+fication-dropdown/notification-dropdown
+.component.ts:10:15:
+[37m      10 Ôöé   templateUrl: [32m'
+./notification-dropdown.component.html'
+[37m,
+         ÔòÁ                [32m~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mNG8103: The `*ngIf` directive was 
+used in the template, but neither the 
+`NgIf` directive nor the 
+`CommonModule` was imported. Use 
+Angular's built-in control flow @if or 
+make sure that either the `NgIf` 
+directive or the `CommonModule` is 
+included in the `@Component.imports` 
+array of this component.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/notifications/noti
+fication-dropdown/notification-dropdown
+.component.html:76:19:
+[37m      76 Ôöé     <ng-container 
+*[32mngIf[37m="(notifications$ | 
+async) as allNotificati...
+         ÔòÁ                    
+[32m~~~~[0m
+
+  Warning occurs in the template of 
+component 
+NotificationDropdownComponent.
+
+    src/app/features/notifications/noti
+fication-dropdown/notification-dropdown
+.component.ts:10:15:
+[37m      10 Ôöé   templateUrl: [32m'
+./notification-dropdown.component.html'
+[37m,
+         ÔòÁ                [32m~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mNG8103: The `*ngIf` directive was 
+used in the template, but neither the 
+`NgIf` directive nor the 
+`CommonModule` was imported. Use 
+Angular's built-in control flow @if or 
+make sure that either the `NgIf` 
+directive or the `CommonModule` is 
+included in the `@Component.imports` 
+array of this component.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/notifications/noti
+fication-dropdown/notification-dropdown
+.component.html:80:9:
+[37m      80 Ôöé         *[32mngIf[3
+7m="allNotifications.length > 0"
+         ÔòÁ          [32m~~~~[0m
+
+  Warning occurs in the template of 
+component 
+NotificationDropdownComponent.
+
+    src/app/features/notifications/noti
+fication-dropdown/notification-dropdown
+.component.ts:10:15:
+[37m      10 Ôöé   templateUrl: [32m'
+./notification-dropdown.component.html'
+[37m,
+         ÔòÁ                [32m~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mNG8103: The `*ngIf` directive was 
+used in the template, but neither the 
+`NgIf` directive nor the 
+`CommonModule` was imported. Use 
+Angular's built-in control flow @if or 
+make sure that either the `NgIf` 
+directive or the `CommonModule` is 
+included in the `@Component.imports` 
+array of this component.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/notifications/noti
+fication-dropdown/notification-dropdown
+.component.html:86:11:
+[37m      86 Ôöé           *[32mngIf
+[37m="(hasMoreNotifications$ | async)"
+         ÔòÁ            [32m~~~~[0m
+
+  Warning occurs in the template of 
+component 
+NotificationDropdownComponent.
+
+    src/app/features/notifications/noti
+fication-dropdown/notification-dropdown
+.component.ts:10:15:
+[37m      10 Ôöé   templateUrl: [32m'
+./notification-dropdown.component.html'
+[37m,
+         ÔòÁ                [32m~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mNG8103: The `*ngIf` directive was 
+used in the template, but neither the 
+`NgIf` directive nor the 
+`CommonModule` was imported. Use 
+Angular's built-in control flow @if or 
+make sure that either the `NgIf` 
+directive or the `CommonModule` is 
+included in the `@Component.imports` 
+array of this component.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/notifications/noti
+fication-dropdown/notification-dropdown
+.component.html:93:44:
+[37m      93 Ôöé 
+...ss="no-notifications-footer" *[32mn
+gIf[37m="allNotifications.length 
+===...
+         ÔòÁ                           
+       [32m~~~~[0m
+
+  Warning occurs in the template of 
+component 
+NotificationDropdownComponent.
+
+    src/app/features/notifications/noti
+fication-dropdown/notification-dropdown
+.component.ts:10:15:
+[37m      10 Ôöé   templateUrl: [32m'
+./notification-dropdown.component.html'
+[37m,
+         ÔòÁ                [32m~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mDeprecation[0m [1m[35m[plugin 
+angular-sass][0m
+
+    src/app/features/dashboard/admin-da
+shboard/admin-dashboard.scss:2:8:
+[37m      2 Ôöé @import [32m[37m'../
+doctorant-dashboard/doctorant-dashboard
+.scss';
+        ÔòÁ         [32m^[0m
+
+
+  Sass @import rules are deprecated 
+and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: 
+[4mhttps://sass-lang.com/d/import[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mDeprecation[0m [1m[35m[plugin 
+angular-sass][0m
+
+    src/app/features/dashboard/directeu
+r-dashboard/directeur-dashboard.compone
+nt.scss:2:8:
+[37m      2 Ôöé @import [32m[37m'../
+doctorant-dashboard/doctorant-dashboard
+.scss';
+        ÔòÁ         [32m^[0m
+
+
+  Sass @import rules are deprecated 
+and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: 
+[4mhttps://sass-lang.com/d/import[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mDeprecation[0m [1m[35m[plugin 
+angular-sass][0m
+
+    src/styles.scss:199:11:
+[37m      199 Ôöé     width: 
+[32m[37mpercentage($i / 12);
+          ÔòÁ            [32m^[0m
+
+
+  Global built-in functions are 
+deprecated and will be removed in Dart 
+Sass 3.0.0.
+  Use math.percentage instead.
+  
+  More info and automated migrator: 
+[4mhttps://sass-lang.com/d/import[0m
+
+  The plugin "angular-sass" was 
+triggered by this import
+
+    angular:styles/global:styles:1:8:
+[37m      1 Ôöé @import 
+[32m'src/styles.scss'[37m;
+        ÔòÁ         
+[32m~~~~~~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mDeprecation[0m [1m[35m[plugin 
+angular-sass][0m
+
+    src/styles.scss:199:22:
+[37m      199 Ôöé     width: 
+percentage([32m[37m$i / 12);
+          ÔòÁ                       
+[32m^[0m
+
+
+  Using / for division outside of 
+calc() is deprecated and will be 
+removed in Dart Sass 2.0.0.
+  
+  Recommendation: math.div($i, 12) or 
+calc($i / 12)
+  
+  More info and automated migrator: [4
+mhttps://sass-lang.com/d/slash-div[0m
+
+  The plugin "angular-sass" was 
+triggered by this import
+
+    angular:styles/global:styles:1:8:
+[37m      1 Ôöé @import 
+[32m'src/styles.scss'[37m;
+        ÔòÁ         
+[32m~~~~~~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mDeprecation[0m [1m[35m[plugin 
+angular-sass][0m
+
+    src/styles.scss:210:13:
+[37m      210 Ôöé       width: 
+[32m[37mpercentage($i / 12);
+          ÔòÁ              [32m^[0m
+
+
+  Global built-in functions are 
+deprecated and will be removed in Dart 
+Sass 3.0.0.
+  Use math.percentage instead.
+  
+  More info and automated migrator: 
+[4mhttps://sass-lang.com/d/import[0m
+
+  The plugin "angular-sass" was 
+triggered by this import
+
+    angular:styles/global:styles:1:8:
+[37m      1 Ôöé @import 
+[32m'src/styles.scss'[37m;
+        ÔòÁ         
+[32m~~~~~~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mDeprecation[0m [1m[35m[plugin 
+angular-sass][0m
+
+    src/styles.scss:210:24:
+[37m      210 Ôöé       width: 
+percentage([32m[37m$i / 12);
+          ÔòÁ                         
+[32m^[0m
+
+
+  Using / for division outside of 
+calc() is deprecated and will be 
+removed in Dart Sass 2.0.0.
+  
+  Recommendation: math.div($i, 12) or 
+calc($i / 12)
+  
+  More info and automated migrator: [4
+mhttps://sass-lang.com/d/slash-div[0m
+
+  The plugin "angular-sass" was 
+triggered by this import
+
+    angular:styles/global:styles:1:8:
+[37m      1 Ôöé @import 
+[32m'src/styles.scss'[37m;
+        ÔòÁ         
+[32m~~~~~~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mDeprecation[0m [1m[35m[plugin 
+angular-sass][0m
+
+    src/styles.scss:219:13:
+[37m      219 Ôöé       width: 
+[32m[37mpercentage($i / 12);
+          ÔòÁ              [32m^[0m
+
+
+  Global built-in functions are 
+deprecated and will be removed in Dart 
+Sass 3.0.0.
+  Use math.percentage instead.
+  
+  More info and automated migrator: 
+[4mhttps://sass-lang.com/d/import[0m
+
+  The plugin "angular-sass" was 
+triggered by this import
+
+    angular:styles/global:styles:1:8:
+[37m      1 Ôöé @import 
+[32m'src/styles.scss'[37m;
+        ÔòÁ         
+[32m~~~~~~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mDeprecation[0m [1m[35m[plugin 
+angular-sass][0m
+
+    src/styles.scss:219:24:
+[37m      219 Ôöé       width: 
+percentage([32m[37m$i / 12);
+          ÔòÁ                         
+[32m^[0m
+
+
+  Using / for division outside of 
+calc() is deprecated and will be 
+removed in Dart Sass 2.0.0.
+  
+  Recommendation: math.div($i, 12) or 
+calc($i / 12)
+  
+  More info and automated migrator: [4
+mhttps://sass-lang.com/d/slash-div[0m
+
+  The plugin "angular-sass" was 
+triggered by this import
+
+    angular:styles/global:styles:1:8:
+[37m      1 Ôöé @import 
+[32m'src/styles.scss'[37m;
+        ÔòÁ         
+[32m~~~~~~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mDeprecation[0m [1m[35m[plugin 
+angular-sass][0m
+
+    src/styles.scss:228:13:
+[37m      228 Ôöé       width: 
+[32m[37mpercentage($i / 12);
+          ÔòÁ              [32m^[0m
+
+
+  Global built-in functions are 
+deprecated and will be removed in Dart 
+Sass 3.0.0.
+  Use math.percentage instead.
+  
+  More info and automated migrator: 
+[4mhttps://sass-lang.com/d/import[0m
+
+  The plugin "angular-sass" was 
+triggered by this import
+
+    angular:styles/global:styles:1:8:
+[37m      1 Ôöé @import 
+[32m'src/styles.scss'[37m;
+        ÔòÁ         
+[32m~~~~~~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mDeprecation[0m [1m[35m[plugin 
+angular-sass][0m
+
+    src/styles.scss:228:24:
+[37m      228 Ôöé       width: 
+percentage([32m[37m$i / 12);
+          ÔòÁ                         
+[32m^[0m
+
+
+  Using / for division outside of 
+calc() is deprecated and will be 
+removed in Dart Sass 2.0.0.
+  
+  Recommendation: math.div($i, 12) or 
+calc($i / 12)
+  
+  More info and automated migrator: [4
+mhttps://sass-lang.com/d/slash-div[0m
+
+  The plugin "angular-sass" was 
+triggered by this import
+
+    angular:styles/global:styles:1:8:
+[37m      1 Ôöé @import 
+[32m'src/styles.scss'[37m;
+        ÔòÁ         
+[32m~~~~~~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mDeprecation[0m [1m[35m[plugin 
+angular-sass][0m
+
+    src/styles.scss:237:13:
+[37m      237 Ôöé       width: 
+[32m[37mpercentage($i / 12);
+          ÔòÁ              [32m^[0m
+
+
+  Global built-in functions are 
+deprecated and will be removed in Dart 
+Sass 3.0.0.
+  Use math.percentage instead.
+  
+  More info and automated migrator: 
+[4mhttps://sass-lang.com/d/import[0m
+
+  The plugin "angular-sass" was 
+triggered by this import
+
+    angular:styles/global:styles:1:8:
+[37m      1 Ôöé @import 
+[32m'src/styles.scss'[37m;
+        ÔòÁ         
+[32m~~~~~~~~~~~~~~~~~[0m
+
+
+[33mÔû▓ 
+[43;33m[[43;30mWARNING[43;33m][0m 
+[1mDeprecation[0m [1m[35m[plugin 
+angular-sass][0m
+
+    src/styles.scss:237:24:
+[37m      237 Ôöé       width: 
+percentage([32m[37m$i / 12);
+          ÔòÁ                         
+[32m^[0m
+
+
+  Using / for division outside of 
+calc() is deprecated and will be 
+removed in Dart Sass 2.0.0.
+  
+  Recommendation: math.div($i, 12) or 
+calc($i / 12)
+  
+  More info and automated migrator: [4
+mhttps://sass-lang.com/d/slash-div[0m
+
+  The plugin "angular-sass" was 
+triggered by this import
+
+    angular:styles/global:styles:1:8:
+[37m      1 Ôöé @import 
+[32m'src/styles.scss'[37m;
+        ÔòÁ         
+[32m~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2769: No overload matches this 
+call.
+  Overload 1 of 5, '(method: "POST", 
+url: string, body: DocumentResponse | 
+null, init?: { headers?: HttpHeaders | 
+undefined; context?: HttpContext | 
+undefined; ... 13 more ...; timeout?: 
+number | undefined; } | undefined): 
+HttpRequest<...>', gave the following 
+error.
+    Argument of type 'FormData' is not 
+assignable to parameter of type 
+'DocumentResponse'.
+      Type 'FormData' is missing the 
+following properties from type 
+'DocumentResponse': id, typeDocument, 
+nomFichier, tailleFichier, and 3 more.
+  Overload 2 of 5, '(method: "PUT" | 
+"PATCH", url: string, body: 
+DocumentResponse | null, init?: { 
+headers?: HttpHeaders | undefined; 
+context?: HttpContext | undefined; ... 
+12 more ...; integrity?: string | 
+undefined; } | undefined): 
+HttpRequest<...>', gave the following 
+error.
+    Argument of type '"POST"' is not 
+assignable to parameter of type '"PUT" 
+| "PATCH"'.
+  Overload 3 of 5, '(method: string, 
+url: string, body: DocumentResponse | 
+null, init?: { headers?: HttpHeaders | 
+undefined; context?: HttpContext | 
+undefined; ... 13 more ...; timeout?: 
+number | undefined; } | undefined): 
+HttpRequest<...>', gave the following 
+error.
+    Argument of type 'FormData' is not 
+assignable to parameter of type 
+'DocumentResponse'.
+      Type 'FormData' is missing the 
+following properties from type 
+'DocumentResponse': id, typeDocument, 
+nomFichier, tailleFichier, and 3 
+more.[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/core/services/document.serv
+ice.ts:52:20:
+[37m      52 Ôöé     const req = new 
+[32mHttpRequest[37m<DocumentResponse>(
+         ÔòÁ                     
+[32m~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2341: Property 'dossierService' 
+is private and only accessible within 
+class 'AdminDashboard'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/admin-dashbo
+ard/admin-dashboard.html:201:72:
+[37m      201 Ôöé ...e" 
+[class]="'status-' + [32mdossierServic
+e[37m.getStatusColor(dossier....
+          ÔòÁ                          
+  [32m~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of 
+component AdminDashboard.
+
+    src/app/features/admin/admin-dashbo
+ard/admin-dashboard.ts:27:17:
+[37m      27 Ôöé     templateUrl: 
+[32m'./admin-dashboard.html'[37m,
+         ÔòÁ                  
+[32m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2341: Property 'dossierService' 
+is private and only accessible within 
+class 'AdminDashboard'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/admin-dashbo
+ard/admin-dashboard.html:202:31:
+[37m      202 Ôöé ...                 
+    {{ [32mdossierService[37m.getStat
+usLabel(dossier....
+          ÔòÁ                          
+  [32m~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of 
+component AdminDashboard.
+
+    src/app/features/admin/admin-dashbo
+ard/admin-dashboard.ts:27:17:
+[37m      27 Ôöé     templateUrl: 
+[32m'./admin-dashboard.html'[37m,
+         ÔòÁ                  
+[32m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2459: Module '"../../../core/serv
+ices/campagne.service"' declares 
+'CampagneResponse' locally, but it is 
+not exported.[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/admin/admin-dashbo
+ard/admin-dashboard.ts:6:26:
+[37m      6 Ôöé import { 
+CampagneService, 
+[32mCampagneResponse[37m } from 
+'../../../core/se...
+        ÔòÁ                           
+[32m~~~~~~~~~~~~~~~~[0m
+
+  'CampagneResponse' is declared here.
+
+    src/app/core/services/campagne.serv
+ice.ts:8:2:
+[37m      8 Ôöé   
+[32mCampagneResponse[37m,
+        ÔòÁ   [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2551: Property 
+'getActiveCampagnes' does not exist on 
+type 'CampagneService'. Did you mean 
+'getAllCampagnes'?[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/admin-dashbo
+ard/admin-dashboard.ts:57:50:
+[37m      57 Ôöé ...       
+activeCampagnes: this.campagneService.
+[32mgetActiveCampagnes[37m(),
+         ÔòÁ                           
+                      
+[32m~~~~~~~~~~~~~~~~~~[0m
+
+  'getAllCampagnes' is declared here.
+
+    src/app/core/services/campagne.serv
+ice.ts:46:2:
+[37m      46 Ôöé   
+[32mgetAllCampagnes[37m(): 
+Observable<CampagneResponse[]> {
+         ÔòÁ   [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'createdAt' does 
+not exist on type 
+'CampagneResponse'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/admin-dashbo
+ard/admin-dashboard.ts:75:47:
+[37m      75 Ôöé ....sort((a, b) => 
+new 
+Date(b.[32mcreatedAt[37m).getTime() 
+- new Date(a.cr...
+         ÔòÁ                           
+    [32m~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'createdAt' does 
+not exist on type 
+'CampagneResponse'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/admin-dashbo
+ard/admin-dashboard.ts:75:81:
+[37m      75 Ôöé ...new 
+Date(b.createdAt).getTime() - new 
+Date(a.[32mcreatedAt[37m).getTime())
+         ÔòÁ                           
+                      
+[32m~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2305: Module '"../../../core/mode
+ls/inscription.model"' has no exported 
+member 'Campagne'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/campagne-man
+agement/campagne-management.component.t
+s:9:9:
+[37m      9 Ôöé import { 
+[32mCampagne[37m, CampagneRequest, 
+TypeInscription } from '../../....
+        ÔòÁ          [32m~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2305: Module '"../../../core/mode
+ls/inscription.model"' has no exported 
+member 'CampagneRequest'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/campagne-man
+agement/campagne-management.component.t
+s:9:19:
+[37m      9 Ôöé import { Campagne, 
+[32mCampagneRequest[37m, 
+TypeInscription } from '../../....
+        ÔòÁ                    
+[32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'getCampagnes' 
+does not exist on type 
+'InscriptionService'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/campagne-man
+agement/campagne-management.component.t
+s:356:28:
+[37m      356 Ôöé     this.inscription
+Service.[32mgetCampagnes[37m().subscr
+ibe({
+          ÔòÁ                          
+   [32m~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS7006: Parameter 'campagnes' 
+implicitly has an 'any' type.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/campagne-man
+agement/campagne-management.component.t
+s:357:13:
+[37m      357 Ôöé       next: 
+([32mcampagnes[37m) => {
+          ÔòÁ              
+[32m~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS7006: Parameter 'error' 
+implicitly has an 'any' type.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/campagne-man
+agement/campagne-management.component.t
+s:360:14:
+[37m      360 Ôöé       error: 
+([32merror[37m) => {
+          ÔòÁ               
+[32m~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'updateCampagne' 
+does not exist on type 
+'InscriptionService'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/campagne-man
+agement/campagne-management.component.t
+s:421:34:
+[37m      421 Ôöé ...this.inscriptionS
+ervice.[32mupdateCampagne[37m(this.ed
+itingCampagne.id...
+          ÔòÁ                          
+  [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'createCampagne' 
+does not exist on type 
+'InscriptionService'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/campagne-man
+agement/campagne-management.component.t
+s:422:34:
+[37m      422 Ôöé         : this.inscr
+iptionService.[32mcreateCampagne[37m(
+campagneRequest);
+          ÔòÁ                          
+         [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS7006: Parameter 'campagne' 
+implicitly has an 'any' type.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/campagne-man
+agement/campagne-management.component.t
+s:425:15:
+[37m      425 Ôöé         next: 
+([32mcampagne[37m) => {
+          ÔòÁ                
+[32m~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS7006: Parameter 'error' 
+implicitly has an 'any' type.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/campagne-man
+agement/campagne-management.component.t
+s:434:16:
+[37m      434 Ôöé         error: 
+([32merror[37m) => {
+          ÔòÁ                 
+[32m~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'updateCampagne' 
+does not exist on type 
+'InscriptionService'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/campagne-man
+agement/campagne-management.component.t
+s:465:28:
+[37m      465 Ôöé ...this.inscriptionS
+ervice.[32mupdateCampagne[37m(campagn
+e.id, updateRequ...
+          ÔòÁ                          
+  [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS7006: Parameter 'error' 
+implicitly has an 'any' type.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/campagne-man
+agement/campagne-management.component.t
+s:474:14:
+[37m      474 Ôöé       error: 
+([32merror[37m) => {
+          ÔòÁ               
+[32m~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'deleteCampagne' 
+does not exist on type 
+'InscriptionService'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/campagne-man
+agement/campagne-management.component.t
+s:483:30:
+[37m      483 Ôöé ...  this.inscriptio
+nService.[32mdeleteCampagne[37m(campa
+gne.id).subscribe({
+          ÔòÁ                          
+    [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS7006: Parameter 'error' 
+implicitly has an 'any' type.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/campagne-man
+agement/campagne-management.component.t
+s:488:16:
+[37m      488 Ôöé         error: 
+([32merror[37m) => {
+          ÔòÁ                 
+[32m~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'description' 
+does not exist on type 
+'CampagneResponse'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/campagnes/ca
+mpagne-list/campagne-list.ts:98:19:
+[37m      98 Ôöé                 
+(c.[32mdescription[37m && 
+c.description.toLowerCase().incl...
+         ÔòÁ                    
+[32m~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'description' 
+does not exist on type 
+'CampagneResponse'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/campagnes/ca
+mpagne-list/campagne-list.ts:98:36:
+[37m      98 Ôöé ...      
+(c.description && c.[32mdescription[3
+7m.toLowerCase().includes(te...
+         ÔòÁ                           
+   [32m~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2551: Property 'doctorant' does 
+not exist on type 
+'InscriptionResponse'. Did you mean 
+'doctorantId'?[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/admin/dossier-vali
+dation/dossier-validation.component.ts:
+414:25:
+[37m      414 Ôöé         nom: inscrip
+tion.[32mdoctorant[37m.LastName,
+          ÔòÁ                          
+[32m~~~~~~~~~[0m
+
+  'doctorantId' is declared here.
+
+    src/app/core/models/inscription.mod
+el.ts:127:2:
+[37m      127 Ôöé   
+[32mdoctorantId[37m: number;
+          ÔòÁ   [32m~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2551: Property 'doctorant' does 
+not exist on type 
+'InscriptionResponse'. Did you mean 
+'doctorantId'?[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/admin/dossier-vali
+dation/dossier-validation.component.ts:
+415:28:
+[37m      415 Ôöé         prenom: insc
+ription.[32mdoctorant[37m.FirstName,
+          ÔòÁ                          
+   [32m~~~~~~~~~[0m
+
+  'doctorantId' is declared here.
+
+    src/app/core/models/inscription.mod
+el.ts:127:2:
+[37m      127 Ôöé   
+[32mdoctorantId[37m: number;
+          ÔòÁ   [32m~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2551: Property 'doctorant' does 
+not exist on type 
+'InscriptionResponse'. Did you mean 
+'doctorantId'?[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/admin/dossier-vali
+dation/dossier-validation.component.ts:
+416:27:
+[37m      416 Ôöé         email: 
+inscription.[32mdoctorant[37m.email
+          ÔòÁ                          
+  [32m~~~~~~~~~[0m
+
+  'doctorantId' is declared here.
+
+    src/app/core/models/inscription.mod
+el.ts:127:2:
+[37m      127 Ôöé   
+[32mdoctorantId[37m: number;
+          ÔòÁ   [32m~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'directeur' does 
+not exist on type 
+'InscriptionResponse'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/dossier-vali
+dation/dossier-validation.component.ts:
+419:25:
+[37m      419 Ôöé         nom: inscrip
+tion.[32mdirecteur[37m.LastName,
+          ÔòÁ                          
+[32m~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'directeur' does 
+not exist on type 
+'InscriptionResponse'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/dossier-vali
+dation/dossier-validation.component.ts:
+420:28:
+[37m      420 Ôöé         prenom: insc
+ription.[32mdirecteur[37m.FirstName
+          ÔòÁ                          
+   [32m~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2551: Property 'dateInscription' 
+does not exist on type 
+'InscriptionResponse'. Did you mean 
+'anneeInscription'?[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/dossier-vali
+dation/dossier-validation.component.ts:
+424:32:
+[37m      424 Ôöé       dateCreation: 
+inscription.[32mdateInscription[37m,
+          ÔòÁ                          
+       [32m~~~~~~~~~~~~~~~[0m
+
+  'anneeInscription' is declared here.
+
+    src/app/core/models/inscription.mod
+el.ts:131:2:
+[37m      131 Ôöé   
+[32manneeInscription[37m: number;
+          ÔòÁ   
+[32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2551: Property 'dateInscription' 
+does not exist on type 
+'InscriptionResponse'. Did you mean 
+'anneeInscription'?[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/dossier-vali
+dation/dossier-validation.component.ts:
+425:51:
+[37m      425 Ôöé ...is.calculatePrior
+ity(inscription.[32mdateInscription[3
+7m, 'inscription'),
+          ÔòÁ                          
+           [32m~~~~~~~~~~~~~~~[0m
+
+  'anneeInscription' is declared here.
+
+    src/app/core/models/inscription.mod
+el.ts:131:2:
+[37m      131 Ôöé   
+[32manneeInscription[37m: number;
+          ÔòÁ   
+[32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2353: Object literal may only 
+specify known properties, and 'valide' 
+does not exist in type 
+'ValidationRequest'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/dossier-vali
+dation/dossier-validation.component.ts:
+595:8:
+[37m      595 Ôöé         
+[32mvalide[37m: this.validationForm.g
+et('valide')?.value
+          ÔòÁ         [32m~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'valide' does not 
+exist on type 'ValidationRequest'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/dossier-vali
+dation/dossier-validation.component.ts:
+601:45:
+[37m      601 Ôöé ... const action = 
+validationRequest.[32mvalide[37m ? 
+'valid├®' : 'rejet├®';
+          ÔòÁ                          
+            [32m~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2345: Argument of type 
+'ValidationRequest' is not assignable 
+to parameter of type '{ valide: 
+boolean; commentaire: string; }'.
+  Property 'valide' is missing in type 
+'ValidationRequest' but required in 
+type '{ valide: boolean; commentaire: 
+string; }'.[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/admin/dossier-vali
+dation/dossier-validation.component.ts:
+615:72:
+[37m      615 Ôöé 
+...rParAdmin(this.selectedDossier.id, 
+[32mvalidationRequest[37m).subscribe({
+          ÔòÁ                          
+             [32m~~~~~~~~~~~~~~~~~[0m
+
+  'valide' is declared here.
+
+    src/app/core/services/soutenance.se
+rvice.ts:251:44:
+[37m      251 Ôöé ...n(id: number, 
+validation: { [32mvalide[37m: 
+boolean; commentaire: stri...
+          ÔòÁ                          
+      [32m~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'valide' does not 
+exist on type 'ValidationRequest'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/dossier-vali
+dation/dossier-validation.component.ts:
+617:45:
+[37m      617 Ôöé ... const action = 
+validationRequest.[32mvalide[37m ? 
+'valid├®' : 'rejet├®';
+          ÔòÁ                          
+            [32m~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2307: Cannot find module '../../.
+./core/services/dossier-validation.serv
+ice' or its corresponding type 
+declarations.[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/admin/dossiers/dos
+sier-list/dossier-list.ts:6:81:
+[37m      6 Ôöé ...ription } from [32
+m'../../../core/services/dossier-valida
+tion.service'[37m;
+        ÔòÁ                   [32m~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2307: Cannot find module '../../.
+./core/services/campagne.service' or 
+its corresponding type 
+declarations.[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/admin/dossiers/dos
+sier-list/dossier-list.ts:7:50:
+[37m      7 Ôöé ... CampagneResponse 
+} from [32m'../../../core/services/cam
+pagne.service'[37m;
+        ÔòÁ                            
+ [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mNG2003: No suitable injection 
+token for parameter 'dossierService' 
+of class 'DossierList'.
+  Consider using the @Inject decorator 
+to specify an injection token.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/dossiers/dos
+sier-list/dossier-list.ts:46:15:
+[37m      46 Ôöé         public 
+[32mdossierService[37m: 
+DossierValidationService,
+         ÔòÁ                
+[32m~~~~~~~~~~~~~~[0m
+
+  This type does not have a value, so 
+it cannot be used as injection token.
+
+    src/app/features/admin/dossiers/dos
+sier-list/dossier-list.ts:46:31:
+[37m      46 Ôöé         public 
+dossierService: 
+[32mDossierValidationService[37m,
+         ÔòÁ                           
+     [32m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS7006: Parameter 'campagnes' 
+implicitly has an 'any' type.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/dossiers/dos
+sier-list/dossier-list.ts:69:19:
+[37m      69 Ôöé             next: 
+([32mcampagnes[37m) => {
+         ÔòÁ                    
+[32m~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS7006: Parameter 'error' 
+implicitly has an 'any' type.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/dossiers/dos
+sier-list/dossier-list.ts:73:20:
+[37m      73 Ôöé             error: 
+([32merror[37m) => {
+         ÔòÁ                     
+[32m~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS7006: Parameter 'data' 
+implicitly has an 'any' type.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/dossiers/dos
+sier-list/dossier-list.ts:82:19:
+[37m      82 Ôöé             next: 
+([32mdata[37m) => {
+         ÔòÁ                    
+[32m~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS7006: Parameter 'error' 
+implicitly has an 'any' type.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/dossiers/dos
+sier-list/dossier-list.ts:87:20:
+[37m      87 Ôöé             error: 
+([32merror[37m) => {
+         ÔòÁ                     
+[32m~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2307: Cannot find module '../../.
+./core/services/user-management.service
+' or its corresponding type 
+declarations.[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/admin/users/user-l
+ist/user-list.ts:6:58:
+[37m      6 Ôöé ...onse, Page } from 
+[32m'../../../core/services/user-manage
+ment.service'[37m;
+        ÔòÁ                      [32m~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mNG2003: No suitable injection 
+token for parameter 
+'userManagementService' of class 
+'UserList'.
+  Consider using the @Inject decorator 
+to specify an injection token.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/users/user-l
+ist/user-list.ts:47:16:
+[37m      47 Ôöé         private 
+[32muserManagementService[37m: 
+UserManagementService,
+         ÔòÁ                 
+[32m~~~~~~~~~~~~~~~~~~~~~[0m
+
+  This type does not have a value, so 
+it cannot be used as injection token.
+
+    src/app/features/admin/users/user-l
+ist/user-list.ts:47:39:
+[37m      47 Ôöé         private 
+userManagementService: 
+[32mUserManagementService[37m,
+         ÔòÁ                           
+             
+[32m~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS7006: Parameter 'data' 
+implicitly has an 'any' type.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/users/user-l
+ist/user-list.ts:69:19:
+[37m      69 Ôöé             next: 
+([32mdata[37m) => {
+         ÔòÁ                    
+[32m~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS7006: Parameter 'error' 
+implicitly has an 'any' type.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/users/user-l
+ist/user-list.ts:74:20:
+[37m      74 Ôöé             error: 
+([32merror[37m) => {
+         ÔòÁ                     
+[32m~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS7006: Parameter 'error' 
+implicitly has an 'any' type.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/users/user-l
+ist/user-list.ts:174:20:
+[37m      174 Ôöé             error: 
+([32merror[37m) => {
+          ÔòÁ                     
+[32m~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS7006: Parameter 'error' 
+implicitly has an 'any' type.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/users/user-l
+ist/user-list.ts:193:20:
+[37m      193 Ôöé             error: 
+([32merror[37m) => {
+          ÔòÁ                     
+[32m~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS7006: Parameter 'error' 
+implicitly has an 'any' type.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/users/user-l
+ist/user-list.ts:212:20:
+[37m      212 Ôöé             error: 
+([32merror[37m) => {
+          ÔòÁ                     
+[32m~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2353: Object literal may only 
+specify known properties, and 'valide' 
+does not exist in type 
+'ValidationRequest'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/admin/validation-f
+orm/validation-form.component.ts:248:8:
+[37m      248 Ôöé         
+[32mvalide[37m: this.validationForm.g
+et('valide')?.value,
+          ÔòÁ         [32m~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2739: Type 'UserResponse' is 
+missing the following properties from 
+type 'UserInfo': adresse, ville, 
+pays[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/auth/profile/profi
+le.component.ts:55:8:
+[37m      55 Ôöé         
+[32mthis.currentUser[37m = user;
+         ÔòÁ         
+[32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mNG8002: Can't bind to 'menuItems' 
+since it isn't a known property of 
+'app-sidebar'.
+1. If 'app-sidebar' is an Angular 
+component and it has 'menuItems' 
+input, then verify that it is included 
+in the '@Component.imports' of this 
+component.
+2. If 'app-sidebar' is a Web Component 
+then add 'CUSTOM_ELEMENTS_SCHEMA' to 
+the '@Component.schemas' of this 
+component to suppress this message.
+3. To allow any property add 
+'NO_ERRORS_SCHEMA' to the 
+'@Component.schemas' of this 
+component.[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/dashboard/admin-da
+shboard/admin-dashboard.html:3:15:
+[37m      3 Ôöé   <app-sidebar [32m[m
+enuItems]="menuItems"[37m></app-sideba
+r>
+        ÔòÁ                
+[32m~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of 
+component AdminDashboard.
+
+    src/app/features/dashboard/admin-da
+shboard/admin-dashboard.ts:19:15:
+[37m      19 Ôöé   templateUrl: 
+[32m'./admin-dashboard.html'[37m,
+         ÔòÁ                
+[32m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mNG8002: Can't bind to 'user' since 
+it isn't a known property of 
+'app-navbar'.
+1. If 'app-navbar' is an Angular 
+component and it has 'user' input, 
+then verify that it is included in the 
+'@Component.imports' of this component.
+2. If 'app-navbar' is a Web Component 
+then add 'CUSTOM_ELEMENTS_SCHEMA' to 
+the '@Component.schemas' of this 
+component to suppress this message.
+3. To allow any property add 
+'NO_ERRORS_SCHEMA' to the 
+'@Component.schemas' of this 
+component.[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/dashboard/admin-da
+shboard/admin-dashboard.html:8:16:
+[37m      8 Ôöé ...app-navbar 
+[32m[user]="dashboard?.userStatistics 
+|| null"[37m></app-navbar>
+        ÔòÁ               [32m~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of 
+component AdminDashboard.
+
+    src/app/features/dashboard/admin-da
+shboard/admin-dashboard.ts:19:15:
+[37m      19 Ôöé   templateUrl: 
+[32m'./admin-dashboard.html'[37m,
+         ÔòÁ                
+[32m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mNG8002: Can't bind to 'menuItems' 
+since it isn't a known property of 
+'app-sidebar'.
+1. If 'app-sidebar' is an Angular 
+component and it has 'menuItems' 
+input, then verify that it is included 
+in the '@Component.imports' of this 
+component.
+2. If 'app-sidebar' is a Web Component 
+then add 'CUSTOM_ELEMENTS_SCHEMA' to 
+the '@Component.schemas' of this 
+component to suppress this message.
+3. To allow any property add 
+'NO_ERRORS_SCHEMA' to the 
+'@Component.schemas' of this 
+component.[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/dashboard/directeu
+r-dashboard/directeur-dashboard.compone
+nt.html:3:15:
+[37m      3 Ôöé   <app-sidebar [32m[m
+enuItems]="menuItems"[37m></app-sideba
+r>
+        ÔòÁ                
+[32m~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of 
+component DirecteurDashboardComponent.
+
+    src/app/features/dashboard/directeu
+r-dashboard/directeur-dashboard.compone
+nt.ts:19:15:
+[37m      19 Ôöé   templateUrl: [32m'
+./directeur-dashboard.component.html'[
+37m,
+         ÔòÁ                [32m~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mNG8002: Can't bind to 'user' since 
+it isn't a known property of 
+'app-navbar'.
+1. If 'app-navbar' is an Angular 
+component and it has 'user' input, 
+then verify that it is included in the 
+'@Component.imports' of this component.
+2. If 'app-navbar' is a Web Component 
+then add 'CUSTOM_ELEMENTS_SCHEMA' to 
+the '@Component.schemas' of this 
+component to suppress this message.
+3. To allow any property add 
+'NO_ERRORS_SCHEMA' to the 
+'@Component.schemas' of this 
+component.[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/dashboard/directeu
+r-dashboard/directeur-dashboard.compone
+nt.html:8:16:
+[37m      8 Ôöé     <app-navbar 
+[32m[user]="dashboard?.user || 
+null"[37m></app-navbar>
+        ÔòÁ                 [32m~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of 
+component DirecteurDashboardComponent.
+
+    src/app/features/dashboard/directeu
+r-dashboard/directeur-dashboard.compone
+nt.ts:19:15:
+[37m      19 Ôöé   templateUrl: [32m'
+./directeur-dashboard.component.html'[
+37m,
+         ÔòÁ                [32m~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mNG8002: Can't bind to 'menuItems' 
+since it isn't a known property of 
+'app-sidebar'.
+1. If 'app-sidebar' is an Angular 
+component and it has 'menuItems' 
+input, then verify that it is included 
+in the '@Component.imports' of this 
+component.
+2. If 'app-sidebar' is a Web Component 
+then add 'CUSTOM_ELEMENTS_SCHEMA' to 
+the '@Component.schemas' of this 
+component to suppress this message.
+3. To allow any property add 
+'NO_ERRORS_SCHEMA' to the 
+'@Component.schemas' of this 
+component.[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/dashboard/doctoran
+t-dashboard/doctorant-dashboard.html:3:
+15:
+[37m      3 Ôöé   <app-sidebar [32m[m
+enuItems]="menuItems"[37m></app-sideba
+r>
+        ÔòÁ                
+[32m~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of 
+component DoctorantDashboard.
+
+    src/app/features/dashboard/doctoran
+t-dashboard/doctorant-dashboard.ts:28:1
+5:
+[37m      28 Ôöé   templateUrl: 
+[32m'./doctorant-dashboard.html'[37m,
+         ÔòÁ                
+[32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mNG8002: Can't bind to 'user' since 
+it isn't a known property of 
+'app-navbar'.
+1. If 'app-navbar' is an Angular 
+component and it has 'user' input, 
+then verify that it is included in the 
+'@Component.imports' of this component.
+2. If 'app-navbar' is a Web Component 
+then add 'CUSTOM_ELEMENTS_SCHEMA' to 
+the '@Component.schemas' of this 
+component to suppress this message.
+3. To allow any property add 
+'NO_ERRORS_SCHEMA' to the 
+'@Component.schemas' of this 
+component.[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/dashboard/doctoran
+t-dashboard/doctorant-dashboard.html:8:
+16:
+[37m      8 Ôöé     <app-navbar 
+[32m[user]="dashboard?.user || 
+null"[37m></app-navbar>
+        ÔòÁ                 [32m~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of 
+component DoctorantDashboard.
+
+    src/app/features/dashboard/doctoran
+t-dashboard/doctorant-dashboard.ts:28:1
+5:
+[37m      28 Ôöé   templateUrl: 
+[32m'./doctorant-dashboard.html'[37m,
+         ÔòÁ                
+[32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'value' does not 
+exist on type 'Observable<UserInfo | 
+null>'.[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/dashboard/resolver
+s/directeur-dashboard.resolver.ts:19:40
+:
+[37m      19 Ôöé   const user = authSe
+rvice.currentUser$.[32mvalue[37m;
+         ÔòÁ                           
+              [32m~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'value' does not 
+exist on type 'Observable<UserInfo | 
+null>'.[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/dashboard/resolver
+s/doctorant-dashboard.resolver.ts:19:40
+:
+[37m      19 Ôöé   const user = authSe
+rvice.currentUser$.[32mvalue[37m;
+         ÔòÁ                           
+              [32m~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'nom' does not 
+exist on type 'CampagneResponse'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/inscription/campag
+ne-info/campagne-info.html:32:26:
+[37m      32 Ôöé           <h3>{{ 
+campagne.[32mnom[37m }}</h3>
+         ÔòÁ                           
+[32m~~~[0m
+
+  Error occurs in the template of 
+component CampagneInfo.
+
+    src/app/features/inscription/campag
+ne-info/campagne-info.ts:13:15:
+[37m      13 Ôöé   templateUrl: 
+[32m'./campagne-info.html'[37m,
+         ÔòÁ                
+[32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'typeInscription' 
+does not exist on type 
+'CampagneResponse'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/inscription/campag
+ne-info/campagne-info.html:44:62:
+[37m      44 Ôöé 
+...s="material-icons">{{ getTypeIcon(ca
+mpagne.[32mtypeInscription[37m) 
+}}</i>
+         ÔòÁ                           
+                    
+[32m~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of 
+component CampagneInfo.
+
+    src/app/features/inscription/campag
+ne-info/campagne-info.ts:13:15:
+[37m      13 Ôöé   templateUrl: 
+[32m'./campagne-info.html'[37m,
+         ÔòÁ                
+[32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'typeInscription' 
+does not exist on type 
+'CampagneResponse'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/inscription/campag
+ne-info/campagne-info.html:45:43:
+[37m      45 Ôöé             <span>{{ 
+getTypeLabel(campagne.[32mtypeInscript
+ion[37m) }}</span>
+         ÔòÁ                           
+                 
+[32m~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of 
+component CampagneInfo.
+
+    src/app/features/inscription/campag
+ne-info/campagne-info.ts:13:15:
+[37m      13 Ôöé   templateUrl: 
+[32m'./campagne-info.html'[37m,
+         ÔòÁ                
+[32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'dateOuverture' 
+does not exist on type 
+'CampagneResponse'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/inscription/campag
+ne-info/campagne-info.html:50:30:
+[37m      50 Ôöé ...       <span>{{ 
+campagne.[32mdateOuverture[37m | 
+date:'dd/MM/yyyy' }} -...
+         ÔòÁ                           
+  [32m~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of 
+component CampagneInfo.
+
+    src/app/features/inscription/campag
+ne-info/campagne-info.ts:13:15:
+[37m      13 Ôöé   templateUrl: 
+[32m'./campagne-info.html'[37m,
+         ÔòÁ                
+[32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'dateFermeture' 
+does not exist on type 
+'CampagneResponse'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/inscription/campag
+ne-info/campagne-info.html:50:81:
+[37m      50 Ôöé ...M/yyyy' }} - {{ 
+campagne.[32mdateFermeture[37m | 
+date:'dd/MM/yyyy' }}</...
+         ÔòÁ                           
+  [32m~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of 
+component CampagneInfo.
+
+    src/app/features/inscription/campag
+ne-info/campagne-info.ts:13:15:
+[37m      13 Ôöé   templateUrl: 
+[32m'./campagne-info.html'[37m,
+         ÔòÁ                
+[32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'nom' does not 
+exist on type 'CampagneResponse'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/inscription/campag
+ne-info/campagne-info.html:85:30:
+[37m      85 Ôöé               <h3>{{ 
+campagne.[32mnom[37m }}</h3>
+         ÔòÁ                           
+    [32m~~~[0m
+
+  Error occurs in the template of 
+component CampagneInfo.
+
+    src/app/features/inscription/campag
+ne-info/campagne-info.ts:13:15:
+[37m      13 Ôöé   templateUrl: 
+[32m'./campagne-info.html'[37m,
+         ÔòÁ                
+[32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'typeInscription' 
+does not exist on type 
+'CampagneResponse'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/inscription/campag
+ne-info/campagne-info.html:100:68:
+[37m      100 Ôöé 
+...="material-icons">{{ getTypeIcon(cam
+pagne.[32mtypeInscription[37m) }}</i>
+          ÔòÁ                          
+                    
+[32m~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of 
+component CampagneInfo.
+
+    src/app/features/inscription/campag
+ne-info/campagne-info.ts:13:15:
+[37m      13 Ôöé   templateUrl: 
+[32m'./campagne-info.html'[37m,
+         ÔòÁ                
+[32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'typeInscription' 
+does not exist on type 
+'CampagneResponse'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/inscription/campag
+ne-info/campagne-info.html:101:49:
+[37m      101 Ôöé ...        <span>{{ 
+getTypeLabel(campagne.[32mtypeInscript
+ion[37m) }}</span>
+          ÔòÁ                          
+                 
+[32m~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of 
+component CampagneInfo.
+
+    src/app/features/inscription/campag
+ne-info/campagne-info.ts:13:15:
+[37m      13 Ôöé   templateUrl: 
+[32m'./campagne-info.html'[37m,
+         ÔòÁ                
+[32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'dateOuverture' 
+does not exist on type 
+'CampagneResponse'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/inscription/campag
+ne-info/campagne-info.html:109:32:
+[37m      109 Ôöé ...             {{ 
+campagne.[32mdateOuverture[37m | 
+date:'dd/MM/yyyy' }} ...
+          ÔòÁ                          
+   [32m~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of 
+component CampagneInfo.
+
+    src/app/features/inscription/campag
+ne-info/campagne-info.ts:13:15:
+[37m      13 Ôöé   templateUrl: 
+[32m'./campagne-info.html'[37m,
+         ÔòÁ                
+[32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'dateFermeture' 
+does not exist on type 
+'CampagneResponse'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/inscription/campag
+ne-info/campagne-info.html:109:83:
+[37m      109 Ôöé ...dd/MM/yyyy' }} - 
+{{ campagne.[32mdateFermeture[37m | 
+date:'dd/MM/yyyy' }}
+          ÔòÁ                          
+       [32m~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of 
+component CampagneInfo.
+
+    src/app/features/inscription/campag
+ne-info/campagne-info.ts:13:15:
+[37m      13 Ôöé   templateUrl: 
+[32m'./campagne-info.html'[37m,
+         ÔòÁ                
+[32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'dateCreation' 
+does not exist on type 
+'CampagneResponse'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/inscription/campag
+ne-info/campagne-info.html:124:34:
+[37m      124 Ôöé ...       <span>{{ 
+campagne.[32mdateCreation[37m | 
+date:'dd/MM/yyyy' }}</...
+          ÔòÁ                          
+   [32m~~~~~~~~~~~~[0m
+
+  Error occurs in the template of 
+component CampagneInfo.
+
+    src/app/features/inscription/campag
+ne-info/campagne-info.ts:13:15:
+[37m      13 Ôöé   templateUrl: 
+[32m'./campagne-info.html'[37m,
+         ÔòÁ                
+[32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'typeInscription' 
+does not exist on type 
+'CampagneResponse'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/inscription/campag
+ne-info/campagne-info.html:150:32:
+[37m      150 Ôöé                 *ngI
+f="campagne.[32mtypeInscription[37m 
+=== 'PREMIERE'"
+          ÔòÁ                          
+       [32m~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of 
+component CampagneInfo.
+
+    src/app/features/inscription/campag
+ne-info/campagne-info.ts:13:15:
+[37m      13 Ôöé   templateUrl: 
+[32m'./campagne-info.html'[37m,
+         ÔòÁ                
+[32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'typeInscription' 
+does not exist on type 
+'CampagneResponse'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/inscription/campag
+ne-info/campagne-info.html:159:32:
+[37m      159 Ôöé                 *ngI
+f="campagne.[32mtypeInscription[37m 
+=== 'REINSCRIPTION'"
+          ÔòÁ                          
+       [32m~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of 
+component CampagneInfo.
+
+    src/app/features/inscription/campag
+ne-info/campagne-info.ts:13:15:
+[37m      13 Ôöé   templateUrl: 
+[32m'./campagne-info.html'[37m,
+         ÔòÁ                
+[32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'nom' does not 
+exist on type 'DocumentResponse'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/inscription/docume
+nt-upload/document-upload.html:39:32:
+[37m      39 Ôöé         <h5>{{ 
+currentDocument?.[32mnom[37m }}</h5>
+         ÔòÁ                           
+      [32m~~~[0m
+
+  Error occurs in the template of 
+component DocumentUpload.
+
+    src/app/features/inscription/docume
+nt-upload/document-upload.ts:26:15:
+[37m      26 Ôöé   templateUrl: 
+[32m'./document-upload.html'[37m,
+         ÔòÁ                
+[32m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'taille' does not 
+exist on type 'DocumentResponse'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/inscription/docume
+nt-upload/document-upload.html:41:53:
+[37m      41 Ôöé ...      Taille: {{ f
+ormatFileSize(currentDocument?.[32mtai
+lle[37m || 0) }} |
+         ÔòÁ                           
+                          
+[32m~~~~~~[0m
+
+  Error occurs in the template of 
+component DocumentUpload.
+
+    src/app/features/inscription/docume
+nt-upload/document-upload.ts:26:15:
+[37m      26 Ôöé   templateUrl: 
+[32m'./document-upload.html'[37m,
+         ÔòÁ                
+[32m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'nom' does not 
+exist on type 'DocumentResponse'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/inscription/docume
+nt-upload/document-upload.html:62:68:
+[37m      62 Ôöé ...   (click)="onDown
+load(currentDocument!.id, 
+currentDocument!.[32mnom[37m)"
+         ÔòÁ                           
+                                      
+[32m~~~[0m
+
+  Error occurs in the template of 
+component DocumentUpload.
+
+    src/app/features/inscription/docume
+nt-upload/document-upload.ts:26:15:
+[37m      26 Ôöé   templateUrl: 
+[32m'./document-upload.html'[37m,
+         ÔòÁ                
+[32m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2345: Argument of type 
+'DocumentUploadRequest' is not 
+assignable to parameter of type 
+'number'.[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/inscription/docume
+nt-upload/document-upload.ts:162:40:
+[37m      162 Ôöé ...ntService.uploadD
+ocument([32muploadRequest[37m, 
+this.inscriptionId, th...
+          ÔòÁ                          
+   [32m~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2322: Type 
+'HttpEvent<DocumentResponse>' is not 
+assignable to type 'DocumentResponse'.
+  Type 'HttpSentEvent' is missing the 
+following properties from type 
+'DocumentResponse': id, typeDocument, 
+nomFichier, tailleFichier, and 3 
+more.[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/inscription/docume
+nt-upload/document-upload.ts:165:36:
+[37m      165 Ôöé         this.documen
+tsSubject.next([[32mresponse[37m]);
+          ÔòÁ                          
+           [32m~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2345: Argument of type 
+'HttpEvent<DocumentResponse>' is not 
+assignable to parameter of type 
+'DocumentResponse | undefined'.
+  Type 'HttpSentEvent' is missing the 
+following properties from type 
+'DocumentResponse': id, typeDocument, 
+nomFichier, tailleFichier, and 3 
+more.[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/inscription/docume
+nt-upload/document-upload.ts:166:35:
+[37m      166 Ôöé         this.documen
+tUploaded.emit([32mresponse[37m);
+          ÔòÁ                          
+          [32m~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 
+'getDocumentsByInscription' does not 
+exist on type 'DocumentService'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/inscription/docume
+nts-manager/documents-manager.ts:85:43:
+[37m      85 Ôöé ...his.documentServic
+e.[32mgetDocumentsByInscription[37m(t
+his.inscriptionId);
+         ÔòÁ                        
+[32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'role' does not 
+exist on type 
+'Observable<UserResponse>'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/inscription/guards
+/inscription-access.guard.ts:38:31:
+[37m      38 Ôöé   const userRole = 
+currentUser.[32mrole[37m?.name;
+         ÔòÁ                           
+     [32m~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'id' does not 
+exist on type 
+'Observable<UserResponse>'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/inscription/guards
+/inscription-access.guard.ts:39:29:
+[37m      39 Ôöé   const userId = 
+currentUser.[32mid[37m;
+         ÔòÁ                           
+   [32m~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2341: Property 'loadDashboard' 
+is private and only accessible within 
+class 'InscriptionDashboard'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/inscription/inscri
+ption-dashboard/inscription-dashboard.h
+tml:12:55:
+[37m      12 Ôöé ...utton 
+mat-raised-button color="primary" 
+(click)="[32mloadDashboard[37m()">
+         ÔòÁ                           
+                          
+[32m~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of 
+component InscriptionDashboard.
+
+    src/app/features/inscription/inscri
+ption-dashboard/inscription-dashboard.t
+s:41:15:
+[37m      41 Ôöé   templateUrl: [32m'
+./inscription-dashboard.html'[37m,
+         ÔòÁ                
+[32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mNG8001: 'mat-chip-list' is not a 
+known element:
+1. If 'mat-chip-list' is an Angular 
+component, then verify that it is 
+included in the '@Component.imports' 
+of this component.
+2. If 'mat-chip-list' is a Web 
+Component then add 
+'CUSTOM_ELEMENTS_SCHEMA' to the 
+'@Component.schemas' of this component 
+to suppress this message.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/inscription/inscri
+ption-form/inscription-form.html:445:14
+:
+[37m      445 Ôöé               
+[32m<mat-chip-list *ngIf="!allRequired
+DocumentsUploaded">[37m
+          ÔòÁ               [32m~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~[0m
+
+  Error occurs in the template of 
+component InscriptionForm.
+
+    src/app/features/inscription/inscri
+ption-form/inscription-form.ts:60:15:
+[37m      60 Ôöé   templateUrl: 
+[32m'./inscription-form.html'[37m,
+         ÔòÁ                
+[32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mNG8001: 'mat-chip-list' is not a 
+known element:
+1. If 'mat-chip-list' is an Angular 
+component, then verify that it is 
+included in the '@Component.imports' 
+of this component.
+2. If 'mat-chip-list' is a Web 
+Component then add 
+'CUSTOM_ELEMENTS_SCHEMA' to the 
+'@Component.schemas' of this component 
+to suppress this message.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/inscription/inscri
+ption-form/inscription-form.html:448:14
+:
+[37m      448 Ôöé               
+[32m<mat-chip-list *ngIf="allRequiredD
+ocumentsUploaded">[37m
+          ÔòÁ               [32m~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~[0m
+
+  Error occurs in the template of 
+component InscriptionForm.
+
+    src/app/features/inscription/inscri
+ption-form/inscription-form.ts:60:15:
+[37m      60 Ôöé   templateUrl: 
+[32m'./inscription-form.html'[37m,
+         ÔòÁ                
+[32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'campagneId' does 
+not exist on type 
+'InscriptionResponse'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/inscription/inscri
+ption-list/inscription-list.ts:227:37:
+[37m      227 Ôöé 
+...ilters.campagneId && 
+data.[32mcampagneId[37m !== 
+parseInt(filters.camp...
+          ÔòÁ                          
+    [32m~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2341: Property 'router' is 
+private and only accessible within 
+class 'ReinscriptionForm'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/inscription/reinsc
+ription-form/reinscription-form.html:12
+:55:
+[37m      12 Ôöé ...ton 
+color="primary" (click)="[32mrouter[3
+7m.navigate(['/inscription/das...
+         ÔòÁ                           
+      [32m~~~~~~[0m
+
+  Error occurs in the template of 
+component ReinscriptionForm.
+
+    src/app/features/inscription/reinsc
+ription-form/reinscription-form.ts:61:1
+5:
+[37m      61 Ôöé   templateUrl: 
+[32m'./reinscription-form.html'[37m,
+         ÔòÁ                
+[32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'formats' does 
+not exist on type 
+'DocumentConfig'.[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/inscription/reinsc
+ription-form/reinscription-form.html:23
+8:65:
+[37m      238 Ôöé 
+...class="format-chip">{{ 
+docConfig.[32mformats[37m.join(', ') 
+}}</mat-chip>
+          ÔòÁ                          
+           [32m~~~~~~~[0m
+
+  Error occurs in the template of 
+component ReinscriptionForm.
+
+    src/app/features/inscription/reinsc
+ription-form/reinscription-form.ts:61:1
+5:
+[37m      61 Ôöé   templateUrl: 
+[32m'./reinscription-form.html'[37m,
+         ÔòÁ                
+[32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'tailleMax' does 
+not exist on type 
+'DocumentConfig'.[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/inscription/reinsc
+ription-form/reinscription-form.html:23
+9:67:
+[37m      239 Ôöé ...ize-chip">Max {{ 
+docConfig.[32mtailleMax[37m / 1024 / 
+1024 }}MB</mat-c...
+          ÔòÁ                          
+     [32m~~~~~~~~~[0m
+
+  Error occurs in the template of 
+component ReinscriptionForm.
+
+    src/app/features/inscription/reinsc
+ription-form/reinscription-form.ts:61:1
+5:
+[37m      61 Ôöé   templateUrl: 
+[32m'./reinscription-form.html'[37m,
+         ÔòÁ                
+[32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'formats' does 
+not exist on type 
+'DocumentConfig'.[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/inscription/reinsc
+ription-form/reinscription-form.html:24
+6:47:
+[37m      246 Ôöé                     
+       [accept]="docConfig.[32mformats
+[37m.join(',')"
+          ÔòÁ                          
+                      [32m~~~~~~~[0m
+
+  Error occurs in the template of 
+component ReinscriptionForm.
+
+    src/app/features/inscription/reinsc
+ription-form/reinscription-form.ts:61:1
+5:
+[37m      61 Ôöé   templateUrl: 
+[32m'./reinscription-form.html'[37m,
+         ÔòÁ                
+[32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mNG8001: 'mat-list' is not a known 
+element:
+1. If 'mat-list' is an Angular 
+component, then verify that it is 
+included in the '@Component.imports' 
+of this component.
+2. If 'mat-list' is a Web Component 
+then add 'CUSTOM_ELEMENTS_SCHEMA' to 
+the '@Component.schemas' of this 
+component to suppress this 
+message.[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/inscription/reinsc
+ription-form/reinscription-form.html:37
+0:14:
+[37m      370 Ôöé               
+[32m<mat-list>[37m
+          ÔòÁ               
+[32m~~~~~~~~~~[0m
+
+  Error occurs in the template of 
+component ReinscriptionForm.
+
+    src/app/features/inscription/reinsc
+ription-form/reinscription-form.ts:61:1
+5:
+[37m      61 Ôöé   templateUrl: 
+[32m'./reinscription-form.html'[37m,
+         ÔòÁ                
+[32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mNG8001: 'mat-list-item' is not a 
+known element:
+1. If 'mat-list-item' is an Angular 
+component, then verify that it is 
+included in the '@Component.imports' 
+of this component.
+2. If 'mat-list-item' is a Web 
+Component then add 
+'CUSTOM_ELEMENTS_SCHEMA' to the 
+'@Component.schemas' of this component 
+to suppress this message.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/inscription/reinsc
+ription-form/reinscription-form.html:37
+1:16:
+[37m      371 Ôöé ...          
+[32m<mat-list-item *ngFor="let doc of 
+uploadedDocuments [37m...
+          ÔòÁ              [32m~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~[0m
+
+  Error occurs in the template of 
+component ReinscriptionForm.
+
+    src/app/features/inscription/reinsc
+ription-form/reinscription-form.ts:61:1
+5:
+[37m      61 Ôöé   templateUrl: 
+[32m'./reinscription-form.html'[37m,
+         ÔòÁ                
+[32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2724: '"../../../core/models/dero
+gation.model"' has no exported member 
+named 'DerogationRequest'. Did you 
+mean 'DerogationRequestDTO'?[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/inscription/reinsc
+ription-form/reinscription-form.ts:37:9
+:
+[37m      37 Ôöé import { 
+[32mDerogationRequest[37m } from 
+'../../../core/models/derogation...
+         ÔòÁ          
+[32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2554: Expected 2-3 arguments, 
+but got 1.[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/inscription/reinsc
+ription-form/reinscription-form.ts:369:
+27:
+[37m      369 Ôöé ...this.derogationSe
+rvice.[32mcreateDerogation[37m(deroga
+tionData).subscr...
+          ÔòÁ                          
+ [32m~~~~~~~~~~~~~~~~[0m
+
+  An argument for 'motif' was not 
+provided.
+
+    src/app/core/services/derogation.se
+rvice.ts:31:4:
+[37m      31 Ôöé     [32mmotif: 
+string[37m,
+         ÔòÁ     [32m~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'nomFichier' does 
+not exist on type 'Document'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/soutenance/soutena
+nce-detail/soutenance-detail.html:212:6
+3:
+[37m      212 Ôöé ...pan 
+class="document-name">{{ 
+doc.[32mnomFichier[37m || doc.type 
+}}</span>
+          ÔòÁ                          
+           [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of 
+component SoutenanceDetail.
+
+    src/app/features/soutenance/soutena
+nce-detail/soutenance-detail.ts:13:15:
+[37m      13 Ôöé   templateUrl: 
+[32m'./soutenance-detail.html'[37m,
+         ÔòÁ                
+[32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'type' does not 
+exist on type 'Document'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/soutenance/soutena
+nce-detail/soutenance-detail.html:212:8
+1:
+[37m      212 Ôöé ...pan 
+class="document-name">{{ 
+doc.nomFichier || doc.[32mtype[37m 
+}}</span>
+          ÔòÁ                          
+                             
+[32m~~~~[0m
+
+  Error occurs in the template of 
+component SoutenanceDetail.
+
+    src/app/features/soutenance/soutena
+nce-detail/soutenance-detail.ts:13:15:
+[37m      13 Ôöé   templateUrl: 
+[32m'./soutenance-detail.html'[37m,
+         ÔòÁ                
+[32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'taille' does not 
+exist on type 'Document'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/soutenance/soutena
+nce-detail/soutenance-detail.html:214:3
+9:
+[37m      214 Ôöé ...                 
+    {{ doc.[32mtaille[37m ? 
+(doc.taille / 1024 / 1024...
+          ÔòÁ                          
+      [32m~~~~~~[0m
+
+  Error occurs in the template of 
+component SoutenanceDetail.
+
+    src/app/features/soutenance/soutena
+nce-detail/soutenance-detail.ts:13:15:
+[37m      13 Ôöé   templateUrl: 
+[32m'./soutenance-detail.html'[37m,
+         ÔòÁ                
+[32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'taille' does not 
+exist on type 'Document'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/soutenance/soutena
+nce-detail/soutenance-detail.html:214:5
+3:
+[37m      214 Ôöé ...       {{ 
+doc.taille ? (doc.[32mtaille[37m / 
+1024 / 1024).toFixed(2) +...
+          ÔòÁ                          
+      [32m~~~~~~[0m
+
+  Error occurs in the template of 
+component SoutenanceDetail.
+
+    src/app/features/soutenance/soutena
+nce-detail/soutenance-detail.ts:13:15:
+[37m      13 Ôöé   templateUrl: 
+[32m'./soutenance-detail.html'[37m,
+         ÔòÁ                
+[32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'dateUpload' does 
+not exist on type 'Document'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/soutenance/soutena
+nce-detail/soutenance-detail.html:215:4
+9:
+[37m      215 Ôöé ...         <span 
+*ngIf="doc.[32mdateUpload[37m"> ÔÇó 
+{{ formatDate(doc.d...
+          ÔòÁ                          
+    [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of 
+component SoutenanceDetail.
+
+    src/app/features/soutenance/soutena
+nce-detail/soutenance-detail.ts:13:15:
+[37m      13 Ôöé   templateUrl: 
+[32m'./soutenance-detail.html'[37m,
+         ÔòÁ                
+[32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2339: Property 'dateUpload' does 
+not exist on type 'Document'.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    src/app/features/soutenance/soutena
+nce-detail/soutenance-detail.html:215:8
+2:
+[37m      215 Ôöé 
+...gIf="doc.dateUpload"> ÔÇó {{ 
+formatDate(do[32mc.dateUplo[37mad) 
+}}</span>
+          ÔòÁ                          
+                  [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of 
+component SoutenanceDetail.
+
+    src/app/features/soutenance/soutena
+nce-detail/soutenance-detail.ts:13:15:
+[37m      13 Ôöé   templateUrl: 
+[32m'./soutenance-detail.html'[37m,
+         ÔòÁ                
+[32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mTS2322: Type 'Document[]' is not 
+assignable to type 
+'DocumentResponse[]'.
+  Type 'Document' is missing the 
+following properties from type 
+'DocumentResponse': id, typeDocument, 
+nomFichier, tailleFichier, and 3 
+more.[0m [1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/features/soutenance/soutena
+nce-form/soutenance-form.ts:319:10:
+[37m      319 Ôöé           
+[32mthis.uploadedDocuments[37m = 
+soutenance.documents;
+          ÔòÁ           
+[32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m

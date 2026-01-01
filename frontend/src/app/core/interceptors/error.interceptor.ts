@@ -7,6 +7,7 @@ import { environment } from '../../environments/environment';
 /**
  * 🔴 Interceptor qui gère les erreurs HTTP globalement
  * ⚠️ N'injecte PAS AuthService ni NotificationService pour éviter les dépendances circulaires
+ * ⚠️ Les erreurs 401 sont gérées par authInterceptor, pas ici
  */
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
@@ -17,26 +18,16 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       const isOptionalService = req.url.includes('/notifications') || 
                                 req.url.includes('/websocket');
       
-      if (!isOptionalService) {
+      if (!isOptionalService && error.status !== 401) {
         console.error('❌ Erreur HTTP:', error.status, req.url);
       }
 
-      // Erreur 401 : Token expiré ou invalide
+      // ⚠️ Erreur 401 : Laissée à authInterceptor pour gérer le refresh token
+      // Ne pas déconnecter ici car authInterceptor va tenter le refresh
       if (error.status === 401) {
-        // Si c'est une requête d'authentification (login/register/refresh), laisser passer
-        if (req.url.includes('/auth/login') || 
-            req.url.includes('/auth/register') ||
-            req.url.includes('/auth/refresh')) {
-          return throwError(() => error);
-        }
-
-        // Sinon, déconnecter et rediriger
-        console.warn('⚠️ Token expiré ou invalide, déconnexion...');
-        localStorage.removeItem(environment.tokenKey);
-        localStorage.removeItem(environment.refreshTokenKey);
-        router.navigate(['/login'], {
-          queryParams: { expired: 'true' }
-        });
+        // Juste logger, ne pas déconnecter
+        console.warn('⚠️ [ERROR INTERCEPTOR] Erreur 401 détectée, laissée à authInterceptor');
+        return throwError(() => error);
       }
 
       // Erreur 403 : Accès refusé

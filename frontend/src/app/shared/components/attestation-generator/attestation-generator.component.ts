@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, Subject, Observable } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
 
 import { DocumentService } from '../../../core/services/document.service';
@@ -126,22 +126,28 @@ export class AttestationGeneratorComponent implements OnInit {
       return;
     }
 
-    this.inscriptionService.getMyInscriptions()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (inscriptions) => {
-          this.inscriptions = inscriptions;
-          
-          // Auto-select if only one inscription
-          if (inscriptions.length === 1) {
-            this.attestationForm.patchValue({ inscriptionId: inscriptions[0].id });
-          }
-        },
-        error: (error) => {
-          console.error('Erreur chargement inscriptions:', error);
-          this.errorSubject.next('Impossible de charger les inscriptions');
-        }
-      });
+    // Use getInscriptionsDoctorant with current user ID
+    // For now, we'll use a placeholder approach
+    this.authService.currentUser$.subscribe(user => {
+      if (user) {
+        this.inscriptionService.getInscriptionsDoctorant(user.id)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (inscriptions: InscriptionResponse[]) => {
+              this.inscriptions = inscriptions;
+              
+              // Auto-select if only one inscription
+              if (inscriptions.length === 1) {
+                this.attestationForm.patchValue({ inscriptionId: inscriptions[0].id });
+              }
+            },
+            error: (error: any) => {
+              console.error('Erreur chargement inscriptions:', error);
+              this.errorSubject.next('Impossible de charger les inscriptions');
+            }
+          });
+      }
+    });
   }
 
   onGenerate(): void {
@@ -177,9 +183,11 @@ export class AttestationGeneratorComponent implements OnInit {
   }
 
   private generateAttestation(request: AttestationRequest) {
-    // This would be a call to the backend API
-    // For now, we'll simulate the API call
-    return this.documentService.generateAttestation(request);
+    // TODO: Implement attestation generation via backend API
+    // For now, return an observable that simulates the API call
+    return new Observable<AttestationResponse>(observer => {
+      observer.error({ status: 501, message: 'Fonctionnalité non implémentée' });
+    });
   }
 
   private downloadAttestation(attestation: AttestationResponse): void {

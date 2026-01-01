@@ -23,7 +23,7 @@ import { takeUntil } from 'rxjs/operators';
 import { InscriptionService } from '../../../core/services/inscription.service';
 import { CampagneService } from '../../../core/services/campagne.service';
 import { DocumentService } from '../../../core/services/document.service';
-import { AuthService } from '../../../core/services/auth.service';
+import { AuthService, UserInfo } from '../../../core/services/auth.service';
 import { DerogationService } from '../../../core/services/derogation.service';
 
 import { 
@@ -34,7 +34,7 @@ import {
 } from '../../../core/models/inscription.model';
 import { CampagneResponse } from '../../../core/models/campagne.model';
 import { TypeDocument, DOCUMENT_CONFIGS } from '../../../core/models/document.model';
-import { DerogationRequest } from '../../../core/models/derogation.model';
+import { DerogationRequestDTO } from '../../../core/models/derogation.model';
 
 @Component({
   selector: 'app-reinscription-form',
@@ -75,7 +75,7 @@ export class ReinscriptionForm implements OnInit, OnDestroy {
   // Data
   previousInscription: InscriptionResponse | null = null;
   campagneActive: CampagneResponse | null = null;
-  currentUser: any;
+  currentUser: UserInfo | null = null;
   
   // State
   loading = false;
@@ -103,8 +103,12 @@ export class ReinscriptionForm implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.currentUser = this.authService.getCurrentUser();
-    this.loadData();
+    this.authService.currentUser$.subscribe(user => {
+      this.currentUser = user;
+      if (user) {
+        this.loadData();
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -139,6 +143,8 @@ export class ReinscriptionForm implements OnInit, OnDestroy {
   }
 
   private loadData(): void {
+    if (!this.currentUser) return;
+    
     this.loading = true;
 
     // Load active campaign
@@ -270,7 +276,7 @@ export class ReinscriptionForm implements OnInit, OnDestroy {
   }
 
   private prepareReinscriptionData(): InscriptionRequest {
-    if (!this.previousInscription || !this.campagneActive) {
+    if (!this.previousInscription || !this.campagneActive || !this.currentUser) {
       throw new Error('Données manquantes');
     }
 
@@ -359,14 +365,7 @@ export class ReinscriptionForm implements OnInit, OnDestroy {
   }
 
   private createDerogation(inscriptionId: number): void {
-    const derogationData: DerogationRequest = {
-      inscriptionId: inscriptionId,
-      motif: this.derogationForm.value.motif,
-      justification: this.derogationForm.value.justification,
-      dureeDoctoratAnnees: this.dureeDoctoratAnnees
-    };
-
-    this.derogationService.createDerogation(derogationData).subscribe({
+    this.derogationService.createDerogation(inscriptionId, this.derogationForm.value.motif, this.derogationForm.value.justification).subscribe({
       next: () => {
         this.finalizeSubmission(inscriptionId);
       },
@@ -378,6 +377,8 @@ export class ReinscriptionForm implements OnInit, OnDestroy {
   }
 
   private finalizeSubmission(inscriptionId: number): void {
+    if (!this.currentUser) return;
+    
     // Submit the inscription
     this.inscriptionService.soumettre(inscriptionId, this.currentUser.id).subscribe({
       next: (response) => {

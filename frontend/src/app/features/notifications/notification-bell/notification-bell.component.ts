@@ -2,6 +2,9 @@ import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, Output, EventEmi
 import { CommonModule, AsyncPipe } from '@angular/common';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatBadgeModule } from '@angular/material/badge';
 
 import { NotificationService } from '../../../core/services/notification.service';
 import { NotificationResponse } from '../../../core/models/notification.model';
@@ -10,7 +13,7 @@ import { NotificationComponent } from '../notification/notification.component';
 @Component({
   selector: 'app-notification-bell',
   standalone: true,
-  imports: [CommonModule, AsyncPipe, NotificationComponent],
+  imports: [CommonModule, AsyncPipe, NotificationComponent, MatIconModule, MatButtonModule, MatBadgeModule],
   templateUrl: './notification-bell.component.html',
   styleUrls: ['./notification-bell.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

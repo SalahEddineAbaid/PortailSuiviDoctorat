@@ -127,14 +127,14 @@
       <mat-divider></mat-divider>
 
       <!-- Publications List -->
-      <div class="prerequis-section" *ngIf="prerequisites?.publications && prerequisites.publications.length > 0">
+      <div class="prerequis-section" *ngIf="prerequisites?.publications && prerequisites!.publications.length > 0">
         <h3>
           <mat-icon>list</mat-icon>
           Liste des Publications
         </h3>
         
         <div class="publications-list">
-          <div *ngFor="let pub of prerequisites.publications" class="publication-item">
+          <div *ngFor="let pub of prerequisites!.publications" class="publication-item">
             <div class="publication-header">
               <mat-icon>{{ pub.type === 'JOURNAL' ? 'menu_book' : 'groups' }}</mat-icon>
               <mat-chip class="publication-type">{{ pub.type }}</mat-chip>

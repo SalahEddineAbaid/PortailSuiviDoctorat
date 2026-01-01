@@ -442,12 +442,12 @@
             </mat-card-header>
             <mat-card-content>
               <p>{{ uploadedDocuments.size }} / {{ requiredDocuments.length }} documents uploadés</p>
-              <mat-chip-list *ngIf="!allRequiredDocumentsUploaded">
+              <mat-chip-set *ngIf="!allRequiredDocumentsUploaded">
                 <mat-chip color="warn" selected>Documents manquants</mat-chip>
-              </mat-chip-list>
-              <mat-chip-list *ngIf="allRequiredDocumentsUploaded">
+              </mat-chip-set>
+              <mat-chip-set *ngIf="allRequiredDocumentsUploaded">
                 <mat-chip color="primary" selected>Tous les documents sont uploadés</mat-chip>
-              </mat-chip-list>
+              </mat-chip-set>
             </mat-card-content>
           </mat-card>
 

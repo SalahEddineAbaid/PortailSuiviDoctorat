@@ -3,10 +3,6 @@ import { Observable, forkJoin, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { ApiIntegrationService } from './api-integration.service';
 import { AuthService } from './auth.service';
-import { InscriptionService } from './inscription.service';
-import { SoutenanceService } from './soutenance.service';
-import { NotificationService } from './notification.service';
-import { DocumentService } from './document.service';
 
 export interface EndpointTest {
   name: string;
@@ -36,11 +32,7 @@ export interface BackendTestResults {
 export class BackendTestService {
   constructor(
     private apiService: ApiIntegrationService,
-    private authService: AuthService,
-    private inscriptionService: InscriptionService,
-    private soutenanceService: SoutenanceService,
-    private notificationService: NotificationService,
-    private documentService: DocumentService
+    private authService: AuthService
   ) {}
 
   /**
@@ -56,34 +48,6 @@ export class BackendTestService {
       // Authentication
       this.testEndpoint('Authentication Test', '/auth/me', 'GET', () => 
         this.authService.getCurrentUser()
-      ),
-
-      // Inscriptions
-      this.testEndpoint('My Inscriptions', '/inscriptions/me', 'GET', () => 
-        this.inscriptionService.getMyInscriptions()
-      ),
-
-      this.testEndpoint('Active Campaign', '/campagnes/active', 'GET', () => 
-        this.inscriptionService.getCampagneActive()
-      ),
-
-      this.testEndpoint('All Campaigns', '/campagnes', 'GET', () => 
-        this.inscriptionService.getAllCampagnes()
-      ),
-
-      // Soutenances
-      this.testEndpoint('My Soutenances', '/soutenances/me', 'GET', () => 
-        this.soutenanceService.getMySoutenances()
-      ),
-
-      // Notifications
-      this.testEndpoint('My Notifications', '/notifications/me', 'GET', () => 
-        this.notificationService.getMyNotifications()
-      ),
-
-      // Documents (if user has documents)
-      this.testEndpoint('Document List', '/documents/me', 'GET', () => 
-        this.documentService.getMyDocuments()
       )
     ];
 
@@ -171,113 +135,13 @@ export class BackendTestService {
   }
 
   /**
-   * Test file upload functionality
-   */
-  testFileUpload(): Observable<{
-    success: boolean;
-    error?: string;
-    details: string;
-  }> {
-    // Create a small test file
-    const testFile = new File(['test content'], 'test.txt', { type: 'text/plain' });
-
-    return this.apiService.uploadFile('/documents/upload', testFile).pipe(
-      map(response => ({
-        success: true,
-        details: `File uploaded successfully: ${response.filename}`
-      })),
-      catchError(error => of({
-        success: false,
-        error: error.userMessage || error.message,
-        details: 'File upload failed'
-      }))
-    );
-  }
-
-  /**
-   * Test WebSocket connection
-   */
-  testWebSocketConnection(): Observable<{
-    success: boolean;
-    error?: string;
-    details: string;
-  }> {
-    return new Observable(observer => {
-      try {
-        const wsUrl = `${this.getWebSocketUrl()}?token=${this.authService.getToken()}`;
-        const ws = new WebSocket(wsUrl);
-        
-        const timeout = setTimeout(() => {
-          ws.close();
-          observer.next({
-            success: false,
-            error: 'Connection timeout',
-            details: 'WebSocket connection timed out after 5 seconds'
-          });
-          observer.complete();
-        }, 5000);
-
-        ws.onopen = () => {
-          clearTimeout(timeout);
-          ws.close();
-          observer.next({
-            success: true,
-            details: 'WebSocket connection established successfully'
-          });
-          observer.complete();
-        };
-
-        ws.onerror = (error) => {
-          clearTimeout(timeout);
-          observer.next({
-            success: false,
-            error: 'Connection error',
-            details: 'Failed to establish WebSocket connection'
-          });
-          observer.complete();
-        };
-
-      } catch (error) {
-        observer.next({
-          success: false,
-          error: 'WebSocket not supported',
-          details: 'WebSocket is not supported in this browser'
-        });
-        observer.complete();
-      }
-    });
-  }
-
-  /**
-   * Test error handling
-   */
-  testErrorHandling(): Observable<{
-    success: boolean;
-    details: string;
-  }> {
-    // Test 404 error
-    return this.apiService.get('/non-existent-endpoint').pipe(
-      map(() => ({
-        success: false,
-        details: 'Error handling failed - should have thrown 404'
-      })),
-      catchError(error => of({
-        success: error.status === 404,
-        details: error.status === 404 
-          ? 'Error handling working correctly (404 caught)'
-          : `Unexpected error: ${error.status}`
-      }))
-    );
-  }
-
-  /**
    * Compile test results
    */
   private compileResults(tests: EndpointTest[]): BackendTestResults {
     const passed = tests.filter(t => t.success).length;
     const failed = tests.length - passed;
     const totalResponseTime = tests.reduce((sum, t) => sum + t.responseTime, 0);
-    const averageResponseTime = totalResponseTime / tests.length;
+    const averageResponseTime = tests.length > 0 ? totalResponseTime / tests.length : 0;
 
     return {
       overall: failed === 0,
@@ -293,14 +157,6 @@ export class BackendTestService {
   }
 
   /**
-   * Get WebSocket URL from environment
-   */
-  private getWebSocketUrl(): string {
-    // This should match your environment configuration
-    return 'ws://localhost:8081/ws';
-  }
-
-  /**
    * Generate test report
    */
   generateTestReport(results: BackendTestResults): string {
@@ -313,23 +169,6 @@ export class BackendTestService {
     report += `- Passed: ${results.summary.passed}\n`;
     report += `- Failed: ${results.summary.failed}\n`;
     report += `- Average Response Time: ${results.summary.averageResponseTime}ms\n\n`;
-    
-    report += `## Detailed Results\n\n`;
-    
-    results.tests.forEach(test => {
-      const status = test.success ? '✅' : '❌';
-      report += `### ${status} ${test.name}\n`;
-      report += `- **Endpoint:** ${test.method} ${test.endpoint}\n`;
-      report += `- **Response Time:** ${Math.round(test.responseTime * 100) / 100}ms\n`;
-      
-      if (!test.success) {
-        report += `- **Error:** ${test.error}\n`;
-        if (test.statusCode) {
-          report += `- **Status Code:** ${test.statusCode}\n`;
-        }
-      }
-      report += `\n`;
-    });
     
     return report;
   }

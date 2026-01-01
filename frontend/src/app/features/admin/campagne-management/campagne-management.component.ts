@@ -1,529 +1,394 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute } from '@angular/router';
-import { Observable, BehaviorSubject } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
-
-import { InscriptionService } from '../../../core/services/inscription.service';
-import { Campagne, CampagneRequest, TypeInscription } from '../../../core/models/inscription.model';
-import { AlertComponent } from '../../../shared/components/alert/alert.component';
-
-interface CampagneFormData {
-  nom: string;
-  anneeUniversitaire: string;
-  dateOuverture: string;
-  dateFermeture: string;
-  typeInscription: 'PREMIERE' | 'REINSCRIPTION';
-  active: boolean;
-  description?: string;
-}
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { CampagneService } from '../../../core/services/campagne.service';
+import { 
+  CampagneResponse, 
+  CampagneRequest, 
+  TypeCampagne,
+  StatistiquesCampagne,
+  getCampagneStatus,
+  getCampagneStatusLabel,
+  getTypeCampagneLabel,
+  getDaysRemaining,
+  canCloseCampagne
+} from '../../../core/models/campagne.model';
 
 @Component({
   selector: 'app-campagne-management',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    FormsModule,
-    RouterModule,
-    AlertComponent
-  ],
-  template: `
-    <div class="campagne-management">
-      <div class="page-header">
-        <div class="header-content">
-          <h1 class="page-title">
-            <i class="fas fa-calendar-alt"></i>
-            Gestion des Campagnes
-          </h1>
-          <button 
-            class="btn btn-primary"
-            (click)="showCreateForm = true"
-            [disabled]="showCreateForm"
-          >
-            <i class="fas fa-plus"></i>
-            Nouvelle Campagne
-          </button>
-        </div>
-      </div>
-
-      <!-- Formulaire de création/modification -->
-      <div class="form-section" *ngIf="showCreateForm || editingCampagne">
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">
-              {{ editingCampagne ? 'Modifier la Campagne' : 'Créer une Nouvelle Campagne' }}
-            </h3>
-            <button 
-              class="btn btn-outline-secondary btn-sm"
-              (click)="cancelForm()"
-            >
-              <i class="fas fa-times"></i>
-              Annuler
-            </button>
-          </div>
-          <div class="card-body">
-            <form [formGroup]="campagneForm" (ngSubmit)="onSubmit()">
-              <div class="row">
-                <div class="col-md-6">
-                  <div class="form-group">
-                    <label for="nom" class="form-label required">Nom de la campagne</label>
-                    <input
-                      type="text"
-                      id="nom"
-                      class="form-control"
-                      formControlName="nom"
-                      placeholder="Ex: Inscription Doctorat 2024-2025"
-                    >
-                    <div class="invalid-feedback" *ngIf="campagneForm.get('nom')?.invalid && campagneForm.get('nom')?.touched">
-                      Le nom de la campagne est obligatoire
-                    </div>
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <div class="form-group">
-                    <label for="anneeUniversitaire" class="form-label required">Année universitaire</label>
-                    <input
-                      type="text"
-                      id="anneeUniversitaire"
-                      class="form-control"
-                      formControlName="anneeUniversitaire"
-                      placeholder="Ex: 2024-2025"
-                    >
-                    <div class="invalid-feedback" *ngIf="campagneForm.get('anneeUniversitaire')?.invalid && campagneForm.get('anneeUniversitaire')?.touched">
-                      L'année universitaire est obligatoire
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="row">
-                <div class="col-md-6">
-                  <div class="form-group">
-                    <label for="dateOuverture" class="form-label required">Date d'ouverture</label>
-                    <input
-                      type="datetime-local"
-                      id="dateOuverture"
-                      class="form-control"
-                      formControlName="dateOuverture"
-                    >
-                    <div class="invalid-feedback" *ngIf="campagneForm.get('dateOuverture')?.invalid && campagneForm.get('dateOuverture')?.touched">
-                      La date d'ouverture est obligatoire
-                    </div>
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <div class="form-group">
-                    <label for="dateFermeture" class="form-label required">Date de fermeture</label>
-                    <input
-                      type="datetime-local"
-                      id="dateFermeture"
-                      class="form-control"
-                      formControlName="dateFermeture"
-                    >
-                    <div class="invalid-feedback" *ngIf="campagneForm.get('dateFermeture')?.invalid && campagneForm.get('dateFermeture')?.touched">
-                      La date de fermeture est obligatoire
-                    </div>
-                    <div class="invalid-feedback" *ngIf="campagneForm.hasError('dateOrder')">
-                      La date de fermeture doit être postérieure à la date d'ouverture
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="row">
-                <div class="col-md-6">
-                  <div class="form-group">
-                    <label for="typeInscription" class="form-label required">Type d'inscription</label>
-                    <select
-                      id="typeInscription"
-                      class="form-control"
-                      formControlName="typeInscription"
-                    >
-                      <option value="">Sélectionner un type</option>
-                      <option value="PREMIERE">Première inscription</option>
-                      <option value="REINSCRIPTION">Réinscription</option>
-                    </select>
-                    <div class="invalid-feedback" *ngIf="campagneForm.get('typeInscription')?.invalid && campagneForm.get('typeInscription')?.touched">
-                      Le type d'inscription est obligatoire
-                    </div>
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <div class="form-group">
-                    <div class="form-check">
-                      <input
-                        type="checkbox"
-                        id="active"
-                        class="form-check-input"
-                        formControlName="active"
-                      >
-                      <label for="active" class="form-check-label">
-                        Campagne active
-                      </label>
-                    </div>
-                    <small class="form-text text-muted">
-                      Une campagne active permet aux utilisateurs de s'inscrire
-                    </small>
-                  </div>
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label for="description" class="form-label">Description (optionnelle)</label>
-                <textarea
-                  id="description"
-                  class="form-control"
-                  formControlName="description"
-                  rows="3"
-                  placeholder="Description de la campagne..."
-                ></textarea>
-              </div>
-
-              <div class="form-actions">
-                <button 
-                  type="submit" 
-                  class="btn btn-primary"
-                  [disabled]="campagneForm.invalid || isSubmitting"
-                >
-                  <i class="fas fa-save"></i>
-                  {{ editingCampagne ? 'Modifier' : 'Créer' }}
-                  <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm ms-2"></span>
-                </button>
-                <button 
-                  type="button" 
-                  class="btn btn-outline-secondary"
-                  (click)="cancelForm()"
-                >
-                  Annuler
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-
-      <!-- Liste des campagnes -->
-      <div class="campaigns-section">
-        <div class="section-header">
-          <h2 class="section-title">Campagnes Existantes</h2>
-          <div class="filters">
-            <select class="form-control form-control-sm" [(ngModel)]="selectedFilter" (change)="applyFilter()">
-              <option value="">Toutes les campagnes</option>
-              <option value="active">Campagnes actives</option>
-              <option value="inactive">Campagnes inactives</option>
-              <option value="PREMIERE">Premières inscriptions</option>
-              <option value="REINSCRIPTION">Réinscriptions</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="campaigns-grid" *ngIf="filteredCampagnes$ | async as campagnes">
-          <div class="campaign-card" *ngFor="let campagne of campagnes">
-            <div class="card">
-              <div class="card-header">
-                <div class="campaign-title">
-                  <h4>{{ campagne.nom }}</h4>
-                  <div class="campaign-badges">
-                    <span 
-                      class="badge"
-                      [class]="campagne.active ? 'badge-success' : 'badge-secondary'"
-                    >
-                      {{ campagne.active ? 'Active' : 'Inactive' }}
-                    </span>
-                    <span 
-                      class="badge badge-info"
-                    >
-                      {{ campagne.typeInscription === 'PREMIERE' ? 'Première inscription' : 'Réinscription' }}
-                    </span>
-                  </div>
-                </div>
-                <div class="campaign-actions">
-                  <button 
-                    class="btn btn-outline-primary btn-sm"
-                    (click)="editCampagne(campagne)"
-                    title="Modifier"
-                  >
-                    <i class="fas fa-edit"></i>
-                  </button>
-                  <button 
-                    class="btn btn-outline-warning btn-sm"
-                    (click)="toggleCampagneStatus(campagne)"
-                    [title]="campagne.active ? 'Désactiver' : 'Activer'"
-                  >
-                    <i [class]="campagne.active ? 'fas fa-pause' : 'fas fa-play'"></i>
-                  </button>
-                  <button 
-                    class="btn btn-outline-danger btn-sm"
-                    (click)="deleteCampagne(campagne)"
-                    title="Supprimer"
-                  >
-                    <i class="fas fa-trash"></i>
-                  </button>
-                </div>
-              </div>
-              <div class="card-body">
-                <div class="campaign-info">
-                  <div class="info-item">
-                    <i class="fas fa-calendar"></i>
-                    <span>{{ campagne.anneeUniversitaire }}</span>
-                  </div>
-                  <div class="info-item">
-                    <i class="fas fa-clock"></i>
-                    <span>
-                      {{ formatDate(campagne.dateOuverture) }} - {{ formatDate(campagne.dateFermeture) }}
-                    </span>
-                  </div>
-                </div>
-                <p class="campaign-description" *ngIf="campagne.description">
-                  {{ campagne.description }}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="empty-state" *ngIf="(filteredCampagnes$ | async)?.length === 0">
-          <i class="fas fa-calendar-times"></i>
-          <h3>Aucune campagne trouvée</h3>
-          <p>{{ selectedFilter ? 'Aucune campagne ne correspond aux filtres sélectionnés.' : 'Créez votre première campagne d\'inscription.' }}</p>
-        </div>
-      </div>
-
-      <!-- Messages d'alerte -->
-      <app-alert 
-        *ngIf="alertMessage"
-        [type]="alertType"
-        [message]="alertMessage"
-        [dismissible]="true"
-        (dismissed)="clearAlert()"
-      ></app-alert>
-    </div>
-  `,
-  styleUrls: ['./campagne-management.component.scss']
+  imports: [CommonModule, RouterModule, FormsModule, ReactiveFormsModule],
+  templateUrl: './campagne-management.component.html',
+  styleUrls: ['./campagne-management.component.css']
 })
 export class CampagneManagementComponent implements OnInit {
-  campagnes$ = new BehaviorSubject<Campagne[]>([]);
-  filteredCampagnes$!: Observable<Campagne[]>;
-  
-  campagneForm!: FormGroup;
-  showCreateForm = false;
-  editingCampagne: Campagne | null = null;
-  isSubmitting = false;
-  selectedFilter = '';
+  // Data
+  campagnes: CampagneResponse[] = [];
+  filteredCampagnes: CampagneResponse[] = [];
+  selectedCampagne: CampagneResponse | null = null;
+  statistiques: StatistiquesCampagne | null = null;
 
-  alertMessage = '';
-  alertType: 'success' | 'error' | 'warning' | 'info' = 'info';
+  // UI State
+  isLoading = true;
+  isSaving = false;
+  errorMessage = '';
+  successMessage = '';
+  
+  // Modal State
+  showFormModal = false;
+  showStatsModal = false;
+  showCloneModal = false;
+  showDeleteConfirm = false;
+  isEditMode = false;
+
+  // Forms
+  campagneForm: FormGroup;
+  cloneForm: FormGroup;
+
+  // Filters
+  filterType: TypeCampagne | '' = '';
+  filterStatus: string = '';
+  filterYear: number | '' = '';
+  searchTerm = '';
+  availableYears: number[] = [];
+
+  // Enum for template
+  TypeCampagne = TypeCampagne;
 
   constructor(
+    private campagneService: CampagneService,
     private fb: FormBuilder,
-    private inscriptionService: InscriptionService,
     private route: ActivatedRoute
   ) {
-    this.initForm();
+    this.campagneForm = this.createCampagneForm();
+    this.cloneForm = this.createCloneForm();
   }
 
   ngOnInit(): void {
     this.loadCampagnes();
-    this.setupFilters();
-    this.checkQueryParams();
-  }
-
-  private initForm(): void {
-    this.campagneForm = this.fb.group({
-      nom: ['', [Validators.required, Validators.minLength(3)]],
-      anneeUniversitaire: ['', [Validators.required, Validators.pattern(/^\d{4}-\d{4}$/)]],
-      dateOuverture: ['', Validators.required],
-      dateFermeture: ['', Validators.required],
-      typeInscription: ['', Validators.required],
-      active: [true],
-      description: ['']
-    }, { validators: this.dateOrderValidator });
-  }
-
-  private dateOrderValidator(form: FormGroup) {
-    const dateOuverture = form.get('dateOuverture')?.value;
-    const dateFermeture = form.get('dateFermeture')?.value;
     
-    if (dateOuverture && dateFermeture && new Date(dateOuverture) >= new Date(dateFermeture)) {
-      return { dateOrder: true };
-    }
-    return null;
-  }
-
-  private loadCampagnes(): void {
-    this.inscriptionService.getCampagnes().subscribe({
-      next: (campagnes) => {
-        this.campagnes$.next(campagnes);
-      },
-      error: (error) => {
-        console.error('Erreur lors du chargement des campagnes:', error);
-        this.showAlert('Erreur lors du chargement des campagnes', 'error');
-      }
-    });
-  }
-
-  private setupFilters(): void {
-    this.filteredCampagnes$ = this.campagnes$.pipe(
-      map(campagnes => this.filterCampagnes(campagnes))
-    );
-  }
-
-  private filterCampagnes(campagnes: Campagne[]): Campagne[] {
-    if (!this.selectedFilter) return campagnes;
-
-    return campagnes.filter(campagne => {
-      switch (this.selectedFilter) {
-        case 'active':
-          return campagne.active;
-        case 'inactive':
-          return !campagne.active;
-        case 'PREMIERE':
-        case 'REINSCRIPTION':
-          return campagne.typeInscription === this.selectedFilter;
-        default:
-          return true;
-      }
-    });
-  }
-
-  private checkQueryParams(): void {
+    // Check for action query param to auto-open create modal
     this.route.queryParams.subscribe(params => {
       if (params['action'] === 'create') {
-        this.showCreateForm = true;
+        setTimeout(() => this.openCreateModal(), 500);
       }
     });
   }
 
-  applyFilter(): void {
-    this.filteredCampagnes$ = this.campagnes$.pipe(
-      map(campagnes => this.filterCampagnes(campagnes))
-    );
-  }
+  // ============================================
+  // Form Creation
+  // ============================================
 
-  onSubmit(): void {
-    if (this.campagneForm.valid) {
-      this.isSubmitting = true;
-      const formData: CampagneFormData = this.campagneForm.value;
-      
-      const campagneRequest: CampagneRequest = {
-        nom: formData.nom,
-        anneeUniversitaire: formData.anneeUniversitaire,
-        dateOuverture: new Date(formData.dateOuverture),
-        dateFermeture: new Date(formData.dateFermeture),
-        typeInscription: formData.typeInscription as TypeInscription,
-        active: formData.active,
-        description: formData.description
-      };
-
-      const operation = this.editingCampagne 
-        ? this.inscriptionService.updateCampagne(this.editingCampagne.id, campagneRequest)
-        : this.inscriptionService.createCampagne(campagneRequest);
-
-      operation.subscribe({
-        next: (campagne) => {
-          const message = this.editingCampagne 
-            ? 'Campagne modifiée avec succès'
-            : 'Campagne créée avec succès';
-          
-          this.showAlert(message, 'success');
-          this.cancelForm();
-          this.loadCampagnes();
-        },
-        error: (error) => {
-          console.error('Erreur lors de la sauvegarde:', error);
-          this.showAlert('Erreur lors de la sauvegarde de la campagne', 'error');
-        },
-        complete: () => {
-          this.isSubmitting = false;
-        }
-      });
-    }
-  }
-
-  editCampagne(campagne: Campagne): void {
-    this.editingCampagne = campagne;
-    this.showCreateForm = true;
-    
-    // Pré-remplir le formulaire
-    this.campagneForm.patchValue({
-      nom: campagne.nom,
-      anneeUniversitaire: campagne.anneeUniversitaire,
-      dateOuverture: this.formatDateForInput(campagne.dateOuverture),
-      dateFermeture: this.formatDateForInput(campagne.dateFermeture),
-      typeInscription: campagne.typeInscription,
-      active: campagne.active,
-      description: campagne.description || ''
+  private createCampagneForm(): FormGroup {
+    return this.fb.group({
+      libelle: ['', [Validators.required, Validators.minLength(3)]],
+      type: [TypeCampagne.INSCRIPTION, Validators.required],
+      dateDebut: ['', Validators.required],
+      dateFin: ['', Validators.required],
+      anneeUniversitaire: [new Date().getFullYear(), [Validators.required, Validators.min(2020)]]
     });
   }
 
-  toggleCampagneStatus(campagne: Campagne): void {
-    const newStatus = !campagne.active;
-    const updateRequest: Partial<CampagneRequest> = { active: newStatus };
+  private createCloneForm(): FormGroup {
+    return this.fb.group({
+      dateDebut: ['', Validators.required],
+      dateFin: ['', Validators.required]
+    });
+  }
 
-    this.inscriptionService.updateCampagne(campagne.id, updateRequest).subscribe({
+  // ============================================
+  // Data Loading
+  // ============================================
+
+  loadCampagnes(): void {
+    this.isLoading = true;
+    this.clearMessages();
+    
+    this.campagneService.getAllCampagnes().subscribe({
+      next: (campagnes: CampagneResponse[]) => {
+        this.campagnes = campagnes.sort((a, b) => 
+          new Date(b.dateDebut).getTime() - new Date(a.dateDebut).getTime()
+        );
+        this.availableYears = this.campagneService.getAvailableYears(campagnes);
+        this.applyFilters();
+        this.isLoading = false;
+      },
+      error: (err: { message: string }) => {
+        this.errorMessage = err.message || 'Erreur lors du chargement des campagnes';
+        this.isLoading = false;
+      }
+    });
+  }
+
+  // ============================================
+  // CRUD Operations
+  // ============================================
+
+  openCreateModal(): void {
+    this.isEditMode = false;
+    this.campagneForm.reset({
+      type: TypeCampagne.INSCRIPTION,
+      anneeUniversitaire: new Date().getFullYear()
+    });
+    this.showFormModal = true;
+  }
+
+  openEditModal(campagne: CampagneResponse): void {
+    this.isEditMode = true;
+    this.selectedCampagne = campagne;
+    this.campagneForm.patchValue({
+      libelle: campagne.libelle,
+      type: campagne.type,
+      dateDebut: campagne.dateDebut,
+      dateFin: campagne.dateFin,
+      anneeUniversitaire: campagne.anneeUniversitaire
+    });
+    this.showFormModal = true;
+  }
+
+  saveCampagne(): void {
+    if (this.campagneForm.invalid) {
+      this.campagneForm.markAllAsTouched();
+      return;
+    }
+
+    this.isSaving = true;
+    this.clearMessages();
+
+    const formValue = this.campagneForm.value;
+    
+    // Format dates to yyyy-MM-dd for backend LocalDate
+    const request: CampagneRequest = {
+      libelle: formValue.libelle,
+      type: formValue.type,
+      dateDebut: formValue.dateDebut, // HTML date input already gives yyyy-MM-dd
+      dateFin: formValue.dateFin,
+      anneeUniversitaire: formValue.anneeUniversitaire
+    };
+
+    const operation = this.isEditMode && this.selectedCampagne
+      ? this.campagneService.updateCampagne(this.selectedCampagne.id, request)
+      : this.campagneService.createCampagne(request);
+
+    operation.subscribe({
       next: () => {
-        const message = newStatus 
-          ? `Campagne "${campagne.nom}" activée`
-          : `Campagne "${campagne.nom}" désactivée`;
-        
-        this.showAlert(message, 'success');
+        this.successMessage = this.isEditMode 
+          ? 'Campagne modifiée avec succès' 
+          : 'Campagne créée avec succès';
+        this.closeFormModal();
+        this.loadCampagnes();
+        this.isSaving = false;
+      },
+      error: (err: { message: string }) => {
+        this.errorMessage = err.message || 'Erreur lors de la sauvegarde';
+        this.isSaving = false;
+      }
+    });
+  }
+
+  confirmDelete(campagne: CampagneResponse): void {
+    this.selectedCampagne = campagne;
+    this.showDeleteConfirm = true;
+  }
+
+  deleteCampagne(): void {
+    if (!this.selectedCampagne) return;
+
+    this.isSaving = true;
+    // Note: Si le backend a une méthode delete, l'utiliser ici
+    // Pour l'instant, on ferme la campagne
+    this.campagneService.fermerCampagne(this.selectedCampagne.id).subscribe({
+      next: () => {
+        this.successMessage = 'Campagne fermée avec succès';
+        this.showDeleteConfirm = false;
+        this.selectedCampagne = null;
+        this.loadCampagnes();
+        this.isSaving = false;
+      },
+      error: (err: { message: string }) => {
+        this.errorMessage = err.message || 'Erreur lors de la fermeture';
+        this.isSaving = false;
+      }
+    });
+  }
+
+  // ============================================
+  // Campagne Actions
+  // ============================================
+
+  fermerCampagne(campagne: CampagneResponse): void {
+    if (!confirm(`Voulez-vous vraiment fermer la campagne "${campagne.libelle}" ?`)) {
+      return;
+    }
+
+    this.campagneService.fermerCampagne(campagne.id).subscribe({
+      next: () => {
+        this.successMessage = 'Campagne fermée avec succès';
         this.loadCampagnes();
       },
-      error: (error) => {
-        console.error('Erreur lors de la modification du statut:', error);
-        this.showAlert('Erreur lors de la modification du statut', 'error');
+      error: (err: { message: string }) => {
+        this.errorMessage = err.message || 'Erreur lors de la fermeture';
       }
     });
   }
 
-  deleteCampagne(campagne: Campagne): void {
-    if (confirm(`Êtes-vous sûr de vouloir supprimer la campagne "${campagne.nom}" ?`)) {
-      this.inscriptionService.deleteCampagne(campagne.id).subscribe({
-        next: () => {
-          this.showAlert(`Campagne "${campagne.nom}" supprimée`, 'success');
-          this.loadCampagnes();
-        },
-        error: (error) => {
-          console.error('Erreur lors de la suppression:', error);
-          this.showAlert('Erreur lors de la suppression de la campagne', 'error');
-        }
-      });
+  openCloneModal(campagne: CampagneResponse): void {
+    this.selectedCampagne = campagne;
+    this.cloneForm.reset();
+    this.showCloneModal = true;
+  }
+
+  cloneCampagne(): void {
+    if (!this.selectedCampagne || this.cloneForm.invalid) {
+      this.cloneForm.markAllAsTouched();
+      return;
     }
-  }
 
-  cancelForm(): void {
-    this.showCreateForm = false;
-    this.editingCampagne = null;
-    this.campagneForm.reset();
-    this.initForm();
-  }
-
-  formatDate(date: Date): string {
-    return new Date(date).toLocaleDateString('fr-FR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
+    this.isSaving = true;
+    this.campagneService.clonerCampagne(this.selectedCampagne.id, this.cloneForm.value).subscribe({
+      next: () => {
+        this.successMessage = 'Campagne clonée avec succès';
+        this.showCloneModal = false;
+        this.selectedCampagne = null;
+        this.loadCampagnes();
+        this.isSaving = false;
+      },
+      error: (err: { message: string }) => {
+        this.errorMessage = err.message || 'Erreur lors du clonage';
+        this.isSaving = false;
+      }
     });
   }
 
-  private formatDateForInput(date: Date): string {
-    const d = new Date(date);
-    return d.toISOString().slice(0, 16);
+  // ============================================
+  // Statistics
+  // ============================================
+
+  openStatsModal(campagne: CampagneResponse): void {
+    this.selectedCampagne = campagne;
+    this.statistiques = null;
+    this.showStatsModal = true;
+
+    this.campagneService.getStatistiques(campagne.id).subscribe({
+      next: (stats: StatistiquesCampagne) => {
+        this.statistiques = stats;
+      },
+      error: (err: { message: string }) => {
+        this.errorMessage = err.message || 'Erreur lors du chargement des statistiques';
+      }
+    });
   }
 
-  private showAlert(message: string, type: 'success' | 'error' | 'warning' | 'info'): void {
-    this.alertMessage = message;
-    this.alertType = type;
-    
-    // Auto-dismiss success messages
-    if (type === 'success') {
-      setTimeout(() => this.clearAlert(), 5000);
+  // ============================================
+  // Filtering
+  // ============================================
+
+  applyFilters(): void {
+    let filtered = [...this.campagnes];
+
+    if (this.filterType) {
+      filtered = filtered.filter(c => c.type === this.filterType);
     }
+
+    if (this.filterStatus) {
+      filtered = filtered.filter(c => getCampagneStatus(c) === this.filterStatus);
+    }
+
+    if (this.filterYear) {
+      filtered = filtered.filter(c => c.anneeUniversitaire === this.filterYear);
+    }
+
+    if (this.searchTerm) {
+      const term = this.searchTerm.toLowerCase();
+      filtered = filtered.filter(c => c.libelle.toLowerCase().includes(term));
+    }
+
+    this.filteredCampagnes = filtered;
   }
 
-  clearAlert(): void {
-    this.alertMessage = '';
+  resetFilters(): void {
+    this.filterType = '';
+    this.filterStatus = '';
+    this.filterYear = '';
+    this.searchTerm = '';
+    this.applyFilters();
+  }
+
+  // ============================================
+  // Helper Methods
+  // ============================================
+
+  getStatus(campagne: CampagneResponse): string {
+    return getCampagneStatus(campagne);
+  }
+
+  getStatusLabel(campagne: CampagneResponse): string {
+    return getCampagneStatusLabel(getCampagneStatus(campagne));
+  }
+
+  getTypeLabel(type: TypeCampagne): string {
+    return getTypeCampagneLabel(type);
+  }
+
+  getDaysRemaining(campagne: CampagneResponse): number {
+    return getDaysRemaining(campagne);
+  }
+
+  canClose(campagne: CampagneResponse): boolean {
+    return canCloseCampagne(campagne);
+  }
+
+  canEdit(campagne: CampagneResponse): boolean {
+    const status = getCampagneStatus(campagne);
+    return status === 'future' || status === 'inactive';
+  }
+
+  formatDate(date: string): string {
+    return new Date(date).toLocaleDateString('fr-FR');
+  }
+
+  // ============================================
+  // Modal Management
+  // ============================================
+
+  closeFormModal(): void {
+    this.showFormModal = false;
+    this.selectedCampagne = null;
+    this.campagneForm.reset();
+  }
+
+  closeStatsModal(): void {
+    this.showStatsModal = false;
+    this.selectedCampagne = null;
+    this.statistiques = null;
+  }
+
+  closeCloneModal(): void {
+    this.showCloneModal = false;
+    this.selectedCampagne = null;
+    this.cloneForm.reset();
+  }
+
+  closeDeleteConfirm(): void {
+    this.showDeleteConfirm = false;
+    this.selectedCampagne = null;
+  }
+
+  // ============================================
+  // Messages
+  // ============================================
+
+  clearMessages(): void {
+    this.errorMessage = '';
+    this.successMessage = '';
+  }
+
+  dismissSuccess(): void {
+    this.successMessage = '';
+  }
+
+  dismissError(): void {
+    this.errorMessage = '';
   }
 }
